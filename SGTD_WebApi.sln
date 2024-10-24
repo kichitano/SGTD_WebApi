@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.10.35027.167
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SGTD_WebApi", "SGTD_WebApi.csproj", "{64AE7B6A-72F3-4CE5-8223-5F57448D2804}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{64AE7B6A-72F3-4CE5-8223-5F57448D2804}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{64AE7B6A-72F3-4CE5-8223-5F57448D2804}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{64AE7B6A-72F3-4CE5-8223-5F57448D2804}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{64AE7B6A-72F3-4CE5-8223-5F57448D2804}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {0ECEA65B-12CE-46E0-8BB8-61C131B76D01}
+	EndGlobalSection
+EndGlobal
