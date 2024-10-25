@@ -62,8 +62,37 @@ namespace SGTD_WebApi.Services.Implementation
                 area.Name = requestParams.Name;
                 area.Description = requestParams.Description;
                 area.Status = requestParams.Status;
-
                 await _context.SaveChangesAsync();
+
+                var existingDependency = await _context.AreaDependencies
+                    .FirstOrDefaultAsync(ad => ad.ChildAreaId == requestParams.Id);
+
+                if (requestParams.ParentAreaId.HasValue)
+                {
+                    if (existingDependency != null)
+                    {
+                        var updateRequest = new AreaDependencyRequestParams
+                        {
+                            Id = existingDependency.Id,
+                            ParentAreaId = requestParams.ParentAreaId.Value,
+                            ChildAreaId = area.Id
+                        };
+                        await _areaDependencyService.UpdateAsync(updateRequest);
+                    }
+                    else
+                    {
+                        var createRequest = new AreaDependencyRequestParams
+                        {
+                            ParentAreaId = requestParams.ParentAreaId.Value,
+                            ChildAreaId = area.Id
+                        };
+                        await _areaDependencyService.CreateAsync(createRequest);
+                    }
+                }
+                else if (existingDependency != null)
+                {
+                    await _areaDependencyService.DeleteByIdAsync(existingDependency.Id);
+                }
             }
             else
             {
@@ -79,7 +108,11 @@ namespace SGTD_WebApi.Services.Implementation
                     Id = a.Id,
                     Name = a.Name,
                     Description = a.Description,
-                    Status = a.Status
+                    Status = a.Status,
+                    ParentAreaId = _context.AreaDependencies
+                        .Where(ad => ad.ChildAreaId == a.Id)
+                        .Select(ad => ad.ParentAreaId)
+                        .FirstOrDefault()
                 })
                 .ToListAsync();
         }
@@ -87,18 +120,23 @@ namespace SGTD_WebApi.Services.Implementation
         public async Task<AreaDto> GetByIdAsync(int id)
         {
             var area = await _context.Areas
+                .Select(a => new AreaDto
+                {
+                    Id = a.Id,
+                    Name = a.Name,
+                    Description = a.Description,
+                    Status = a.Status,
+                    ParentAreaId = _context.AreaDependencies
+                        .Where(ad => ad.ChildAreaId == a.Id)
+                        .Select(ad => ad.ParentAreaId)
+                        .FirstOrDefault()
+                })
                 .FirstOrDefaultAsync(a => a.Id == id);
 
             if (area == null)
                 throw new KeyNotFoundException("Area not found.");
 
-            return new AreaDto
-            {
-                Id = area.Id,
-                Name = area.Name,
-                Description = area.Description,
-                Status = area.Status
-            };
+            return area;
         }
 
         public async Task DeleteByIdAsync(int id)
