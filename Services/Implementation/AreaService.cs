@@ -2,16 +2,19 @@
 using SGTD_WebApi.DbModel.Context;
 using SGTD_WebApi.DbModel.Entities;
 using SGTD_WebApi.Models.Area;
+using SGTD_WebApi.Models.AreaDependency;
 
 namespace SGTD_WebApi.Services.Implementation
 {
     public class AreaService : IAreaService
     {
         private readonly DatabaseContext _context;
+        private readonly IAreaDependencyService _areaDependencyService;
 
-        public AreaService(DatabaseContext context)
+        public AreaService(DatabaseContext context, IAreaDependencyService areaDependencyService)
         {
             _context = context;
+            _areaDependencyService = areaDependencyService;
         }
 
         public async Task CreateAsync(AreaRequestParams requestParams)
@@ -27,6 +30,17 @@ namespace SGTD_WebApi.Services.Implementation
 
                 _context.Areas.Add(area);
                 await _context.SaveChangesAsync();
+
+                if (requestParams.ParentAreaId.HasValue)
+                {
+                    var dependencyRequest = new AreaDependencyRequestParams
+                    {
+                        ParentAreaId = requestParams.ParentAreaId.Value,
+                        ChildAreaId = area.Id
+                    };
+
+                    await _areaDependencyService.CreateAsync(dependencyRequest);
+                }
             }
             else
             {

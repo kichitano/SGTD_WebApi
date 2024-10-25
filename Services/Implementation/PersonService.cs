@@ -33,7 +33,7 @@ public class PersonService : IPersonService
     public async Task UpdateAsync(PersonRequestParams requestParams)
     {
         if (requestParams.Id == 0)
-            throw new ArgumentNullException(nameof(requestParams.Id), "Person Id is required for update.");
+            throw new ArgumentException("Person Id is required for update.");
 
         var person = await _context.People.FirstOrDefaultAsync(p => p.Id == requestParams.Id);
         if (person == null)

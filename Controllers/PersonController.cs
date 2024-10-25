@@ -39,9 +39,13 @@ public class PersonController : Controller
             await _personService.UpdateAsync(requestParams);
             return Ok();
         }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(ex.Message);
+        }
         catch (Exception ex)
         {
-            return StatusCode(500, ex);
+            return StatusCode(500, ex.Message);
         }
     }
 
