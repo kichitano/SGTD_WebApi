@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using SGTD_WebApi.DbModel.Context;
 
@@ -11,9 +12,11 @@ using SGTD_WebApi.DbModel.Context;
 namespace SGTD_WebApi.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-    partial class DatabaseContextModelSnapshot : ModelSnapshot
+    [Migration("20241029215321_AddTables_Component_ComponentPermission_RoleComponentPermission")]
+    partial class AddTables_Component_ComponentPermission_RoleComponentPermission
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -105,6 +108,35 @@ namespace SGTD_WebApi.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Components");
+                });
+
+            modelBuilder.Entity("SGTD_WebApi.DbModel.Entities.ComponentPermission", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("ComponentId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("PermissionId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ComponentId");
+
+                    b.HasIndex("PermissionId");
+
+                    b.ToTable("ComponentPermissions");
                 });
 
             modelBuilder.Entity("SGTD_WebApi.DbModel.Entities.LogSystem", b =>
@@ -339,14 +371,11 @@ namespace SGTD_WebApi.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<int>("ComponentId")
+                    b.Property<int>("ComponentPermissionId")
                         .HasColumnType("int");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
-
-                    b.Property<int>("PermissionId")
-                        .HasColumnType("int");
 
                     b.Property<int>("RoleId")
                         .HasColumnType("int");
@@ -356,9 +385,7 @@ namespace SGTD_WebApi.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ComponentId");
-
-                    b.HasIndex("PermissionId");
+                    b.HasIndex("ComponentPermissionId");
 
                     b.HasIndex("RoleId");
 
@@ -453,6 +480,25 @@ namespace SGTD_WebApi.Migrations
                     b.Navigation("ParentArea");
                 });
 
+            modelBuilder.Entity("SGTD_WebApi.DbModel.Entities.ComponentPermission", b =>
+                {
+                    b.HasOne("SGTD_WebApi.DbModel.Entities.Component", "Component")
+                        .WithMany()
+                        .HasForeignKey("ComponentId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("SGTD_WebApi.DbModel.Entities.Permission", "Permission")
+                        .WithMany()
+                        .HasForeignKey("PermissionId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Component");
+
+                    b.Navigation("Permission");
+                });
+
             modelBuilder.Entity("SGTD_WebApi.DbModel.Entities.Position", b =>
                 {
                     b.HasOne("SGTD_WebApi.DbModel.Entities.Area", "Area")
@@ -504,15 +550,9 @@ namespace SGTD_WebApi.Migrations
 
             modelBuilder.Entity("SGTD_WebApi.DbModel.Entities.RoleComponentPermission", b =>
                 {
-                    b.HasOne("SGTD_WebApi.DbModel.Entities.Component", "Component")
+                    b.HasOne("SGTD_WebApi.DbModel.Entities.ComponentPermission", "ComponentPermission")
                         .WithMany()
-                        .HasForeignKey("ComponentId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("SGTD_WebApi.DbModel.Entities.Permission", "Permission")
-                        .WithMany()
-                        .HasForeignKey("PermissionId")
+                        .HasForeignKey("ComponentPermissionId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
@@ -522,9 +562,7 @@ namespace SGTD_WebApi.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.Navigation("Component");
-
-                    b.Navigation("Permission");
+                    b.Navigation("ComponentPermission");
 
                     b.Navigation("Role");
                 });

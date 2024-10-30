@@ -16,12 +16,14 @@ public static class ServiceConfiguration
         services.AddScoped<IAreaDependencyService, AreaDependencyService>();
         services.AddScoped<IAreaService, AreaService>();
         services.AddScoped<ICountryService, CountryService>();
+        services.AddScoped<IComponentService, ComponentService>();
         services.AddScoped<IPermissionService, PermissionService>();
         services.AddScoped<IPersonService, PersonService>();
         services.AddScoped<IPositionRoleService, PositionRoleService>();
         services.AddScoped<IPositionService, PositionService>();
-        services.AddScoped<IRolePermissionService, RolePermissionService>();
+        services.AddScoped<IPositionDependencyService, PositionDependencyService>();
         services.AddScoped<IRoleService, RoleService>();
+        services.AddScoped<IRoleComponentPermissionService, RoleComponentPermissionService>();
         services.AddScoped<IUserPositionService, UserPositionService>();
         services.AddScoped<IUserService, UserService>();
 

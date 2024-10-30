@@ -1,27 +1,27 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using SGTD_WebApi.Models.RolePermission;
+using SGTD_WebApi.Models.Component;
 using SGTD_WebApi.Services;
 
 namespace SGTD_WebApi.Controllers;
 
 [Route("[controller]")]
 [ApiController]
-public class RolePermissionController : Controller
+public class ComponentController : Controller
 {
-    private readonly IRolePermissionService _rolePermissionService;
+    private readonly IComponentService _componentService;
 
-    public RolePermissionController(IRolePermissionService rolePermissionService)
+    public ComponentController(IComponentService componentService)
     {
-        _rolePermissionService = rolePermissionService;
+        _componentService = componentService;
     }
 
     [Route("")]
     [HttpPost]
-    public async Task<ActionResult> CreateAsync(RolePermissionRequestParams requestParams)
+    public async Task<ActionResult> CreateAsync(ComponentRequestParams requestParams)
     {
         try
         {
-            await _rolePermissionService.CreateAsync(requestParams);
+            await _componentService.CreateAsync(requestParams);
             return Ok();
         }
         catch (Exception ex)
@@ -32,11 +32,11 @@ public class RolePermissionController : Controller
 
     [Route("")]
     [HttpPut]
-    public async Task<ActionResult> UpdateAsync(RolePermissionRequestParams requestParams)
+    public async Task<ActionResult> UpdateAsync(ComponentRequestParams requestParams)
     {
         try
         {
-            await _rolePermissionService.UpdateAsync(requestParams);
+            await _componentService.UpdateAsync(requestParams);
             return Ok();
         }
         catch (Exception ex)
@@ -51,7 +51,7 @@ public class RolePermissionController : Controller
     {
         try
         {
-            var response = await _rolePermissionService.GetAllAsync();
+            var response = await _componentService.GetAllAsync();
             return Ok(response);
         }
         catch (Exception ex)
@@ -66,7 +66,7 @@ public class RolePermissionController : Controller
     {
         try
         {
-            var response = await _rolePermissionService.GetByIdAsync(id);
+            var response = await _componentService.GetByIdAsync(id);
             return Ok(response);
         }
         catch (Exception ex)
@@ -80,7 +80,7 @@ public class RolePermissionController : Controller
     {
         try
         {
-            await _rolePermissionService.DeleteByIdAsync(id);
+            await _componentService.DeleteByIdAsync(id);
             return Ok();
         }
         catch (Exception ex)

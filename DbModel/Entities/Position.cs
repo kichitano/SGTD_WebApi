@@ -17,6 +17,4 @@ public class Position : Base
 
     [ForeignKey("AreaId")]
     public Area Area { get; set; }
-
-    public int Hierarchy { get; set; }
 }
