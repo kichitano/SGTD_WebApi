@@ -1,8 +1,8 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace SGTD_WebApi.Models.Permission;
+namespace SGTD_WebApi.Models.Component;
 
-public class PermissionRequestParams
+public class ComponentRequestParams
 {
     public int? Id { get; set; }
 

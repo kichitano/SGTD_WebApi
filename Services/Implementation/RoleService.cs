@@ -75,4 +75,17 @@ public class RoleService : IRoleService
         _context.Roles.Remove(role);
         await _context.SaveChangesAsync();
     }
+
+    public async Task<int> CreateReturnIdAsync(RoleRequestParams requestParams)
+    {
+        var role = new Role
+        {
+            Name = requestParams.Name,
+            Description = requestParams.Description
+        };
+        _context.Roles.Add(role);
+        await _context.SaveChangesAsync();
+
+        return role.Id;
+    }
 }

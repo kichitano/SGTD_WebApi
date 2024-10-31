@@ -3,8 +3,8 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace SGTD_WebApi.DbModel.Entities;
 
-[Table("Permissions")]
-public class Permission : Base
+[Table("Components")]
+public class Component : Base
 {
     [Required]
     [StringLength(50)]
