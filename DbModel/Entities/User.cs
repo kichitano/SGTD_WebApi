@@ -20,5 +20,11 @@ public class User : Base
     [StringLength(100)]
     public string Password { get; set; }
 
+    [Required]
+    public long StorageSize { get; set; }
+
+    [Required]
+    public string FolderPath { get; set; }
+
     public bool Status { get; set; }
 }

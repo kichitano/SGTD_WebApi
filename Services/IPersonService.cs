@@ -2,4 +2,11 @@
 
 namespace SGTD_WebApi.Services;
 
-public interface IPersonService : IBaseService<PersonRequestParams, PersonDto>;
+public interface IPersonService
+{
+    Task CreateAsync(PersonRequestParams requestParams);
+    Task UpdateAsync(PersonRequestParams requestParams);
+    Task<List<PersonDto>> GetAllAsync();
+    Task<PersonDto> GetByIdAsync(int id);
+    Task DeleteByIdAsync(int id);
+}

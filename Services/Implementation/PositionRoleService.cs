@@ -2,6 +2,7 @@
 using SGTD_WebApi.DbModel.Context;
 using SGTD_WebApi.DbModel.Entities;
 using SGTD_WebApi.Models.PositionRole;
+using SGTD_WebApi.Models.Role;
 
 namespace SGTD_WebApi.Services.Implementation;
 
@@ -74,5 +75,18 @@ public class PositionRoleService : IPositionRoleService
 
         _context.PositionRoles.Remove(positionRole);
         await _context.SaveChangesAsync();
+    }
+
+    public async Task<List<PositionRoleDto>> GetByPositionIdAsync(int positionId)
+    {
+        return await _context.PositionRoles
+            .Where(pr => pr.PositionId == positionId)
+            .Select(pr => new PositionRoleDto
+            {
+                Id = pr.Id,
+                PositionId = pr.PositionId,
+                RoleId = pr.RoleId,
+            })
+            .ToListAsync();
     }
 }

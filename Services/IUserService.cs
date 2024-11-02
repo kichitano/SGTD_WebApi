@@ -2,4 +2,16 @@
 
 namespace SGTD_WebApi.Services;
 
-public interface IUserService : IBaseService<UserRequestParams, UserDto>;
+public interface IUserService
+{
+    Task CreateAsync(UserRequestParams requestParams);
+    Task UpdateAsync(UserRequestParams requestParams);
+    Task<List<UserDto>> GetAllAsync();
+    Task<UserDto> GetByIdAsync(int id);
+    Task DeleteByIdAsync(int id);
+
+    public Task<Guid> CreateReturnGuidAsync(UserRequestParams requestParams);
+    public Task<UserDto> GetByGuidAsync(Guid guid);
+    public Task<UserDto> GetIdByGuidAsync(Guid guid);
+
+}

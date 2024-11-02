@@ -2,4 +2,11 @@
 
 namespace SGTD_WebApi.Services;
 
-public interface IComponentService : IBaseService<ComponentRequestParams, ComponentDto>;
+public interface IComponentService
+{
+    Task CreateAsync(ComponentRequestParams requestParams);
+    Task UpdateAsync(ComponentRequestParams requestParams);
+    Task<List<ComponentDto>> GetAllAsync();
+    Task<ComponentDto> GetByIdAsync(int id);
+    Task DeleteByIdAsync(int id);
+}

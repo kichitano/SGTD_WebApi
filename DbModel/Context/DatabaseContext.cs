@@ -54,6 +54,7 @@ public class DatabaseContext : DbContext
     public DbSet<PositionDependency> PositionsDependency { get; set; }
     public DbSet<Person> People { get; set; }
     public DbSet<User> Users { get; set; }
+    public DbSet<UserFile> UserFiles { get; set; }
     public DbSet<UserPosition> UserPositions { get; set; }
     public DbSet<Role> Roles { get; set; }
     public DbSet<RoleComponentPermission> RoleComponentPermissions { get; set; }
@@ -205,5 +206,7 @@ public class DatabaseContext : DbContext
         ConfigureOneToManyRelationship<RoleComponentPermission, Permission>(modelBuilder, rcp => rcp.Permission, rcp => rcp.PermissionId);
 
         ConfigureOneToManyRelationship<User, Person>(modelBuilder, u => u.Person, u => u.PersonId);
+
+        ConfigureOneToManyRelationship<UserFile, User>(modelBuilder, u => u.User, u => u.UserId);
     }
 }
