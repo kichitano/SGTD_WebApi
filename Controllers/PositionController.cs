@@ -88,4 +88,19 @@ public class PositionController : Controller
             return StatusCode(500, ex);
         }
     }
+
+    [Route("return")]
+    [HttpPost]
+    public async Task<ActionResult> CreateReturnIdAsync(PositionRequestParams requestParams)
+    {
+        try
+        {
+            var response = await _positionService.CreateReturnIdAsync(requestParams);
+            return Ok(response);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, ex);
+        }
+    }
 }

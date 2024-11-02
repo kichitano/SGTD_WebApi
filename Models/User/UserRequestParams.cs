@@ -4,7 +4,7 @@ namespace SGTD_WebApi.Models.User;
 
 public class UserRequestParams
 {
-    public int? Id { get; set; }
+    public Guid? UserGuid { get; set; }
 
     [Required]
     public int PersonId { get; set; }
@@ -16,6 +16,9 @@ public class UserRequestParams
     [Required]
     [StringLength(100)]
     public string Password { get; set; }
+
+    [Range(0, long.MaxValue)]
+    public long StorageSize { get; set; }
 
     public bool Status { get; set; }
 }

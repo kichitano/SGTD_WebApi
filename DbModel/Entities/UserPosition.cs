@@ -5,6 +5,7 @@ namespace SGTD_WebApi.DbModel.Entities;
 [Table("UserPositions")]
 public class UserPosition : Base
 {
+    public Guid UserGuid { get; set; }
     public int UserId { get; set; }
 
     [ForeignKey("UserId")]

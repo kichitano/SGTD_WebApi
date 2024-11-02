@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using SGTD_WebApi.Models.User;
 using SGTD_WebApi.Services;
+using System;
 
 namespace SGTD_WebApi.Controllers;
 
@@ -60,13 +61,27 @@ public class UserController : Controller
         }
     }
 
-    [Route("{id}")]
-    [HttpGet]
-    public async Task<ActionResult> GetByIdAsync(int id)
+    [HttpDelete("{id}")]
+    public async Task<ActionResult> DeleteByIdAsync(int id)
     {
         try
         {
-            var response = await _userService.GetByIdAsync(id);
+            await _userService.DeleteByIdAsync(id);
+            return Ok();
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, ex);
+        }
+    }
+
+    [Route("return")]
+    [HttpPost]
+    public async Task<ActionResult> CreateReturnGuidAsync(UserRequestParams requestParams)
+    {
+        try
+        {
+            var response = await _userService.CreateReturnGuidAsync(requestParams);
             return Ok(response);
         }
         catch (Exception ex)
@@ -75,13 +90,14 @@ public class UserController : Controller
         }
     }
 
-    [HttpDelete("{id}")]
-    public async Task<ActionResult> DeleteByIdAsync(int id)
+    [Route("{guid}")]
+    [HttpGet]
+    public async Task<ActionResult> GetByGuidAsync(Guid guid)
     {
         try
         {
-            await _userService.DeleteByIdAsync(id);
-            return Ok();
+            var response = await _userService.GetByGuidAsync(guid);
+            return Ok(response);
         }
         catch (Exception ex)
         {

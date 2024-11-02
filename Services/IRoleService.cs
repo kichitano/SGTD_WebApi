@@ -2,7 +2,13 @@
 
 namespace SGTD_WebApi.Services;
 
-public interface IRoleService : IBaseService<RoleRequestParams, RoleDto>
+public interface IRoleService
 {
+    Task CreateAsync(RoleRequestParams requestParams);
+    Task UpdateAsync(RoleRequestParams requestParams);
+    Task<List<RoleDto>> GetAllAsync();
+    Task<RoleDto> GetByIdAsync(int id);
+    Task DeleteByIdAsync(int id);
+
     public Task<int> CreateReturnIdAsync(RoleRequestParams requestParams);
 }

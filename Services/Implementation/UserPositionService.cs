@@ -8,17 +8,22 @@ namespace SGTD_WebApi.Services.Implementation;
 public class UserPositionService : IUserPositionService
 {
     private readonly DatabaseContext _context;
+    private readonly IUserService _userService;
 
-    public UserPositionService(DatabaseContext context)
+    public UserPositionService(DatabaseContext context, IUserService userService)
     {
         _context = context;
+        _userService = userService;
     }
 
     public async Task CreateAsync(UserPositionRequestParams requestParams)
     {
+        var user = await _userService.GetIdByGuidAsync(requestParams.UserGuid);
+
         var userPosition = new UserPosition
         {
-            UserId = requestParams.UserId,
+            UserId = user.Id ?? 0,
+            UserGuid = requestParams.UserGuid,
             PositionId = requestParams.PositionId
         };
         _context.UserPositions.Add(userPosition);
@@ -27,14 +32,10 @@ public class UserPositionService : IUserPositionService
 
     public async Task UpdateAsync(UserPositionRequestParams requestParams)
     {
-        if (requestParams.Id == null)
-            throw new ArgumentNullException(nameof(requestParams.Id), "UserPosition Id is required for update.");
-
-        var userPosition = await _context.UserPositions.FirstOrDefaultAsync(up => up.Id == requestParams.Id);
+        var userPosition = await _context.UserPositions.FirstOrDefaultAsync(up => up.UserGuid == requestParams.UserGuid);
         if (userPosition == null)
             throw new KeyNotFoundException("UserPosition not found.");
 
-        userPosition.UserId = requestParams.UserId;
         userPosition.PositionId = requestParams.PositionId;
 
         await _context.SaveChangesAsync();
@@ -46,7 +47,7 @@ public class UserPositionService : IUserPositionService
             .Select(up => new UserPositionDto
             {
                 Id = up.Id,
-                UserId = up.UserId,
+                UserGuid = up.UserGuid,
                 PositionId = up.PositionId
             })
             .ToListAsync();
@@ -61,7 +62,7 @@ public class UserPositionService : IUserPositionService
         return new UserPositionDto
         {
             Id = userPosition.Id,
-            UserId = userPosition.UserId,
+            UserGuid = userPosition.UserGuid,
             PositionId = userPosition.PositionId
         };
     }

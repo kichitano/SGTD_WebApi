@@ -3,7 +3,8 @@ using SGTD_WebApi.DbModel.Context;
 using SGTD_WebApi.DbModel.Entities;
 using SGTD_WebApi.Models.Position;
 using SGTD_WebApi.Models.PositionDependency;
-using SGTD_WebApi.Services;
+
+namespace SGTD_WebApi.Services.Implementation;
 
 public class PositionService : IPositionService
 {
@@ -25,7 +26,6 @@ public class PositionService : IPositionService
     {
         if (await IsPositionNameUniqueAsync(requestParams.Name))
         {
-            // Crear la posición
             var position = new Position
             {
                 Name = requestParams.Name,
@@ -36,7 +36,6 @@ public class PositionService : IPositionService
             _context.Positions.Add(position);
             await _context.SaveChangesAsync();
 
-            // Crear la dependencia si existe
             if (requestParams.ParentPositionId.HasValue)
             {
                 var dependencyRequest = new PositionDependencyRequestParams
@@ -64,13 +63,11 @@ public class PositionService : IPositionService
 
         if (await IsPositionNameUniqueAsync(requestParams.Name, requestParams.Id))
         {
-            // Actualizar la posición
             position.Name = requestParams.Name;
             position.Description = requestParams.Description;
             position.AreaId = requestParams.AreaId;
             await _context.SaveChangesAsync();
 
-            // Manejar la dependencia
             var existingDependency = await _context.PositionsDependency
                 .FirstOrDefaultAsync(pd => pd.ChildPositionId == requestParams.Id);
 
@@ -154,9 +151,38 @@ public class PositionService : IPositionService
         if (position == null)
             throw new KeyNotFoundException("Position not found.");
 
-        // Eliminar la posición
         _context.Positions.Remove(position);
         await _context.SaveChangesAsync();
+    }
+
+    public async Task<int> CreateReturnIdAsync(PositionRequestParams requestParams)
+    {
+        if (await IsPositionNameUniqueAsync(requestParams.Name))
+        {
+            var position = new Position
+            {
+                Name = requestParams.Name,
+                Description = requestParams.Description,
+                AreaId = requestParams.AreaId
+            };
+
+            _context.Positions.Add(position);
+            await _context.SaveChangesAsync();
+
+            if (requestParams.ParentPositionId.HasValue)
+            {
+                var dependencyRequest = new PositionDependencyRequestParams
+                {
+                    ParentPositionId = requestParams.ParentPositionId.Value,
+                    ChildPositionId = position.Id
+                };
+                await _positionDependencyService.CreateAsync(dependencyRequest);
+            }
+
+            return position.Id;
+        }
+
+        throw new InvalidOperationException("Position name already exists.");
     }
 
     private async Task<bool> IsPositionNameUniqueAsync(string name, int? excludePositionId = null)
