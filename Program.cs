@@ -22,7 +22,7 @@ builder.Services.AddCors(options =>
     options.AddPolicy("AllowAngularApp",
         policy =>
         {
-            policy.WithOrigins("http://localhost:4200")
+            policy.WithOrigins("http://localhost:4200", "https://tidy-naturally-slug.ngrok-free.app")
                 .AllowAnyMethod()
                 .AllowAnyHeader() // Allow necesary headers
                 .AllowCredentials();

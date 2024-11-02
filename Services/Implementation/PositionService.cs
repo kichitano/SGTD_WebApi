@@ -185,6 +185,26 @@ public class PositionService : IPositionService
         throw new InvalidOperationException("Position name already exists.");
     }
 
+    public async Task<List<PositionDto>> GetAllByAreaIdAsync(int areaId)
+    {
+        var positions = await _context.Positions
+            .Where(q => q.Area.Id == areaId)
+            .Select(p => new PositionDto
+            {
+                Id = p.Id,
+                Name = p.Name,
+                Description = p.Description,
+                AreaId = p.AreaId,
+                ParentPositionId = _context.PositionsDependency
+                    .Where(pd => pd.ChildPositionId == p.Id)
+                    .Select(pd => pd.ParentPositionId)
+                    .FirstOrDefault()
+            })
+            .ToListAsync();
+
+        return positions;
+    }
+
     private async Task<bool> IsPositionNameUniqueAsync(string name, int? excludePositionId = null)
     {
         var query = _context.Positions

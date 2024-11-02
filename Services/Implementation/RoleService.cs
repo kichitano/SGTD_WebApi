@@ -47,7 +47,9 @@ public class RoleService : IRoleService
             {
                 Id = r.Id,
                 Name = r.Name,
-                Description = r.Description
+                Description = r.Description,
+                PermissionCount = _context.RoleComponentPermissions
+                    .Count(rcp => rcp.RoleId == r.Id)
             })
             .ToListAsync();
     }
