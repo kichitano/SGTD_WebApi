@@ -26,7 +26,7 @@ public class PermissionController : Controller
         }
         catch (Exception ex)
         {
-            return StatusCode(500, ex);
+            return StatusCode(500, ex.Message);
         }
     }
 
@@ -41,7 +41,7 @@ public class PermissionController : Controller
         }
         catch (Exception ex)
         {
-            return StatusCode(500, ex);
+            return StatusCode(500, ex.Message);
         }
     }
 
@@ -56,7 +56,7 @@ public class PermissionController : Controller
         }
         catch (Exception ex)
         {
-            return StatusCode(500, ex);
+            return StatusCode(500, ex.Message);
         }
     }
 
@@ -71,7 +71,7 @@ public class PermissionController : Controller
         }
         catch (Exception ex)
         {
-            return StatusCode(500, ex);
+            return StatusCode(500, ex.Message);
         }
     }
 
@@ -85,7 +85,7 @@ public class PermissionController : Controller
         }
         catch (Exception ex)
         {
-            return StatusCode(500, ex);
+            return StatusCode(500, ex.Message);
         }
     }
 }
