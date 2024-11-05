@@ -16,5 +16,5 @@ public class PositionRequestParams
     [Required]
     public int AreaId { get; set; }
 
-    public int Hierarchy { get; set; }
+    public int? ParentPositionId { get; set; }
 }   

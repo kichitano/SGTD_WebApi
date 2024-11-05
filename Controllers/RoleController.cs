@@ -88,5 +88,20 @@ namespace SGTD_WebApi.Controllers
                 return StatusCode(500, ex);
             }
         }
+
+        [Route("return")]
+        [HttpPost]
+        public async Task<ActionResult> CreateReturnIdAsync(RoleRequestParams requestParams)
+        {
+            try
+            {
+                var response = await _roleService.CreateReturnIdAsync(requestParams);
+                return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex);
+            }
+        }
     }
 }

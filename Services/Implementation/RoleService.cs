@@ -47,7 +47,9 @@ public class RoleService : IRoleService
             {
                 Id = r.Id,
                 Name = r.Name,
-                Description = r.Description
+                Description = r.Description,
+                PermissionCount = _context.RoleComponentPermissions
+                    .Count(rcp => rcp.RoleId == r.Id)
             })
             .ToListAsync();
     }
@@ -74,5 +76,18 @@ public class RoleService : IRoleService
 
         _context.Roles.Remove(role);
         await _context.SaveChangesAsync();
+    }
+
+    public async Task<int> CreateReturnIdAsync(RoleRequestParams requestParams)
+    {
+        var role = new Role
+        {
+            Name = requestParams.Name,
+            Description = requestParams.Description
+        };
+        _context.Roles.Add(role);
+        await _context.SaveChangesAsync();
+
+        return role.Id;
     }
 }

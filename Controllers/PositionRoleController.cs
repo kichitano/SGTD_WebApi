@@ -88,5 +88,20 @@ namespace SGTD_WebApi.Controllers
                 return StatusCode(500, ex);
             }
         }
+
+        [Route("position/{positionId}")]
+        [HttpGet]
+        public async Task<ActionResult> GetByPositionIdAsync(int positionId)
+        {
+            try
+            {
+                var response = await _positionRoleService.GetByPositionIdAsync(positionId);
+                return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex);
+            }
+        }
     }
 }

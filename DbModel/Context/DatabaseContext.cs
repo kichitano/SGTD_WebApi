@@ -23,6 +23,7 @@ public class DatabaseContext : DbContext
     {
         _configuration = configuration;
         _httpContextAccessor = httpContextAccessor;
+
         try
         {
             var dbCreator = Database.GetService<IDatabaseCreator>() as RelationalDatabaseCreator;
@@ -48,14 +49,17 @@ public class DatabaseContext : DbContext
 
     public DbSet<Area> Areas { get; set; }
     public DbSet<AreaDependency> AreaDependencies { get; set; }
+    public DbSet<Component> Components { get; set; }
     public DbSet<Position> Positions { get; set; }
+    public DbSet<PositionDependency> PositionsDependency { get; set; }
     public DbSet<Person> People { get; set; }
     public DbSet<User> Users { get; set; }
+    public DbSet<UserFile> UserFiles { get; set; }
     public DbSet<UserPosition> UserPositions { get; set; }
     public DbSet<Role> Roles { get; set; }
+    public DbSet<RoleComponentPermission> RoleComponentPermissions { get; set; }
     public DbSet<Permission> Permissions { get; set; }
     public DbSet<PositionRole> PositionRoles { get; set; }
-    public DbSet<RolePermission> RolePermissions { get; set; }
     public DbSet<LogSystem> LogSystems { get; set; }
 
     public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
@@ -184,10 +188,12 @@ public class DatabaseContext : DbContext
                 .HasForeignKey(foreignKeyExpression!)
                 .OnDelete(DeleteBehavior.Restrict);
         }
-
-
+        
         ConfigureOneToManyRelationship<AreaDependency, Area>(modelBuilder, ad => ad.ParentArea, ad => ad.ParentAreaId);
         ConfigureOneToManyRelationship<AreaDependency, Area>(modelBuilder, ad => ad.ChildArea, ad => ad.ChildAreaId);
+
+        ConfigureOneToManyRelationship<PositionDependency, Position>(modelBuilder, pd => pd.ParentPosition, pd => pd.ParentPositionId);
+        ConfigureOneToManyRelationship<PositionDependency, Position>(modelBuilder, pd => pd.ChildPosition, ad => ad.ChildPositionId);
 
         ConfigureOneToManyRelationship<UserPosition, User>(modelBuilder, up => up.User, up => up.UserId);
         ConfigureOneToManyRelationship<UserPosition, Position>(modelBuilder, up => up.Position, up => up.PositionId);
@@ -195,9 +201,12 @@ public class DatabaseContext : DbContext
         ConfigureOneToManyRelationship<PositionRole, Position>(modelBuilder, pr => pr.Position, pr => pr.PositionId);
         ConfigureOneToManyRelationship<PositionRole, Role>(modelBuilder, pr => pr.Role, pr => pr.RoleId);
 
-        ConfigureOneToManyRelationship<RolePermission, Role>(modelBuilder, rp => rp.Role, rp => rp.RoleId);
-        ConfigureOneToManyRelationship<RolePermission, Permission>(modelBuilder, rp => rp.Permission, rp => rp.PermissionId);
+        ConfigureOneToManyRelationship<RoleComponentPermission, Role>(modelBuilder, rcp => rcp.Role, rcp => rcp.RoleId);
+        ConfigureOneToManyRelationship<RoleComponentPermission, Component>(modelBuilder, rcp => rcp.Component, rcp => rcp.ComponentId);
+        ConfigureOneToManyRelationship<RoleComponentPermission, Permission>(modelBuilder, rcp => rcp.Permission, rcp => rcp.PermissionId);
 
         ConfigureOneToManyRelationship<User, Person>(modelBuilder, u => u.Person, u => u.PersonId);
+
+        ConfigureOneToManyRelationship<UserFile, User>(modelBuilder, u => u.User, u => u.UserId);
     }
 }

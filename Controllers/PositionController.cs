@@ -88,4 +88,34 @@ public class PositionController : Controller
             return StatusCode(500, ex);
         }
     }
+
+    [Route("return")]
+    [HttpPost]
+    public async Task<ActionResult> CreateReturnIdAsync(PositionRequestParams requestParams)
+    {
+        try
+        {
+            var response = await _positionService.CreateReturnIdAsync(requestParams);
+            return Ok(response);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, ex);
+        }
+    }
+
+    [Route("area/{areaId}")]
+    [HttpGet]
+    public async Task<ActionResult> GetAllByAreaIdAsync(int areaId)
+    {
+        try
+        {
+            var response = await _positionService.GetAllByAreaIdAsync(areaId);
+            return Ok(response);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, ex);
+        }
+    }
 }

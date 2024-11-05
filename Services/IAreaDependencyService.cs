@@ -2,4 +2,11 @@
 
 namespace SGTD_WebApi.Services;
 
-public interface IAreaDependencyService : IBaseService<AreaDependencyRequestParams, AreaDependencyDto>;
+public interface IAreaDependencyService
+{
+    Task CreateAsync(AreaDependencyRequestParams requestParams);
+    Task UpdateAsync(AreaDependencyRequestParams requestParams);
+    Task<List<AreaDependencyDto>> GetAllAsync();
+    Task<AreaDependencyDto> GetByIdAsync(int id);
+    Task DeleteByIdAsync(int id);
+}

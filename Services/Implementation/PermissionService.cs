@@ -9,20 +9,27 @@ public class PermissionService : IPermissionService
 {
     private readonly DatabaseContext _context;
 
-    public PermissionService(DatabaseContext context)
+    public PermissionService(
+        DatabaseContext context)
     {
         _context = context;
     }
 
     public async Task CreateAsync(PermissionRequestParams requestParams)
     {
-        var permission = new Permission
+        if (await IsPermissionNameUniqueAsync(requestParams.Name))
         {
-            Name = requestParams.Name,
-            Description = requestParams.Description
-        };
-        _context.Permissions.Add(permission);
-        await _context.SaveChangesAsync();
+            var permission = new Permission
+            {
+                Name = requestParams.Name
+            };
+            _context.Permissions.Add(permission);
+            await _context.SaveChangesAsync();
+        }
+        else
+        {
+            throw new InvalidOperationException("Permission name already exists.");
+        }
     }
 
     public async Task UpdateAsync(PermissionRequestParams requestParams)
@@ -34,10 +41,15 @@ public class PermissionService : IPermissionService
         if (permission == null)
             throw new KeyNotFoundException("Permission not found.");
 
-        permission.Name = requestParams.Name;
-        permission.Description = requestParams.Description;
-
-        await _context.SaveChangesAsync();
+        if (await IsPermissionNameUniqueAsync(requestParams.Name, requestParams.Id))
+        {
+            permission.Name = requestParams.Name;
+            await _context.SaveChangesAsync();
+        }
+        else
+        {
+            throw new InvalidOperationException("Permission name already exists.");
+        }
     }
 
     public async Task<List<PermissionDto>> GetAllAsync()
@@ -46,23 +58,22 @@ public class PermissionService : IPermissionService
             .Select(p => new PermissionDto
             {
                 Id = p.Id,
-                Name = p.Name,
-                Description = p.Description
+                Name = p.Name
             })
             .ToListAsync();
     }
 
     public async Task<PermissionDto> GetByIdAsync(int id)
     {
-        var permission = await _context.Permissions.FirstOrDefaultAsync(p => p.Id == id);
+        var permission = await _context.Permissions
+            .FirstOrDefaultAsync(p => p.Id == id);
         if (permission == null)
             throw new KeyNotFoundException("Permission not found.");
 
         return new PermissionDto
         {
             Id = permission.Id,
-            Name = permission.Name,
-            Description = permission.Description
+            Name = permission.Name
         };
     }
 
@@ -74,5 +85,16 @@ public class PermissionService : IPermissionService
 
         _context.Permissions.Remove(permission);
         await _context.SaveChangesAsync();
+    }
+
+    private async Task<bool> IsPermissionNameUniqueAsync(string name, int? excludePermissionId = null)
+    {
+        var query = _context.Permissions
+            .Where(p => p.Name == name);
+
+        if (excludePermissionId.HasValue)
+            query = query.Where(p => p.Id != excludePermissionId.Value);
+
+        return !await query.AnyAsync();
     }
 }
