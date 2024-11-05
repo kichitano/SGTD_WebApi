@@ -51,9 +51,9 @@ jobs:
       - name: Login to Azure
         uses: azure/login@v2
         with:
-          client-id: ${{ secrets.__clientidsecretname__ }}
-          tenant-id: ${{ secrets.__tenantidsecretname__ }}
-          subscription-id: ${{ secrets.__subscriptionidsecretname__ }}
+          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_E1E9C2F16578466DB20691BCBE90899A }}
+          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_2A9740ACB33245B2B562D864B56633AA }}
+          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_14B68DE372C44BFC85001C3BAA7C1643 }}
 
       - name: Deploy to Azure Web App
         id: deploy-to-webapp
@@ -62,4 +62,3 @@ jobs:
           app-name: 'SGTD-Webapi'
           slot-name: 'Production'
           package: .
-          
