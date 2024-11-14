@@ -19,7 +19,7 @@ public static class ServiceConfiguration
         services.AddScoped<IComponentService, ComponentService>();
         services.AddScoped<IPermissionService, PermissionService>();
         services.AddScoped<IPersonService, PersonService>();
-        services.AddScoped<IPositionRoleService, PositionRoleService>();
+        services.AddScoped<IUserRoleService, UserRoleService>();
         services.AddScoped<IPositionService, PositionService>();
         services.AddScoped<IPositionDependencyService, PositionDependencyService>();
         services.AddScoped<IRoleService, RoleService>();

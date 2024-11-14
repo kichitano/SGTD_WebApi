@@ -2,13 +2,13 @@
 
 namespace SGTD_WebApi.DbModel.Entities;
 
-[Table("PositionRoles")]
-public class PositionRole : Base
+[Table("UserRoles")]
+public class UserRole : Base
 {
-    public int PositionId { get; set; }
+    public int UserId { get; set; }
 
-    [ForeignKey("PositionId")]
-    public Position Position { get; set; }
+    [ForeignKey("UserId")]
+    public User User { get; set; }
 
     public int RoleId { get; set; }
 
