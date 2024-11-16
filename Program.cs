@@ -51,7 +51,7 @@ using (var scope = app.Services.CreateScope())
     try
     {
         var context = services.GetRequiredService<DatabaseContext>();
-        context.Database.Migrate();
+        await context.Database.MigrateAsync();
     }
     catch (Exception ex)
     {
@@ -73,4 +73,4 @@ app.UseAuthorization();
 
 app.MapControllers();
 
-app.Run();
+await app.RunAsync();

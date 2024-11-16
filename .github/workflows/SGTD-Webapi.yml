@@ -30,14 +30,14 @@ jobs:
       run: dotnet build "${{ env.WORKING_DIRECTORY }}" --configuration ${{ env.CONFIGURATION }} --no-restore
     
     - name: Run Unit Tests
-      run: dotnet test SGTD_UnitTests/SGTD_UnitTests.csproj --configuration ${{ env.CONFIGURATION }} --no-build
+      run: dotnet test Tests/SGTD_UnitTests/SGTD_UnitTests.csproj --configuration ${{ env.CONFIGURATION }} --no-build
       
     - name: Run Integration Tests
-      run: dotnet test SGTD_IntegrationTests/SGTD_IntegrationTests.csproj --configuration ${{ env.CONFIGURATION }} --no-build
+      run: dotnet test Tests/SGTD_IntegrationTests/SGTD_IntegrationTests.csproj --configuration ${{ env.CONFIGURATION }} --no-build
     
     - name: Publish
       if: success()
-      run: dotnet publish "${{ env.WORKING_DIRECTORY }}" --configuration ${{ env.CONFIGURATION }} --no-build --output "${{ env.AZURE_WEBAPP_PACKAGE_PATH }}"
+      run: dotnet publish SGTD_WebApi.csproj --configuration ${{ env.CONFIGURATION }} --no-build --output "${{ env.AZURE_WEBAPP_PACKAGE_PATH }}"
     
     - name: Publish Artifacts
       if: success()
