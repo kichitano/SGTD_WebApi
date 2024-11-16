@@ -59,7 +59,7 @@ public class DatabaseContext : DbContext
     public DbSet<Role> Roles { get; set; }
     public DbSet<RoleComponentPermission> RoleComponentPermissions { get; set; }
     public DbSet<Permission> Permissions { get; set; }
-    public DbSet<PositionRole> PositionRoles { get; set; }
+    public DbSet<UserRole> UserRoles { get; set; }
     public DbSet<LogSystem> LogSystems { get; set; }
 
     public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
@@ -198,8 +198,8 @@ public class DatabaseContext : DbContext
         ConfigureOneToManyRelationship<UserPosition, User>(modelBuilder, up => up.User, up => up.UserId);
         ConfigureOneToManyRelationship<UserPosition, Position>(modelBuilder, up => up.Position, up => up.PositionId);
 
-        ConfigureOneToManyRelationship<PositionRole, Position>(modelBuilder, pr => pr.Position, pr => pr.PositionId);
-        ConfigureOneToManyRelationship<PositionRole, Role>(modelBuilder, pr => pr.Role, pr => pr.RoleId);
+        ConfigureOneToManyRelationship<UserRole, User>(modelBuilder, ur => ur.User, ur => ur.UserId);
+        ConfigureOneToManyRelationship<UserRole, Role>(modelBuilder, ur => ur.Role, ur => ur.RoleId);
 
         ConfigureOneToManyRelationship<RoleComponentPermission, Role>(modelBuilder, rcp => rcp.Role, rcp => rcp.RoleId);
         ConfigureOneToManyRelationship<RoleComponentPermission, Component>(modelBuilder, rcp => rcp.Component, rcp => rcp.ComponentId);
