@@ -12,10 +12,18 @@ builder.Services.AddControllers(options =>
     options.Conventions.Insert(0, new RoutePrefixConfiguration("api"));
 });
 
-string? connectionString = Environment.GetEnvironmentVariable("DB_CONNECTION_STRING") ??
-                           builder.Configuration.GetConnectionString("DefaultConnection");
-
-builder.Services.AddDbContext<DatabaseContext>(options => options.UseSqlServer(connectionString));
+if (builder.Environment.EnvironmentName == "Testing")
+{
+    builder.Services.AddDbContext<DatabaseContext>(options =>
+        options.UseInMemoryDatabase("TestingDb"));
+}
+else
+{
+    string? connectionString = Environment.GetEnvironmentVariable("DB_CONNECTION_STRING") ??
+                               builder.Configuration.GetConnectionString("DefaultConnection");
+    builder.Services.AddDbContext<DatabaseContext>(options =>
+        options.UseSqlServer(connectionString));
+}
 
 builder.Services.AddCors(options =>
 {
