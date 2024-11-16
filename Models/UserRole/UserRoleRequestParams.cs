@@ -2,12 +2,12 @@
 
 namespace SGTD_WebApi.Models.PositionRole;
 
-public class PositionRoleRequestParams
+public class UserRoleRequestParams
 {
     public int? Id { get; set; }
 
     [Required]
-    public int PositionId { get; set; }
+    public Guid UserGuid { get; set; }
 
     [Required]
     public int RoleId { get; set; }

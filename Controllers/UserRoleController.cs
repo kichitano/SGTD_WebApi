@@ -6,22 +6,22 @@ namespace SGTD_WebApi.Controllers
 {
     [Route("[controller]")]
     [ApiController]
-    public class PositionRoleController : Controller
+    public class UserRoleController : Controller
     {
-        private readonly IPositionRoleService _positionRoleService;
+        private readonly IUserRoleService _userRoleService;
 
-        public PositionRoleController(IPositionRoleService positionRoleService)
+        public UserRoleController(IUserRoleService userRoleService)
         {
-            _positionRoleService = positionRoleService;
+            _userRoleService = userRoleService;
         }
 
         [Route("")]
         [HttpPost]
-        public async Task<ActionResult> CreateAsync(PositionRoleRequestParams requestParams)
+        public async Task<ActionResult> CreateAsync(UserRoleRequestParams requestParams)
         {
             try
             {
-                await _positionRoleService.CreateAsync(requestParams);
+                await _userRoleService.CreateAsync(requestParams);
                 return Ok();
             }
             catch (Exception ex)
@@ -32,11 +32,11 @@ namespace SGTD_WebApi.Controllers
 
         [Route("")]
         [HttpPut]
-        public async Task<ActionResult> UpdateAsync(PositionRoleRequestParams requestParams)
+        public async Task<ActionResult> UpdateAsync(UserRoleRequestParams requestParams)
         {
             try
             {
-                await _positionRoleService.UpdateAsync(requestParams);
+                await _userRoleService.UpdateAsync(requestParams);
                 return Ok();
             }
             catch (Exception ex)
@@ -51,7 +51,7 @@ namespace SGTD_WebApi.Controllers
         {
             try
             {
-                var response = await _positionRoleService.GetAllAsync();
+                var response = await _userRoleService.GetAllAsync();
                 return Ok(response);
             }
             catch (Exception ex)
@@ -66,7 +66,7 @@ namespace SGTD_WebApi.Controllers
         {
             try
             {
-                var response = await _positionRoleService.GetByIdAsync(id);
+                var response = await _userRoleService.GetByIdAsync(id);
                 return Ok(response);
             }
             catch (Exception ex)
@@ -75,12 +75,12 @@ namespace SGTD_WebApi.Controllers
             }
         }
 
-        [HttpDelete("{id}")]
-        public async Task<ActionResult> DeleteByIdAsync(int id)
+        [HttpDelete("{userGuid}")]
+        public async Task<ActionResult> DeleteByUserGuidAsync(Guid userGuid)
         {
             try
             {
-                await _positionRoleService.DeleteByIdAsync(id);
+                await _userRoleService.DeleteByUserGuidAsync(userGuid);
                 return Ok();
             }
             catch (Exception ex)
@@ -89,13 +89,13 @@ namespace SGTD_WebApi.Controllers
             }
         }
 
-        [Route("position/{positionId}")]
+        [Route("user/{userGuid}")]
         [HttpGet]
-        public async Task<ActionResult> GetByPositionIdAsync(int positionId)
+        public async Task<ActionResult> GetByUserGuidAsync(Guid userGuid)
         {
             try
             {
-                var response = await _positionRoleService.GetByPositionIdAsync(positionId);
+                var response = await _userRoleService.GetByUserGuidAsync(userGuid);
                 return Ok(response);
             }
             catch (Exception ex)
