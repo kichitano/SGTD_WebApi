@@ -162,33 +162,37 @@ public class AreaServiceUnitTest : IDisposable
             await _areaService.UpdateAsync(updateRequest));
     }
 
-    //[Fact]
-    //public async Task UpdateAsync_WithParentAreaChange_ShouldUpdateDependency()
-    //{
-    //    // Arrange
-    //    var area = new Area { Name = "Test Area", Description = "Description", Status = true };
-    //    _context.Areas.Add(area);
-    //    await _context.SaveChangesAsync();
+    [Fact]
+    public async Task UpdateAsync_WithParentAreaChange_ShouldUpdateDependency()
+    {
+        // Arrange
+        var areas = new List<Area>
+        {
+            new() { Name = "Area 1", Description = "Description 1", Status = true },
+            new() { Name = "Area 2", Description = "Description 2", Status = false }
+        };
+        _context.Areas.AddRange(areas);
+        await _context.SaveChangesAsync();
 
-    //    var updateRequest = new AreaRequestParams
-    //    {
-    //        Id = area.Id,
-    //        Name = "Test Area",
-    //        Description = "Updated Description",
-    //        Status = true,
-    //        ParentAreaId = 2
-    //    };
+        var updateRequest = new AreaRequestParams
+        {
+            Id = areas[0].Id,
+            Name = "Test Area",
+            Description = "Updated Description",
+            Status = true,
+            ParentAreaId = 2
+        };
 
-    //    _areaDependencyServiceMock.Setup(x => x.CreateAsync(It.IsAny<AreaDependencyRequestParams>()))
-    //        .Returns(Task.CompletedTask);
+        _areaDependencyServiceMock.Setup(x => x.CreateAsync(It.IsAny<AreaDependencyRequestParams>()))
+            .Returns(Task.CompletedTask);
 
-    //    // Act
-    //    await _areaService.UpdateAsync(updateRequest);
+        // Act
+        await _areaService.UpdateAsync(updateRequest);
 
-    //    // Assert
-    //    _areaDependencyServiceMock.Verify(x => x.CreateAsync(It.Is<AreaDependencyRequestParams>(
-    //        p => p.ParentAreaId == 2 && p.ChildAreaId == area.Id)), Times.Once);
-    //}
+        // Assert
+        _areaDependencyServiceMock.Verify(x => x.CreateAsync(It.Is<AreaDependencyRequestParams>(
+            p => p.ParentAreaId == 2 && p.ChildAreaId == areas[0].Id)), Times.Once);
+    }
     #endregion
 
     #region GetAllAsync Tests
