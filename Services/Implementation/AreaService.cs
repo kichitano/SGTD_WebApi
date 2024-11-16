@@ -57,47 +57,55 @@ public class AreaService : IAreaService
         if (area == null)
             throw new KeyNotFoundException("Area not found.");
 
-        if (await IsAreaNameUniqueAsync(requestParams.Name, requestParams.Id))
-        {
-            area.Name = requestParams.Name;
-            area.Description = requestParams.Description;
-            area.Status = requestParams.Status;
-            await _context.SaveChangesAsync();
-
-            var existingDependency = await _context.AreaDependencies
-                .FirstOrDefaultAsync(ad => ad.ChildAreaId == requestParams.Id);
-
-            if (requestParams.ParentAreaId.HasValue)
-            {
-                if (existingDependency != null)
-                {
-                    var updateRequest = new AreaDependencyRequestParams
-                    {
-                        Id = existingDependency.Id,
-                        ParentAreaId = requestParams.ParentAreaId.Value,
-                        ChildAreaId = area.Id
-                    };
-                    await _areaDependencyService.UpdateAsync(updateRequest);
-                }
-                else
-                {
-                    var createRequest = new AreaDependencyRequestParams
-                    {
-                        ParentAreaId = requestParams.ParentAreaId.Value,
-                        ChildAreaId = area.Id
-                    };
-                    await _areaDependencyService.CreateAsync(createRequest);
-                }
-            }
-            else if (existingDependency != null)
-            {
-                await _areaDependencyService.DeleteByIdAsync(existingDependency.Id);
-            }
-        }
-        else
-        {
+        if (!await IsAreaNameUniqueAsync(requestParams.Name, requestParams.Id))
             throw new InvalidOperationException("Area name already exists.");
+
+        if (requestParams.ParentAreaId.HasValue)
+        {
+            var parentArea = await _context.Areas
+                .FirstOrDefaultAsync(a => a.Id == requestParams.ParentAreaId.Value);
+            if (parentArea == null)
+                throw new KeyNotFoundException("Parent area not found.");
+
+            if (await WouldCreateCircularReference(requestParams.Id.Value, requestParams.ParentAreaId.Value))
+                throw new InvalidOperationException("Cannot create circular reference between areas.");
         }
+
+        area.Name = requestParams.Name;
+        area.Description = requestParams.Description;
+        area.Status = requestParams.Status;
+
+        var existingDependency = await _context.AreaDependencies
+            .FirstOrDefaultAsync(ad => ad.ChildAreaId == requestParams.Id);
+
+        if (requestParams.ParentAreaId.HasValue)
+        {
+            if (existingDependency != null)
+            {
+                var updateRequest = new AreaDependencyRequestParams
+                {
+                    Id = existingDependency.Id,
+                    ParentAreaId = requestParams.ParentAreaId.Value,
+                    ChildAreaId = area.Id
+                };
+                await _areaDependencyService.UpdateAsync(updateRequest);
+            }
+            else
+            {
+                var createRequest = new AreaDependencyRequestParams
+                {
+                    ParentAreaId = requestParams.ParentAreaId.Value,
+                    ChildAreaId = area.Id
+                };
+                await _areaDependencyService.CreateAsync(createRequest);
+            }
+        }
+        else if (existingDependency != null)
+        {
+            await _areaDependencyService.DeleteByIdAsync(existingDependency.Id);
+        }
+
+        await _context.SaveChangesAsync();
     }
 
     public async Task<List<AreaDto>> GetAllAsync()
@@ -158,5 +166,39 @@ public class AreaService : IAreaService
             query = query.Where(a => a.Id != excludeAreaId.Value);
 
         return !await query.AnyAsync();
+    }
+
+    private async Task<bool> WouldCreateCircularReference(int targetAreaId, int parentAreaId)
+    {
+        if (targetAreaId == parentAreaId)
+            return true;
+
+        var dependencies = await _context.AreaDependencies.ToListAsync();
+        var visited = new HashSet<int>();
+        var stack = new Stack<int>();
+
+        stack.Push(parentAreaId);
+
+        while (stack.Count > 0)
+        {
+            var currentAreaId = stack.Pop();
+
+            if (!visited.Add(currentAreaId))
+                continue;
+
+            var parentAreas = dependencies
+                .Where(d => d.ChildAreaId == currentAreaId)
+                .Select(d => d.ParentAreaId);
+
+            foreach (var area in parentAreas)
+            {
+                if (area == targetAreaId)
+                    return true;
+
+                stack.Push(area);
+            }
+        }
+
+        return false;
     }
 }
