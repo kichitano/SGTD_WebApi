@@ -26,14 +26,21 @@ public class AuthController : ControllerBase
     [HttpPost("login")]
     public async Task<ActionResult> LoginAsync(AuthRequestParams requestParams)
     {
-        var response = await _authService.LoginAsync(requestParams);
-        if (response.Success)
+        try
         {
-            var cookieOptions = _authService.SetRefreshTokenCookie(response.RefreshToken);
-            Response.Cookies.Append("refresh_token", response.RefreshToken, cookieOptions);
-            return Ok(response);
+            var response = await _authService.LoginAsync(requestParams);
+            if (response.Success)
+            {
+                var cookieOptions = _authService.SetRefreshTokenCookie(response.RefreshToken);
+                Response.Cookies.Append("refresh_token", response.RefreshToken, cookieOptions);
+                return Ok(response);
+            }
+            return Unauthorized(new { message = "Invalid credentials" });
         }
-        return Unauthorized(new { message = "Invalid credentials" });
+        catch (Exception ex)
+        {
+            return BadRequest(ex.Message);
+        }
     }
 
     [HttpPost("logout")]
