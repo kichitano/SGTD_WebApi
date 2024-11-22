@@ -15,6 +15,7 @@ public static class ServiceConfiguration
 
         services.AddScoped<IAreaDependencyService, AreaDependencyService>();
         services.AddScoped<IAreaService, AreaService>();
+        services.AddScoped<IAuthService, AuthService>();
         services.AddScoped<ICountryService, CountryService>();
         services.AddScoped<IComponentService, ComponentService>();
         services.AddScoped<IPermissionService, PermissionService>();
@@ -24,8 +25,10 @@ public static class ServiceConfiguration
         services.AddScoped<IPositionDependencyService, PositionDependencyService>();
         services.AddScoped<IRoleService, RoleService>();
         services.AddScoped<IRoleComponentPermissionService, RoleComponentPermissionService>();
+        services.AddScoped<IUserFileService, UserFileService>();
         services.AddScoped<IUserPositionService, UserPositionService>();
         services.AddScoped<IUserService, UserService>();
+        services.AddScoped<IUserTokenService, UserTokenService>();
 
         services.AddAutoMapper(typeof(MappingProfile));
     }

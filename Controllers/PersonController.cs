@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using System.ComponentModel.DataAnnotations;
+using Microsoft.AspNetCore.Mvc;
 using SGTD_WebApi.Models.Person;
 using SGTD_WebApi.Services;
 
@@ -24,9 +25,13 @@ public class PersonController : Controller
             await _personService.CreateAsync(requestParams);
             return Ok();
         }
-        catch (Exception ex)
+        catch (ValidationException ex)
         {
             return BadRequest(ex.Message);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, ex.Message);
         }
     }
 

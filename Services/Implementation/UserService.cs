@@ -3,6 +3,7 @@ using System.Text;
 using Microsoft.EntityFrameworkCore;
 using SGTD_WebApi.DbModel.Context;
 using SGTD_WebApi.DbModel.Entities;
+using SGTD_WebApi.Helpers;
 using SGTD_WebApi.Models.User;
 
 namespace SGTD_WebApi.Services.Implementation;
@@ -10,10 +11,12 @@ namespace SGTD_WebApi.Services.Implementation;
 public class UserService : IUserService
 {
     private readonly DatabaseContext _context;
+    private readonly EncryptHelper _encryptHelper;
 
-    public UserService(DatabaseContext context)
+    public UserService(DatabaseContext context, IConfiguration configuration)
     {
         _context = context;
+        _encryptHelper = new EncryptHelper(configuration);
     }
 
     public async Task CreateAsync(UserRequestParams requestParams)
@@ -22,7 +25,7 @@ public class UserService : IUserService
         {
             PersonId = requestParams.PersonId,
             Email = requestParams.Email,
-            Password = HashPassword(requestParams.Password),
+            Password = _encryptHelper.PasswordEncrypt(requestParams.Password),
             StorageSize = requestParams.StorageSize,
             Status = requestParams.Status,
             CreatedAt = DateTime.Now,
@@ -46,7 +49,8 @@ public class UserService : IUserService
         user.Email = requestParams.Email;
         if (!string.IsNullOrEmpty(requestParams.Password))
         {
-            user.Password = HashPassword(requestParams.Password);
+
+            user.Password = BCrypt.Net.BCrypt.HashPassword(requestParams.Password, workFactor: 12);
         }
 
         user.StorageSize = requestParams.StorageSize;
@@ -119,7 +123,7 @@ public class UserService : IUserService
             {
                 PersonId = requestParams.PersonId,
                 Email = requestParams.Email,
-                Password = HashPassword(requestParams.Password),
+                Password = BCrypt.Net.BCrypt.HashPassword(requestParams.Password, workFactor: 12),
                 StorageSize = requestParams.StorageSize,
                 Status = requestParams.Status,
                 CreatedAt = DateTime.Now,
@@ -132,7 +136,7 @@ public class UserService : IUserService
             return user.UserGuid;
         }
 
-        throw new InvalidOperationException("Position name already exists.");
+        throw new InvalidOperationException("User email already exists.");
     }
 
     public async Task<UserDto> GetByGuidAsync(Guid guid)
@@ -186,13 +190,6 @@ public class UserService : IUserService
             throw new KeyNotFoundException("User not found.");
 
         return user;
-    }
-
-    private string HashPassword(string password)
-    {
-        using var sha256 = SHA256.Create();
-        var hashedBytes = sha256.ComputeHash(Encoding.UTF8.GetBytes(password));
-        return BitConverter.ToString(hashedBytes).Replace("-", "").ToLower();
     }
 
     private string GenerateFolderPath()
