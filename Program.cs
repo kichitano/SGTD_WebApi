@@ -1,6 +1,10 @@
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using SGTD_WebApi.Configurations;
 using SGTD_WebApi.DbModel.Context;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -10,6 +14,7 @@ builder.Services.AddHttpClient();
 builder.Services.AddControllers(options =>
 {
     options.Conventions.Insert(0, new RoutePrefixConfiguration("api"));
+    options.Filters.Add(new AuthorizeFilter());
 });
 
 if (builder.Environment.EnvironmentName == "Testing")
@@ -30,12 +35,30 @@ builder.Services.AddCors(options =>
     options.AddPolicy("AllowAngularApp",
         policy =>
         {
-            policy.WithOrigins("https://kichitano.github.io")
+            policy.WithOrigins("http://localhost:4200")
                 .AllowAnyMethod()
                 .AllowAnyHeader() // Allow necesary headers
                 .AllowCredentials();
         });
 });
+
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+            ValidIssuer = builder.Configuration["Jwt:Issuer"],
+            ValidAudience = builder.Configuration["Jwt:Audience"],
+            IssuerSigningKey = new SymmetricSecurityKey(
+                Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"] ?? string.Empty))
+        };
+    });
+
+builder.Services.AddAuthorization();
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
@@ -69,6 +92,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseCors("AllowAngularApp");
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();

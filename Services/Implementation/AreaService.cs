@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using System.ComponentModel.DataAnnotations;
+using Microsoft.EntityFrameworkCore;
 using SGTD_WebApi.DbModel.Context;
 using SGTD_WebApi.DbModel.Entities;
 using SGTD_WebApi.Models.Area;
@@ -51,7 +52,7 @@ public class AreaService : IAreaService
     public async Task UpdateAsync(AreaRequestParams requestParams)
     {
         if (requestParams.Id == null)
-            throw new ArgumentNullException(nameof(requestParams.Id), "Area Id is required for update.");
+            throw new ValidationException("Area Id is required for update.");
 
         var area = await _context.Areas.FirstOrDefaultAsync(q => q.Id == requestParams.Id);
         if (area == null)
