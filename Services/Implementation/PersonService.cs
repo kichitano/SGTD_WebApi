@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using System.ComponentModel.DataAnnotations;
+using Microsoft.EntityFrameworkCore;
 using SGTD_WebApi.DbModel.Context;
 using SGTD_WebApi.DbModel.Entities;
 using SGTD_WebApi.Models.Person;
@@ -16,6 +17,15 @@ public class PersonService : IPersonService
 
     public async Task CreateAsync(PersonRequestParams requestParams)
     {
+        var personExists = await _context.People
+            .Where(q => q.Phone.Equals(requestParams.Phone) || q.DocumentNumber.Equals(requestParams.DocumentNumber))
+            .AnyAsync();
+
+        if (personExists)
+        {
+            throw new ValidationException("Ya existe una persona con el mismo número de teléfono o DNI");
+        }
+
         var person = new Person
         {
             FirstName = requestParams.FirstName,
