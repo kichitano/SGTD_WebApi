@@ -1,60 +1,73 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using SGTD_WebApi.Models;
 using SGTD_WebApi.Services;
 
-namespace SGTD_WebApi.Controllers
+namespace SGTD_WebApi.Controllers;
+
+[Route("[controller]")]
+[ApiController]
+public class UserFileController : ControllerBase
 {
-    [Route("[controller]")]
-    [ApiController]
-    public class FileController : ControllerBase
+    private readonly IUserFileService _fileService;
+
+    public UserFileController(IUserFileService fileService)
     {
-        private readonly IUserFileService _fileService;
+        _fileService = fileService;
+    }
 
-        public FileController(IUserFileService fileService)
+    [Route("{userGuid}")]
+    [HttpGet]
+    public async Task<ActionResult> GetByUserGuIdAsync(Guid userGuid)
+    {
+        try
         {
-            _fileService = fileService;
+            var response = await _fileService.GetByUserGuIdAsync(userGuid);
+            return Ok(response);
         }
-
-        [HttpPost("upload")]
-        public async Task<ActionResult> UploadFilesAsync([FromForm] List<IFormFile> files, Guid userGuid)
+        catch (Exception ex)
         {
-            try
-            {
-                await _fileService.UploadFilesAsync(files, userGuid);
-                return Ok();
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ex.Message);
-            }
+            return BadRequest(ex.Message);
         }
+    }
 
-        [HttpGet("download/{id}")]
-        public async Task<ActionResult> DownloadFileAsync(int id)
+    [HttpPost("upload/{userGuid}")]
+    public async Task<ActionResult> UploadFilesAsync([FromForm] List<IFormFile> files, Guid userGuid)
+    {
+        try
         {
-            try
-            {
-                var downloadedFile = await _fileService.DownloadFileAsync(id);
-                return File(downloadedFile.File, "application/octet-stream", downloadedFile.FileName);
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ex.Message);
-            }
+            await _fileService.UploadFilesAsync(files, userGuid);
+            return Ok();
         }
-
-        [HttpPost("download")]
-        public async Task<ActionResult> DownloadMultipleFilesAsync(List<int> ids)
+        catch (Exception ex)
         {
-            try
-            {
-                var zipContent = await _fileService.DownloadMultipleFilesAsync(ids);
-                return File(zipContent, "application/zip", "files.zip");
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ex.Message);
-            }
+            return BadRequest(ex.Message);
+        }
+    }
+
+    [HttpGet("download/{id}")]
+    public async Task<ActionResult> DownloadFileAsync(int id)
+    {
+        try
+        {
+            var downloadedFile = await _fileService.DownloadFileAsync(id);
+            return File(downloadedFile.File, "application/octet-stream", downloadedFile.FileName);
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(ex.Message);
+        }
+    }
+
+    [HttpPost("download")]
+    public async Task<ActionResult> DownloadMultipleFilesAsync(List<int> ids)
+    {
+        try
+        {
+            var zipContent = await _fileService.DownloadMultipleFilesAsync(ids);
+            return File(zipContent, "application/zip", "files.zip");
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(ex.Message);
         }
     }
 }

@@ -2,6 +2,9 @@
 
 public class UserFileDto
 {
-    public byte[] File { get; set; }
+    public int Id { get; set; }
     public string FileName { get; set; }
+    public decimal FileSize { get; set; }
+    public string ContentType { get; set; }
+    public DateTime CreatedAt { get; set; }
 }

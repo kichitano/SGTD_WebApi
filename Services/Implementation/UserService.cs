@@ -1,6 +1,4 @@
-﻿using System.Security.Cryptography;
-using System.Text;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using SGTD_WebApi.DbModel.Context;
 using SGTD_WebApi.DbModel.Entities;
 using SGTD_WebApi.Helpers;
@@ -30,7 +28,8 @@ public class UserService : IUserService
             Status = requestParams.Status,
             CreatedAt = DateTime.Now,
             UserGuid = Guid.NewGuid(),
-            FolderPath = GenerateFolderPath()
+            FolderPath = GenerateFolderPath(),
+            AreaId = requestParams.AreaId
         };
         _context.Users.Add(user);
         await _context.SaveChangesAsync();
@@ -47,14 +46,15 @@ public class UserService : IUserService
 
         user.PersonId = requestParams.PersonId;
         user.Email = requestParams.Email;
+
         if (!string.IsNullOrEmpty(requestParams.Password))
         {
-
             user.Password = BCrypt.Net.BCrypt.HashPassword(requestParams.Password, workFactor: 12);
         }
 
         user.StorageSize = requestParams.StorageSize;
         user.Status = requestParams.Status;
+        user.AreaId = requestParams.AreaId;
 
         await _context.SaveChangesAsync();
     }
@@ -74,7 +74,8 @@ public class UserService : IUserService
                 StorageSize = q.user.StorageSize,
                 Status = q.user.Status,
                 Person = q.user.Person,
-                Position = q.userPosition.Position
+                Position = q.userPosition.Position,
+                AreaId = q.user.AreaId ?? 0
             })
             .ToListAsync();
 
@@ -97,7 +98,8 @@ public class UserService : IUserService
                     StorageSize = user.StorageSize,
                     Status = user.Status,
                     Person = user.Person,
-                    Position = userPosition.Position
+                    Position = userPosition.Position,
+                    AreaId = user.AreaId ?? 0
                 }).FirstOrDefaultAsync(u => u.Id == id);
         if (user == null)
             throw new KeyNotFoundException("User not found.");
@@ -128,7 +130,8 @@ public class UserService : IUserService
                 Status = requestParams.Status,
                 CreatedAt = DateTime.Now,
                 UserGuid = Guid.NewGuid(),
-                FolderPath = GenerateFolderPath()
+                FolderPath = GenerateFolderPath(),
+                AreaId = requestParams.AreaId
             };
 
             _context.Users.Add(user);
@@ -159,7 +162,8 @@ public class UserService : IUserService
                     StorageSize = result.User.StorageSize,
                     Status = result.User.Status,
                     Person = result.User.Person,
-                    Position = userPosition!.Position
+                    Position = userPosition!.Position,
+                    AreaId = result.User.AreaId ?? 0
                 }
             )
             .FirstOrDefaultAsync();
@@ -182,7 +186,8 @@ public class UserService : IUserService
                 Email = q.Email,
                 StorageSize = q.StorageSize,
                 Status = q.Status,
-                Person = q.Person
+                Person = q.Person,
+                AreaId = q.AreaId ?? 0
             })
             .FirstOrDefaultAsync();
 

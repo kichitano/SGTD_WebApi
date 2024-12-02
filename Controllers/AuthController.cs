@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using SGTD_WebApi.Models.Auth;
 using SGTD_WebApi.Services;
 using SGTD_WebApi.Services.Implementation;
+using System.ComponentModel.DataAnnotations;
 
 namespace SGTD_WebApi.Controllers;
 
@@ -33,9 +34,12 @@ public class AuthController : ControllerBase
             {
                 var cookieOptions = _authService.SetRefreshTokenCookie(response.RefreshToken);
                 Response.Cookies.Append("refresh_token", response.RefreshToken, cookieOptions);
-                return Ok(response);
             }
-            return Unauthorized(new { message = "Invalid credentials" });
+            return Ok(response);
+        }
+        catch (ValidationException ex)
+        {
+            return BadRequest(ex.Message);
         }
         catch (Exception ex)
         {

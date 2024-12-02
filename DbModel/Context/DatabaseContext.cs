@@ -50,6 +50,7 @@ public class DatabaseContext : DbContext
     public DbSet<Area> Areas { get; set; }
     public DbSet<AreaDependency> AreaDependencies { get; set; }
     public DbSet<Component> Components { get; set; }
+    public DbSet<DocumentType> DocumentTypes { get; set; }
     public DbSet<Position> Positions { get; set; }
     public DbSet<PositionDependency> PositionsDependency { get; set; }
     public DbSet<Person> People { get; set; }

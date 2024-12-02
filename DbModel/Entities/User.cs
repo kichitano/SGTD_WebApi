@@ -12,6 +12,11 @@ public class User : Base
     [ForeignKey("PersonId")]
     public Person Person { get; set; }
 
+    public int? AreaId { get; set; }
+
+    [ForeignKey("AreaId")]
+    public Area? Area { get; set; }
+
     [Required]
     [StringLength(100)]
     public string Email { get; set; }
