@@ -27,7 +27,6 @@ public static class ServiceConfiguration
         services.AddScoped<IRoleService, RoleService>();
         services.AddScoped<IRoleComponentPermissionService, RoleComponentPermissionService>();
         services.AddScoped<IUserFileService, UserFileService>();
-        services.AddScoped<IUserPositionService, UserPositionService>();
         services.AddScoped<IUserService, UserService>();
         services.AddScoped<IUserTokenService, UserTokenService>();
 

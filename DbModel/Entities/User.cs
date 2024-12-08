@@ -12,10 +12,10 @@ public class User : Base
     [ForeignKey("PersonId")]
     public Person Person { get; set; }
 
-    public int? AreaId { get; set; }
+    public int? PositionId { get; set; }
 
-    [ForeignKey("AreaId")]
-    public Area? Area { get; set; }
+    [ForeignKey("PositionId")]
+    public Position? Position { get; set; }
 
     [Required]
     [StringLength(100)]

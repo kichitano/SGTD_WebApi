@@ -9,7 +9,7 @@ public class UserRequestParams
     [Required]
     public int PersonId { get; set; }
 
-    public int? AreaId { get; set; }
+    public int? PositionId { get; set; }
 
     [Required]
     [StringLength(100)]

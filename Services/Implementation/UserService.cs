@@ -29,7 +29,7 @@ public class UserService : IUserService
             CreatedAt = DateTime.Now,
             UserGuid = Guid.NewGuid(),
             FolderPath = GenerateFolderPath(),
-            AreaId = requestParams.AreaId
+            PositionId = requestParams.PositionId
         };
         _context.Users.Add(user);
         await _context.SaveChangesAsync();
@@ -54,7 +54,7 @@ public class UserService : IUserService
 
         user.StorageSize = requestParams.StorageSize;
         user.Status = requestParams.Status;
-        user.AreaId = requestParams.AreaId;
+        user.PositionId = requestParams.PositionId;
 
         await _context.SaveChangesAsync();
     }
@@ -62,20 +62,16 @@ public class UserService : IUserService
     public async Task<List<UserDto>> GetAllAsync()
     {
         var users = await _context.Users
-            .Join(_context.UserPositions,
-                u => u.Id,
-                up => up.User.Id,
-                (u, up) => new { user = u, userPosition = up})
             .Select(q => new UserDto
             {
-                UserGuid = q.user.UserGuid,
-                PersonId = q.user.PersonId,
-                Email = q.user.Email,
-                StorageSize = q.user.StorageSize,
-                Status = q.user.Status,
-                Person = q.user.Person,
-                Position = q.userPosition.Position,
-                AreaId = q.user.AreaId ?? 0
+                UserGuid = q.UserGuid,
+                PersonId = q.PersonId,
+                Email = q.Email,
+                StorageSize = q.StorageSize,
+                Status = q.Status,
+                Person = q.Person,
+                PositionId = q.Position!.Id,
+                PositionName = q.Position.Name
             })
             .ToListAsync();
 
@@ -85,22 +81,18 @@ public class UserService : IUserService
     public async Task<UserDto> GetByIdAsync(int id)
     {
         var user = await _context.Users
-            .Join(
-                _context.UserPositions,
-                user => user.Id,
-                userPosition => userPosition.Id,
-                (user, userPosition) => new UserDto
-                {
-                    Id = user.Id,
-                    UserGuid = user.UserGuid,
-                    PersonId = user.PersonId,
-                    Email = user.Email,
-                    StorageSize = user.StorageSize,
-                    Status = user.Status,
-                    Person = user.Person,
-                    Position = userPosition.Position,
-                    AreaId = user.AreaId ?? 0
-                }).FirstOrDefaultAsync(u => u.Id == id);
+            .Select(q => new UserDto
+            {
+                Id = q.Id,
+                UserGuid = q.UserGuid,
+                PersonId = q.PersonId,
+                Email = q.Email,
+                StorageSize = q.StorageSize,
+                Status = q.Status,
+                Person = q.Person,
+                PositionId = q.Position!.Id,
+            }).FirstOrDefaultAsync(u => u.Id == id);
+
         if (user == null)
             throw new KeyNotFoundException("User not found.");
 
@@ -131,7 +123,7 @@ public class UserService : IUserService
                 CreatedAt = DateTime.Now,
                 UserGuid = Guid.NewGuid(),
                 FolderPath = GenerateFolderPath(),
-                AreaId = requestParams.AreaId
+                PositionId = requestParams.PositionId
             };
 
             _context.Users.Add(user);
@@ -146,26 +138,16 @@ public class UserService : IUserService
     {
         var user = await _context.Users
             .Where(u => u.UserGuid.Equals(guid))
-            .GroupJoin(
-                _context.UserPositions,
-                u => u.Id,
-                up => up.UserId,
-                (u, userPositions) => new { User = u, UserPositions = userPositions.DefaultIfEmpty() }
-            )
-            .SelectMany(
-                result => result.UserPositions,
-                (result, userPosition) => new UserDto
-                {
-                    UserGuid = result.User.UserGuid,
-                    PersonId = result.User.PersonId,
-                    Email = result.User.Email,
-                    StorageSize = result.User.StorageSize,
-                    Status = result.User.Status,
-                    Person = result.User.Person,
-                    Position = userPosition!.Position,
-                    AreaId = result.User.AreaId ?? 0
-                }
-            )
+            .Select(q => new UserDto
+            {
+                UserGuid = q.UserGuid,
+                PersonId = q.PersonId,
+                Email = q.Email,
+                StorageSize = q.StorageSize,
+                Status = q.Status,
+                Person = q.Person,
+                PositionId = q.PositionId ?? 0
+            })
             .FirstOrDefaultAsync();
 
         if (user == null)
@@ -187,7 +169,7 @@ public class UserService : IUserService
                 StorageSize = q.StorageSize,
                 Status = q.Status,
                 Person = q.Person,
-                AreaId = q.AreaId ?? 0
+                PositionId = q.PositionId ?? 0
             })
             .FirstOrDefaultAsync();
 
