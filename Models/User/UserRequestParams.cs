@@ -9,6 +9,8 @@ public class UserRequestParams
     [Required]
     public int PersonId { get; set; }
 
+    public int? PositionId { get; set; }
+
     [Required]
     [StringLength(100)]
     public string Email { get; set; }

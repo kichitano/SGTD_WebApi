@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using SGTD_WebApi.DbModel.Context;
 
@@ -11,9 +12,11 @@ using SGTD_WebApi.DbModel.Context;
 namespace SGTD_WebApi.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-    partial class DatabaseContextModelSnapshot : ModelSnapshot
+    [Migration("20241202181007_AddTable_DocumentaryProcedureStepDocument")]
+    partial class AddTable_DocumentaryProcedureStepDocument
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -474,6 +477,9 @@ namespace SGTD_WebApi.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<int?>("AreaId")
+                        .HasColumnType("int");
+
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
@@ -494,9 +500,6 @@ namespace SGTD_WebApi.Migrations
                     b.Property<int>("PersonId")
                         .HasColumnType("int");
 
-                    b.Property<int?>("PositionId")
-                        .HasColumnType("int");
-
                     b.Property<bool>("Status")
                         .HasColumnType("bit");
 
@@ -511,9 +514,9 @@ namespace SGTD_WebApi.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("PersonId");
+                    b.HasIndex("AreaId");
 
-                    b.HasIndex("PositionId");
+                    b.HasIndex("PersonId");
 
                     b.ToTable("Users");
                 });
@@ -552,6 +555,38 @@ namespace SGTD_WebApi.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("UserFiles");
+                });
+
+            modelBuilder.Entity("SGTD_WebApi.DbModel.Entities.UserPosition", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("PositionId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("UserGuid")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PositionId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("UserPositions");
                 });
 
             modelBuilder.Entity("SGTD_WebApi.DbModel.Entities.UserRole", b =>
@@ -754,19 +789,19 @@ namespace SGTD_WebApi.Migrations
 
             modelBuilder.Entity("SGTD_WebApi.DbModel.Entities.User", b =>
                 {
+                    b.HasOne("SGTD_WebApi.DbModel.Entities.Area", "Area")
+                        .WithMany()
+                        .HasForeignKey("AreaId");
+
                     b.HasOne("SGTD_WebApi.DbModel.Entities.Person", "Person")
                         .WithMany()
                         .HasForeignKey("PersonId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
-                    b.HasOne("SGTD_WebApi.DbModel.Entities.Position", "Position")
-                        .WithMany()
-                        .HasForeignKey("PositionId");
+                    b.Navigation("Area");
 
                     b.Navigation("Person");
-
-                    b.Navigation("Position");
                 });
 
             modelBuilder.Entity("SGTD_WebApi.DbModel.Entities.UserFile", b =>
@@ -776,6 +811,25 @@ namespace SGTD_WebApi.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("SGTD_WebApi.DbModel.Entities.UserPosition", b =>
+                {
+                    b.HasOne("SGTD_WebApi.DbModel.Entities.Position", "Position")
+                        .WithMany()
+                        .HasForeignKey("PositionId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("SGTD_WebApi.DbModel.Entities.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("Position");
 
                     b.Navigation("User");
                 });

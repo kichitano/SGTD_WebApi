@@ -3,15 +3,11 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace SGTD_WebApi.DbModel.Entities;
 
-[Table("Areas")]
-public class Area : Base
+[Table("DocumentTypes")]
+public class DocumentType : Base
 {
     [Required]
-    [StringLength(150)]
+    [StringLength(50)]
     public string Name { get; set; }
-
-    [StringLength(200)]
-    public string Description { get; set; }
-
-    public bool Status { get; set; }
+    public bool IsUploadable { get; set; }
 }

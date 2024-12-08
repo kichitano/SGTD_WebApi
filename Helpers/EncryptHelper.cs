@@ -20,9 +20,8 @@ public class EncryptHelper
     public byte[] FileEncrypt(Stream input)
     {
         var aesAlg = Aes.Create();
-        aesAlg.Key = Encoding.UTF8.GetBytes(_configuration["Encryption:Key"] ?? string.Empty);
+        aesAlg.Key = Convert.FromBase64String(_configuration["Encryption:Key"] ?? string.Empty);
         aesAlg.IV = new byte[16];
-
         var encryptor = aesAlg.CreateEncryptor(aesAlg.Key, aesAlg.IV);
         var msEncrypt = new MemoryStream();
         var cryptoStream = new CryptoStream(msEncrypt, encryptor, CryptoStreamMode.Write);
@@ -34,9 +33,8 @@ public class EncryptHelper
     public byte[] FileDecrypt(byte[] encryptedContent)
     {
         var aesAlg = Aes.Create();
-        aesAlg.Key = Encoding.UTF8.GetBytes(_configuration["Encryption:Key"] ?? string.Empty);
+        aesAlg.Key = Convert.FromBase64String(_configuration["Encryption:Key"] ?? string.Empty);
         aesAlg.IV = new byte[16];
-
         var decryptor = aesAlg.CreateDecryptor(aesAlg.Key, aesAlg.IV);
         var msDecrypt = new MemoryStream(encryptedContent);
         var cryptoStream = new CryptoStream(msDecrypt, decryptor, CryptoStreamMode.Read);
