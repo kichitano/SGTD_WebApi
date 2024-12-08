@@ -1,27 +1,27 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using SGTD_WebApi.Models.UserPosition;
+using SGTD_WebApi.Models.DocumentType;
 using SGTD_WebApi.Services;
 
 namespace SGTD_WebApi.Controllers;
 
 [Route("[controller]")]
 [ApiController]
-public class UserPositionController : Controller
+public class DocumentTypeController : Controller
 {
-    private readonly IUserPositionService _userPositionService;
+    private readonly IDocumentTypeService _documentTypeService;
 
-    public UserPositionController(IUserPositionService userPositionService)
+    public DocumentTypeController(IDocumentTypeService documentTypeService)
     {
-        _userPositionService = userPositionService;
+        _documentTypeService = documentTypeService;
     }
 
     [Route("")]
     [HttpPost]
-    public async Task<ActionResult> CreateAsync(UserPositionRequestParams requestParams)
+    public async Task<ActionResult> CreateAsync(DocumentTypeRequestParams requestParams)
     {
         try
         {
-            await _userPositionService.CreateAsync(requestParams);
+            await _documentTypeService.CreateAsync(requestParams);
             return Ok();
         }
         catch (Exception ex)
@@ -32,11 +32,11 @@ public class UserPositionController : Controller
 
     [Route("")]
     [HttpPut]
-    public async Task<ActionResult> UpdateAsync(UserPositionRequestParams requestParams)
+    public async Task<ActionResult> UpdateAsync(DocumentTypeRequestParams requestParams)
     {
         try
         {
-            await _userPositionService.UpdateAsync(requestParams);
+            await _documentTypeService.UpdateAsync(requestParams);
             return Ok();
         }
         catch (Exception ex)
@@ -51,7 +51,7 @@ public class UserPositionController : Controller
     {
         try
         {
-            var response = await _userPositionService.GetAllAsync();
+            var response = await _documentTypeService.GetAllAsync();
             return Ok(response);
         }
         catch (Exception ex)
@@ -66,7 +66,7 @@ public class UserPositionController : Controller
     {
         try
         {
-            var response = await _userPositionService.GetByIdAsync(id);
+            var response = await _documentTypeService.GetByIdAsync(id);
             return Ok(response);
         }
         catch (Exception ex)
@@ -80,7 +80,7 @@ public class UserPositionController : Controller
     {
         try
         {
-            await _userPositionService.DeleteByIdAsync(id);
+            await _documentTypeService.DeleteByIdAsync(id);
             return Ok();
         }
         catch (Exception ex)

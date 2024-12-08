@@ -12,6 +12,11 @@ public class User : Base
     [ForeignKey("PersonId")]
     public Person Person { get; set; }
 
+    public int? PositionId { get; set; }
+
+    [ForeignKey("PositionId")]
+    public Position? Position { get; set; }
+
     [Required]
     [StringLength(100)]
     public string Email { get; set; }

@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using System.ComponentModel.DataAnnotations;
+using Microsoft.EntityFrameworkCore;
 using SGTD_WebApi.DbModel.Context;
 using SGTD_WebApi.Models.Auth;
 using SGTD_WebApi.Models.UserToken;
@@ -29,7 +30,8 @@ public class AuthService : IAuthService
         bool isValidPassword = BCrypt.Net.BCrypt.Verify(requestParams.Password, user.Password);
         if (!isValidPassword)
         {
-            return new AuthDto { Success = false };
+
+            throw new ValidationException("Credenciales incorrectas");
         }
 
         var token = await _userTokenService.GenerateTokenAsync(user.UserGuid);

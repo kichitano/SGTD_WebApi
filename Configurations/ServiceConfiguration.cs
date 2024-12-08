@@ -18,6 +18,7 @@ public static class ServiceConfiguration
         services.AddScoped<IAuthService, AuthService>();
         services.AddScoped<ICountryService, CountryService>();
         services.AddScoped<IComponentService, ComponentService>();
+        services.AddScoped<IDocumentTypeService, DocumentTypeService>();
         services.AddScoped<IPermissionService, PermissionService>();
         services.AddScoped<IPersonService, PersonService>();
         services.AddScoped<IUserRoleService, UserRoleService>();
@@ -26,7 +27,6 @@ public static class ServiceConfiguration
         services.AddScoped<IRoleService, RoleService>();
         services.AddScoped<IRoleComponentPermissionService, RoleComponentPermissionService>();
         services.AddScoped<IUserFileService, UserFileService>();
-        services.AddScoped<IUserPositionService, UserPositionService>();
         services.AddScoped<IUserService, UserService>();
         services.AddScoped<IUserTokenService, UserTokenService>();
 

@@ -50,12 +50,15 @@ public class DatabaseContext : DbContext
     public DbSet<Area> Areas { get; set; }
     public DbSet<AreaDependency> AreaDependencies { get; set; }
     public DbSet<Component> Components { get; set; }
+    public DbSet<DocumentType> DocumentTypes { get; set; }
+    public DbSet<DocumentaryProcedure> DocumentaryProcedures { get; set; }
+    public DbSet<DocumentaryProcedureStep> DocumentaryProcedureSteps { get; set; }
+    public DbSet<DocumentaryProcedureStepDocument> DocumentaryProcedureStepDocuments { get; set; }
     public DbSet<Position> Positions { get; set; }
     public DbSet<PositionDependency> PositionsDependency { get; set; }
     public DbSet<Person> People { get; set; }
     public DbSet<User> Users { get; set; }
     public DbSet<UserFile> UserFiles { get; set; }
-    public DbSet<UserPosition> UserPositions { get; set; }
     public DbSet<Role> Roles { get; set; }
     public DbSet<RoleComponentPermission> RoleComponentPermissions { get; set; }
     public DbSet<Permission> Permissions { get; set; }
@@ -187,17 +190,23 @@ public class DatabaseContext : DbContext
                 .HasOne(navigationPropertyExpression!)
                 .WithMany()
                 .HasForeignKey(foreignKeyExpression!)
-                .OnDelete(DeleteBehavior.Restrict);
+                .OnDelete(DeleteBehavior.NoAction);
         }
         
         ConfigureOneToManyRelationship<AreaDependency, Area>(modelBuilder, ad => ad.ParentArea, ad => ad.ParentAreaId);
         ConfigureOneToManyRelationship<AreaDependency, Area>(modelBuilder, ad => ad.ChildArea, ad => ad.ChildAreaId);
 
-        ConfigureOneToManyRelationship<PositionDependency, Position>(modelBuilder, pd => pd.ParentPosition, pd => pd.ParentPositionId);
-        ConfigureOneToManyRelationship<PositionDependency, Position>(modelBuilder, pd => pd.ChildPosition, ad => ad.ChildPositionId);
+        ConfigureOneToManyRelationship<DocumentaryProcedure, Area>(modelBuilder, dp => dp.Area, dp => dp.AreaId);
 
-        ConfigureOneToManyRelationship<UserPosition, User>(modelBuilder, up => up.User, up => up.UserId);
-        ConfigureOneToManyRelationship<UserPosition, Position>(modelBuilder, up => up.Position, up => up.PositionId);
+        ConfigureOneToManyRelationship<DocumentaryProcedureStep, Area>(modelBuilder, dps => dps.Area, dps => dps.AreaId);
+        ConfigureOneToManyRelationship<DocumentaryProcedureStep, Position>(modelBuilder, dps => dps.Position, dps => dps.PositionId);
+        ConfigureOneToManyRelationship<DocumentaryProcedureStep, DocumentaryProcedure>(modelBuilder, dps => dps.DocumentaryProcedure, dps => dps.DocumentaryProcedureId);
+
+        ConfigureOneToManyRelationship<DocumentaryProcedureStepDocument, DocumentaryProcedureStep>(modelBuilder, dpsd => dpsd.DocumentaryProcedureStep, dpsd => dpsd.DocumentaryProcedureStepId);
+        ConfigureOneToManyRelationship<DocumentaryProcedureStepDocument, DocumentType>(modelBuilder, dpsd => dpsd.DocumentType, dpsd => dpsd.DocumentTypeId);
+
+        ConfigureOneToManyRelationship<PositionDependency, Position>(modelBuilder, pd => pd.ParentPosition, pd => pd.ParentPositionId);
+        ConfigureOneToManyRelationship<PositionDependency, Position>(modelBuilder, pd => pd.ChildPosition, pd => pd.ChildPositionId);
 
         ConfigureOneToManyRelationship<UserRole, User>(modelBuilder, ur => ur.User, ur => ur.UserId);
         ConfigureOneToManyRelationship<UserRole, Role>(modelBuilder, ur => ur.Role, ur => ur.RoleId);
