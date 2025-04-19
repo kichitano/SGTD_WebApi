@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using Microsoft.EntityFrameworkCore;
-using SGTD_WebApi.DbModel.Context;
-using SGTD_WebApi.DbModel.Entities;
+using SGTD_WebApi.DbModels.Contexts;
+using SGTD_WebApi.DbModels.Entities;
 using SGTD_WebApi.Models.Area;
 using SGTD_WebApi.Models.AreaDependency;
 

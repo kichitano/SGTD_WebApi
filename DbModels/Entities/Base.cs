@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace SGTD_WebApi.DbModel.Entities;
+namespace SGTD_WebApi.DbModels.Entities;
 
 public abstract class Base
 {

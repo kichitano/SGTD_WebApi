@@ -4,17 +4,17 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Storage;
 using Newtonsoft.Json;
-using SGTD_WebApi.DbModel.Entities;
-using SGTD_WebApi.DbModel.Enums;
+using SGTD_WebApi.DbModels.Entities;
+using SGTD_WebApi.DbModels.Enums;
 using SGTD_WebApi.Models.LogSystem;
 
-namespace SGTD_WebApi.DbModel.Context;
+namespace SGTD_WebApi.DbModels.Contexts;
 
 public class DatabaseContext : DbContext
 {
     private readonly IConfiguration _configuration;
     private readonly IHttpContextAccessor _httpContextAccessor;
-    private ActionTypeEnum? _currentAction;
+    private readonly ActionTypeEnum? _currentAction;
 
     public DatabaseContext(DbContextOptions<DatabaseContext> options, 
         IConfiguration configuration, 
@@ -26,12 +26,9 @@ public class DatabaseContext : DbContext
 
         try
         {
-            var dbCreator = Database.GetService<IDatabaseCreator>() as RelationalDatabaseCreator;
-            if (dbCreator != null)
-            {
-                if (!dbCreator.CanConnect())
-                    dbCreator.Create();
-            }
+            if (this.GetService<IDatabaseCreator>() is not RelationalDatabaseCreator dbCreator) return;
+            if (!dbCreator.CanConnect())
+                dbCreator.Create();
         }
         catch (Exception e)
         {

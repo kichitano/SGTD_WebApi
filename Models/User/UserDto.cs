@@ -1,5 +1,5 @@
 ﻿namespace SGTD_WebApi.Models.User;
-using DbModel.Entities;
+using DbModels.Entities;
 
 public class UserDto
 {

@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace SGTD_WebApi.DbModel.Entities;
+namespace SGTD_WebApi.DbModels.Entities;
 
 [Table("People")]
 public class Person : Base

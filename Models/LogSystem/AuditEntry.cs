@@ -1,5 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore.ChangeTracking;
-using SGTD_WebApi.DbModel.Enums;
+using SGTD_WebApi.DbModels.Enums;
 
 namespace SGTD_WebApi.Models.LogSystem;
 

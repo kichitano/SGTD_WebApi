@@ -2,8 +2,8 @@
 using Microsoft.EntityFrameworkCore;
 using Moq;
 using SGTD_UnitTests.Helpers;
-using SGTD_WebApi.DbModel.Context;
-using SGTD_WebApi.DbModel.Entities;
+using SGTD_WebApi.DbModels.Contexts;
+using SGTD_WebApi.DbModels.Entities;
 using SGTD_WebApi.Models.Area;
 using SGTD_WebApi.Models.AreaDependency;
 using SGTD_WebApi.Services;

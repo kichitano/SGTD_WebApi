@@ -1,20 +1,17 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace SGTD_WebApi.DbModel.Entities;
+namespace SGTD_WebApi.DbModels.Entities;
 
-[Table("Positions")]
-public class Position : Base
+[Table("Areas")]
+public class Area : Base
 {
     [Required]
-    [StringLength(50)]
+    [StringLength(150)]
     public string Name { get; set; }
 
     [StringLength(200)]
     public string Description { get; set; }
 
-    public int AreaId { get; set; }
-
-    [ForeignKey("AreaId")]
-    public Area Area { get; set; }
+    public bool Status { get; set; }
 }

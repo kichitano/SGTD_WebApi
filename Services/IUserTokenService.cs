@@ -1,4 +1,4 @@
-﻿using SGTD_WebApi.DbModel.Entities;
+﻿using SGTD_WebApi.DbModels.Entities;
 using SGTD_WebApi.Models.UserToken;
 
 namespace SGTD_WebApi.Services;
