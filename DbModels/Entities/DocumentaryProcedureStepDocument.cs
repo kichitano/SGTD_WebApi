@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 
-namespace SGTD_WebApi.DbModel.Entities;
+namespace SGTD_WebApi.DbModels.Entities;
 
 [Table("DocumentaryProcedureStepDocuments")]
 public class DocumentaryProcedureStepDocument : Base

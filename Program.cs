@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using SGTD_WebApi.Configurations;
-using SGTD_WebApi.DbModel.Context;
+using SGTD_WebApi.DbModels.Contexts;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);

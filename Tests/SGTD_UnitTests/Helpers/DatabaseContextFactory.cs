@@ -2,7 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using SGTD_WebApi.DbModel.Context;
+using SGTD_WebApi.DbModels.Contexts;
 
 namespace SGTD_UnitTests.Helpers
 {

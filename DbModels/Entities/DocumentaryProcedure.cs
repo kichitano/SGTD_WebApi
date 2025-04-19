@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
 
-namespace SGTD_WebApi.DbModel.Entities;
+namespace SGTD_WebApi.DbModels.Entities;
 
 [Table("DocumentaryProcedures")]
 public class DocumentaryProcedure : Base

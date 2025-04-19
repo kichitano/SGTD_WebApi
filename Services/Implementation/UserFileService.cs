@@ -1,8 +1,8 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using Microsoft.EntityFrameworkCore;
-using SGTD_WebApi.DbModel.Context;
+using SGTD_WebApi.DbModels.Contexts;
 using SGTD_WebApi.Models.UserFile;
-using SGTD_WebApi.DbModel.Entities;
+using SGTD_WebApi.DbModels.Entities;
 using System.IO.Compression;
 using SGTD_WebApi.Helpers;
 

@@ -1,6 +1,6 @@
-﻿using SGTD_WebApi.DbModel.Enums;
+﻿using SGTD_WebApi.DbModels.Enums;
 
-namespace SGTD_WebApi.DbModel.Entities;
+namespace SGTD_WebApi.DbModels.Entities;
 
 public class LogSystem
 {

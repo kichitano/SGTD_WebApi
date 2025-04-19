@@ -1,4 +1,4 @@
-﻿namespace SGTD_WebApi.DbModel.Enums;
+﻿namespace SGTD_WebApi.DbModels.Enums;
 
 public enum ActionTypeEnum
 {
