@@ -1,11 +1,7 @@
-﻿using Azure;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Identity.Data;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SGTD_WebApi.Models.Auth;
 using SGTD_WebApi.Services;
-using SGTD_WebApi.Services.Implementation;
 using System.ComponentModel.DataAnnotations;
 
 namespace SGTD_WebApi.Controllers;
@@ -30,12 +26,8 @@ public class AuthController : ControllerBase
         try
         {
             var response = await _authService.LoginAsync(requestParams);
-            if (response.Success)
-            {
-                var cookieOptions = _authService.SetRefreshTokenCookie(response.RefreshToken);
-                Response.Cookies.Append("refresh_token", response.RefreshToken, cookieOptions);
-            }
             return Ok(response);
+
         }
         catch (ValidationException ex)
         {
@@ -59,31 +51,31 @@ public class AuthController : ControllerBase
     [HttpPost("refresh-token")]
     public async Task<ActionResult> RefreshTokenAsync()
     {
-        var refreshToken = Request.Cookies["refresh_token"];
-        if (string.IsNullOrEmpty(refreshToken))
+        try
         {
-            return Unauthorized(new { message = "No refresh token found" });
-        }
-        var userGuid = await _userTokenService.GetUserGuidFromRefreshTokenAsync(refreshToken);
-        if (userGuid == null)
-        {
-            return Unauthorized(new { message = "Invalid refresh token" });
-        }
-        var newAccessToken = await _userTokenService.GenerateTokenAsync(userGuid.Value);
-        var newRefreshToken = await _userTokenService.GetUserRefreshTokenFromGeneratedTokenAsync(newAccessToken);
-        var cookieOptions = _authService.SetRefreshTokenCookie(newRefreshToken);
-        Response.Cookies.Append("refresh_token", newRefreshToken, cookieOptions);
-        return Ok(new AuthDto{ Success = true, Token = newAccessToken });
-    }
+            var refreshToken = Request.Cookies["refresh_token"];
+            if (string.IsNullOrEmpty(refreshToken))
+            {
+                return Unauthorized(new { message = "No refresh token found" });
+            }
 
-    [HttpPost("validate-token")]
-    public async Task<ActionResult> ValidateTokenAsync(string token)
-    {
-        var isValid = await _authService.ValidateTokenAsync(token);
-        if (!isValid)
-        {
-            return Unauthorized();
+            var userGuid = await _userTokenService.GetUserGuidFromRefreshTokenAsync(refreshToken);
+            if (userGuid == null)
+            {
+                return Unauthorized(new { message = "Invalid refresh token" });
+            }
+
+            await _userTokenService.RevokeRefreshTokenAsync(refreshToken);
+            var newAccessToken = await _userTokenService.GenerateTokenAsync(userGuid.Value);
+            var newRefreshToken = await _userTokenService.GetUserRefreshTokenFromGeneratedTokenAsync(newAccessToken);
+            var cookieOptions = _authService.SetRefreshTokenCookie(newRefreshToken);
+            Response.Cookies.Append("refresh_token", newRefreshToken, cookieOptions);
+
+            return Ok(new AuthDto { Success = true, Token = newAccessToken });
         }
-        return Ok();
+        catch (Exception)
+        {
+            return BadRequest(new { message = "Error renewing session" });
+        }
     }
 }

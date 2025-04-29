@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using SGTD_WebApi.DbModels.Contexts;
 
@@ -11,9 +12,11 @@ using SGTD_WebApi.DbModels.Contexts;
 namespace SGTD_WebApi.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-    partial class DatabaseContextModelSnapshot : ModelSnapshot
+    [Migration("20250428163136_AddTable_Authenticator")]
+    partial class AddTable_Authenticator
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -104,10 +107,6 @@ namespace SGTD_WebApi.Migrations
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
 
-                    b.Property<string>("SecretKey")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("datetime2");
 
@@ -116,7 +115,7 @@ namespace SGTD_WebApi.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Authenticators");
+                    b.ToTable("Authenticator");
                 });
 
             modelBuilder.Entity("SGTD_WebApi.DbModels.Entities.Component", b =>

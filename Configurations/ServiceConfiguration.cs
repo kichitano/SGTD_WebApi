@@ -20,6 +20,8 @@ public static class ServiceConfiguration
         services.AddScoped<IAreaDependencyService, AreaDependencyService>();
         services.AddScoped<IAreaService, AreaService>();
         services.AddScoped<IAuthService, AuthService>();
+        services.AddScoped<IAuthenticatorEmailService, AuthenticatorEmailService>();
+        services.AddScoped<IAuthenticatorService, AuthenticatorService>();
         services.AddScoped<ICountryService, CountryService>();
         services.AddScoped<IComponentService, ComponentService>();
         services.AddScoped<IDocumentTypeService, DocumentTypeService>();

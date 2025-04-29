@@ -1,11 +1,12 @@
 ﻿using SGTD_WebApi.Models.Auth;
+using SGTD_WebApi.Models.Authenticator;
 
 namespace SGTD_WebApi.Services;
 
 public interface IAuthService
 {
-    Task<AuthDto> LoginAsync(AuthRequestParams requestParams);
+    Task<bool> LoginAsync(AuthRequestParams requestParams);
+    Task<AuthDto> LoginOtpAsync(AuthenticatorOtpRequestParams requestParams);
     Task LogoutAsync(LogoutRequestParams requestParams);
-    Task<bool> ValidateTokenAsync(string token);
     CookieOptions SetRefreshTokenCookie(string refreshToken);
 }
