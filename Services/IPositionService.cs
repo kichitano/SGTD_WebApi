@@ -11,7 +11,7 @@ public interface IPositionService
     Task<PositionDto> GetByIdAsync(int id);
     Task DeleteByIdAsync(int id);
 
-    public Task<int> CreateReturnIdAsync(PositionRequestParams requestParams);
+    Task<int> CreateReturnIdAsync(PositionRequestParams requestParams);
     Task<List<PositionDto>> GetAllByAreaIdAsync(int areaId);
 
 }

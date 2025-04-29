@@ -46,6 +46,7 @@ public class DatabaseContext : DbContext
 
     public DbSet<Area> Areas { get; set; }
     public DbSet<AreaDependency> AreaDependencies { get; set; }
+    public DbSet<Authenticator> Authenticators { get; set; }
     public DbSet<Component> Components { get; set; }
     public DbSet<DocumentType> DocumentTypes { get; set; }
     public DbSet<DocumentaryProcedure> DocumentaryProcedures { get; set; }

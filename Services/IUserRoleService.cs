@@ -9,6 +9,5 @@ public interface IUserRoleService
     Task<List<UserRoleDto>> GetAllAsync();
     Task<UserRoleDto> GetByIdAsync(int id);
     Task DeleteByUserGuidAsync(Guid userGuid);
-
     Task<List<UserRoleDto>> GetByUserGuidAsync(Guid userGuid);
 }

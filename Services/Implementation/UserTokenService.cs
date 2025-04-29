@@ -36,7 +36,7 @@ public class UserTokenService : IUserTokenService
             Token = token,
             RefreshToken = refreshToken,
             CreatedAt = DateTime.UtcNow,
-            ExpiresAt = DateTime.UtcNow.AddDays(3),
+            ExpiresAt = DateTime.UtcNow.AddMinutes(10),
             IsActive = true
         };
 
@@ -52,7 +52,7 @@ public class UserTokenService : IUserTokenService
     public async Task<Guid?> GetUserGuidFromRefreshTokenAsync(string refreshToken)
     {
         var userToken = await _context.UserTokens
-            .FirstOrDefaultAsync(t => t.RefreshToken == refreshToken && t.IsActive && t.ExpiresAt > DateTime.UtcNow);
+            .FirstOrDefaultAsync(t => t.RefreshToken == refreshToken && t.IsActive);
         return userToken?.UserGuid;
     }
 
@@ -60,14 +60,28 @@ public class UserTokenService : IUserTokenService
     {
         var userToken = await _context.UserTokens
             .FirstOrDefaultAsync(t => t.Token == token && t.IsActive && t.ExpiresAt > DateTime.UtcNow);
-        return userToken?.RefreshToken ?? string.Empty;
+
+        if (userToken == null)
+            return string.Empty;
+
+        var newRefreshToken = Guid.NewGuid().ToString();
+        userToken.RefreshToken = newRefreshToken;
+        userToken.ExpiresAt = DateTime.UtcNow.AddDays(15);
+        await _context.SaveChangesAsync();
+
+        return newRefreshToken;
     }
 
     public async Task InvalidateAllTokensAsync(UserTokenModel userTokenModel)
     {
         var userTokens = await _context.UserTokens
-            .Where(q => q.UserGuid.Equals(userTokenModel.UserGuid) && q.Token != userTokenModel.Token)
+            .Where(q => q.UserGuid.Equals(userTokenModel.UserGuid))
             .ToListAsync();
+
+        if (!string.IsNullOrEmpty(userTokenModel.Token))
+        {
+            userTokens = userTokens.Where(q => q.Token != userTokenModel.Token).ToList();
+        }
 
         if (userTokens.Count > 0)
         {
@@ -101,5 +115,17 @@ public class UserTokenService : IUserTokenService
                 { UserGuid = userToken.UserGuid, Token = userToken.Token });
         }
         return response;
+    }
+
+    public async Task RevokeRefreshTokenAsync(string refreshToken)
+    {
+        var userToken = await _context.UserTokens
+            .FirstOrDefaultAsync(t => t.RefreshToken == refreshToken);
+
+        if (userToken != null)
+        {
+            userToken.IsActive = false;
+            await _context.SaveChangesAsync();
+        }
     }
 }

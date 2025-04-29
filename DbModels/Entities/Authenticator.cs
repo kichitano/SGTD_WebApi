@@ -2,12 +2,12 @@
 
 namespace SGTD_WebApi.DbModels.Entities;
 
-[Table("UserTokens")]
-public class UserToken : Base
+[Table("Authenticators")]
+public class Authenticator : Base
 {
     public Guid UserGuid { get; set; }
-    public string Token { get; set; }
-    public string RefreshToken { get; set; }
+    public string AuthenticatorToken { get; set; }
+    public string SecretKey { get; set; }
     public DateTime ExpiresAt { get; set; }
     public bool IsActive { get; set; }
 }

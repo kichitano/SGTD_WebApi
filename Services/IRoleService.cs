@@ -10,5 +10,5 @@ public interface IRoleService
     Task<RoleDto> GetByIdAsync(int id);
     Task DeleteByIdAsync(int id);
 
-    public Task<int> CreateReturnIdAsync(RoleRequestParams requestParams);
+    Task<int> CreateReturnIdAsync(RoleRequestParams requestParams);
 }

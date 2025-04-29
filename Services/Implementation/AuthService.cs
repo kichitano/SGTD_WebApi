@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using SGTD_WebApi.DbModels.Contexts;
 using SGTD_WebApi.Models.Auth;
+using SGTD_WebApi.Models.Authenticator;
 using SGTD_WebApi.Models.UserToken;
 
 namespace SGTD_WebApi.Services.Implementation;
@@ -17,7 +18,15 @@ public class AuthService : IAuthService
         _userTokenService = userTokenService;
     }
 
-    public async Task<AuthDto> LoginAsync(AuthRequestParams requestParams)
+    public async Task<bool> LoginAsync(AuthRequestParams requestParams)
+    {
+        var user = await _context.Users
+            .FirstOrDefaultAsync(u => u.Email == requestParams.Email);
+
+        return user != null;
+    }
+
+    public async Task<AuthDto> LoginOtpAsync(AuthenticatorOtpRequestParams requestParams)
     {
         var user = await _context.Users
             .FirstOrDefaultAsync(u => u.Email == requestParams.Email);
@@ -30,7 +39,6 @@ public class AuthService : IAuthService
         bool isValidPassword = BCrypt.Net.BCrypt.Verify(requestParams.Password, user.Password);
         if (!isValidPassword)
         {
-
             throw new ValidationException("Credenciales incorrectas");
         }
 
@@ -72,7 +80,7 @@ public class AuthService : IAuthService
         {
             HttpOnly = true,
             Secure = true,
-            SameSite = SameSiteMode.Strict,
+            SameSite = SameSiteMode.None,
             Expires = DateTime.UtcNow.AddDays(7)
         };
         return cookieOptions;
