@@ -2,106 +2,105 @@
 using SGTD_WebApi.Models.PositionRole;
 using SGTD_WebApi.Services;
 
-namespace SGTD_WebApi.Controllers
+namespace SGTD_WebApi.Controllers;
+
+[Route("[controller]")]
+[ApiController]
+public class UserRoleController : Controller
 {
-    [Route("[controller]")]
-    [ApiController]
-    public class UserRoleController : Controller
+    private readonly IUserRoleService _userRoleService;
+
+    public UserRoleController(IUserRoleService userRoleService)
     {
-        private readonly IUserRoleService _userRoleService;
+        _userRoleService = userRoleService;
+    }
 
-        public UserRoleController(IUserRoleService userRoleService)
+    [Route("")]
+    [HttpPost]
+    public async Task<ActionResult> CreateAsync(UserRoleRequestParams requestParams)
+    {
+        try
         {
-            _userRoleService = userRoleService;
+            await _userRoleService.CreateAsync(requestParams);
+            return Ok();
         }
-
-        [Route("")]
-        [HttpPost]
-        public async Task<ActionResult> CreateAsync(UserRoleRequestParams requestParams)
+        catch (Exception ex)
         {
-            try
-            {
-                await _userRoleService.CreateAsync(requestParams);
-                return Ok();
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ex.Message);
-            }
+            return BadRequest(ex.Message);
         }
+    }
 
-        [Route("")]
-        [HttpPut]
-        public async Task<ActionResult> UpdateAsync(UserRoleRequestParams requestParams)
+    [Route("")]
+    [HttpPut]
+    public async Task<ActionResult> UpdateAsync(UserRoleRequestParams requestParams)
+    {
+        try
         {
-            try
-            {
-                await _userRoleService.UpdateAsync(requestParams);
-                return Ok();
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ex.Message);
-            }
+            await _userRoleService.UpdateAsync(requestParams);
+            return Ok();
         }
-
-        [Route("")]
-        [HttpGet]
-        public async Task<ActionResult> GetAllAsync()
+        catch (Exception ex)
         {
-            try
-            {
-                var response = await _userRoleService.GetAllAsync();
-                return Ok(response);
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ex.Message);
-            }
+            return BadRequest(ex.Message);
         }
+    }
 
-        [Route("{id}")]
-        [HttpGet]
-        public async Task<ActionResult> GetByIdAsync(int id)
+    [Route("")]
+    [HttpGet]
+    public async Task<ActionResult> GetAllAsync()
+    {
+        try
         {
-            try
-            {
-                var response = await _userRoleService.GetByIdAsync(id);
-                return Ok(response);
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ex.Message);
-            }
+            var response = await _userRoleService.GetAllAsync();
+            return Ok(response);
         }
-
-        [HttpDelete("{userGuid}")]
-        public async Task<ActionResult> DeleteByUserGuidAsync(Guid userGuid)
+        catch (Exception ex)
         {
-            try
-            {
-                await _userRoleService.DeleteByUserGuidAsync(userGuid);
-                return Ok();
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ex.Message);
-            }
+            return BadRequest(ex.Message);
         }
+    }
 
-        [Route("user/{userGuid}")]
-        [HttpGet]
-        public async Task<ActionResult> GetByUserGuidAsync(Guid userGuid)
+    [Route("{id}")]
+    [HttpGet]
+    public async Task<ActionResult> GetByIdAsync(int id)
+    {
+        try
         {
-            try
-            {
-                var response = await _userRoleService.GetByUserGuidAsync(userGuid);
-                return Ok(response);
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ex.Message);
-            }
+            var response = await _userRoleService.GetByIdAsync(id);
+            return Ok(response);
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(ex.Message);
+        }
+    }
+
+    [HttpDelete("{userGuid}")]
+    public async Task<ActionResult> DeleteByUserGuidAsync(Guid userGuid)
+    {
+        try
+        {
+            await _userRoleService.DeleteByUserGuidAsync(userGuid);
+            return Ok();
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(ex.Message);
+        }
+    }
+
+    [Route("user/{userGuid}")]
+    [HttpGet]
+    public async Task<ActionResult> GetByUserGuidAsync(Guid userGuid)
+    {
+        try
+        {
+            var response = await _userRoleService.GetByUserGuidAsync(userGuid);
+            return Ok(response);
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(ex.Message);
         }
     }
 }
