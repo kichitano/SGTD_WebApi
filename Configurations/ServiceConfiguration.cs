@@ -19,20 +19,21 @@ public static class ServiceConfiguration
 
         services.AddScoped<IAreaDependencyService, AreaDependencyService>();
         services.AddScoped<IAreaService, AreaService>();
-        services.AddScoped<IAuthService, AuthService>();
         services.AddScoped<IAuthenticatorEmailService, AuthenticatorEmailService>();
         services.AddScoped<IAuthenticatorService, AuthenticatorService>();
-        services.AddScoped<ICountryService, CountryService>();
+        services.AddScoped<IAuthService, AuthService>();
         services.AddScoped<IComponentService, ComponentService>();
+        services.AddScoped<ICountryService, CountryService>();
         services.AddScoped<IDocumentTypeService, DocumentTypeService>();
         services.AddScoped<IPermissionService, PermissionService>();
         services.AddScoped<IPersonService, PersonService>();
-        services.AddScoped<IUserRoleService, UserRoleService>();
-        services.AddScoped<IPositionService, PositionService>();
         services.AddScoped<IPositionDependencyService, PositionDependencyService>();
-        services.AddScoped<IRoleService, RoleService>();
+        services.AddScoped<IPositionService, PositionService>();
         services.AddScoped<IRoleComponentPermissionService, RoleComponentPermissionService>();
+        services.AddScoped<IRoleService, RoleService>();
+        services.AddScoped<IUserDigitalSignatureService, UserDigitalSignatureService>();
         services.AddScoped<IUserFileService, UserFileService>();
+        services.AddScoped<IUserRoleService, UserRoleService>();
         services.AddScoped<IUserService, UserService>();
         services.AddScoped<IUserTokenService, UserTokenService>();
 
