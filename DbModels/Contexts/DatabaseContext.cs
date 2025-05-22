@@ -62,6 +62,7 @@ public class DatabaseContext : DbContext
     public DbSet<Permission> Permissions { get; set; }
     public DbSet<UserRole> UserRoles { get; set; }
     public DbSet<UserToken> UserTokens { get; set; }
+    public DbSet<UserDigitalSignature> UserDigitalSignatures { get; set; }
     public DbSet<LogSystem> LogSystems { get; set; }
 
     public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)

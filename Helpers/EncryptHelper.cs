@@ -1,5 +1,4 @@
 ﻿using System.Security.Cryptography;
-using System.Text;
 
 namespace SGTD_WebApi.Helpers;
 
@@ -15,6 +14,17 @@ public class EncryptHelper
     public string PasswordEncrypt(string password)
     {
         return BCrypt.Net.BCrypt.HashPassword(password, workFactor: 12);
+    }
+
+    public string EncryptNameGenerator()
+    {
+        var randomBytes = new byte[32];
+        using (var rng = RandomNumberGenerator.Create())
+        {
+            rng.GetBytes(randomBytes);
+        }
+        var rawName = Convert.ToBase64String(randomBytes);
+        return BCrypt.Net.BCrypt.HashPassword(rawName, workFactor: 14);
     }
 
     public byte[] FileEncrypt(Stream input)
