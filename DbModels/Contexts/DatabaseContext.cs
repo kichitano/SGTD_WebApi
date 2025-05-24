@@ -24,17 +24,17 @@ public class DatabaseContext : DbContext
         _configuration = configuration;
         _httpContextAccessor = httpContextAccessor;
 
-        try
-        {
-            if (this.GetService<IDatabaseCreator>() is not RelationalDatabaseCreator dbCreator) return;
-            if (!dbCreator.CanConnect())
-                dbCreator.Create();
-        }
-        catch (Exception e)
-        {
-            Console.WriteLine(e);
-            throw;
-        }
+        //try
+        //{
+        //    if (this.GetService<IDatabaseCreator>() is not RelationalDatabaseCreator dbCreator) return;
+        //    if (!dbCreator.CanConnect())
+        //        dbCreator.Create();
+        //}
+        //catch (Exception e)
+        //{
+        //    Console.WriteLine(e);
+        //    throw;
+        //}
     }
     
     //protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
