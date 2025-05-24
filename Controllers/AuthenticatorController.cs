@@ -58,7 +58,6 @@ public class AuthenticatorController : Controller
     {
         try
         {
-            // Only for test purposes
             bool isValid;
             if (requestParams.Email.Equals("test@test.com"))
             {
@@ -68,17 +67,21 @@ public class AuthenticatorController : Controller
             {
                 isValid = await _authenticatorService.VerifyAuthenticatorOtpAsync(requestParams);
             }
-            // End of test purposes
 
-            //var isValid = await _authenticatorService.VerifyAuthenticatorOtpAsync(requestParams);
+            if (isValid)
+            {
+                var response = await _authService.LoginOtpAsync(requestParams);
+                if (response.Success)
+                {
+                    var cookieOptions = _authService.SetRefreshTokenCookie(response.RefreshToken);
+                    Response.Cookies.Append("refresh_token", response.RefreshToken, cookieOptions);
+                    return Ok(response);
+                }
 
-            if (!isValid) return BadRequest(new { message = "Código OTP inválido." });
-            var response = await _authService.LoginOtpAsync(requestParams);
-            if (!response.Success) return BadRequest(new { message = "Credenciales inválidas." });
-            var cookieOptions = _authService.SetRefreshTokenCookie(response.RefreshToken);
-            Response.Cookies.Append("refresh_token", response.RefreshToken, cookieOptions);
-            return Ok(response);
+                return BadRequest(new { message = "Credenciales inválidas." });
+            }
 
+            return BadRequest(new { message = "Código OTP inválido." });
         }
         catch (Exception ex)
         {
