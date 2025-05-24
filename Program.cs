@@ -27,12 +27,9 @@ if (builder.Environment.EnvironmentName == "Testing")
 }
 else
 {
-    string? connectionString = Environment.GetEnvironmentVariable("DATABASE_URL") ??
-                               Environment.GetEnvironmentVariable("DB_CONNECTION_STRING") ??
-                               builder.Configuration.GetConnectionString("DefaultConnection");
+    string? connectionString = GetConnectionString();
 
-    Console.WriteLine($"DATABASE_URL from env: '{Environment.GetEnvironmentVariable("DATABASE_URL")}'");
-    Console.WriteLine($"Final connection string: '{connectionString}'");
+    Console.WriteLine($"Final connection string: {MaskPassword(connectionString)}");
 
     builder.Services.AddDbContext<DatabaseContext>(options =>
         options.UseNpgsql(connectionString));
@@ -156,5 +153,41 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+
+static string GetConnectionString()
+{
+    string? databaseUrl = Environment.GetEnvironmentVariable("DATABASE_URL");
+
+    if (!string.IsNullOrEmpty(databaseUrl) && databaseUrl.StartsWith("postgresql://"))
+    {
+        try
+        {
+            var uri = new Uri(databaseUrl);
+            var userInfo = uri.UserInfo.Split(':');
+
+            return $"Host={uri.Host};Port={uri.Port};Database={uri.AbsolutePath.TrimStart('/')};Username={userInfo[0]};Password={userInfo[1]};SSL Mode=Require;Trust Server Certificate=true";
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error parsing DATABASE_URL: {ex.Message}");
+            throw;
+        }
+    }
+
+    // Fallback para desarrollo local
+    return Environment.GetEnvironmentVariable("DB_CONNECTION_STRING") ??
+           "Host=localhost;Database=sgtd_db;Username=postgres;Password=tu_password;Port=5432";
+}
+
+static string MaskPassword(string? connectionString)
+{
+    if (string.IsNullOrEmpty(connectionString)) return "null";
+
+    return System.Text.RegularExpressions.Regex.Replace(
+        connectionString,
+        @"Password=([^;]+)",
+        "Password=***"
+    );
+}
 
 await app.RunAsync();
