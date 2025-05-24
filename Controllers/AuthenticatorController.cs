@@ -58,22 +58,27 @@ public class AuthenticatorController : Controller
     {
         try
         {
-            var isValid = await _authenticatorService.VerifyAuthenticatorOtpAsync(requestParams);
-
-            if (isValid)
+            // Only for test purposes
+            bool isValid;
+            if (requestParams.Email.Equals("test@test.com"))
             {
-                var response = await _authService.LoginOtpAsync(requestParams);
-                if (response.Success)
-                {
-                    var cookieOptions = _authService.SetRefreshTokenCookie(response.RefreshToken);
-                    Response.Cookies.Append("refresh_token", response.RefreshToken, cookieOptions);
-                    return Ok(response);
-                }
-
-                return BadRequest(new { message = "Credenciales inválidas." });
+                isValid = true;
             }
+            else
+            {
+                isValid = await _authenticatorService.VerifyAuthenticatorOtpAsync(requestParams);
+            }
+            // End of test purposes
 
-            return BadRequest(new { message = "Código OTP inválido." });
+            //var isValid = await _authenticatorService.VerifyAuthenticatorOtpAsync(requestParams);
+
+            if (!isValid) return BadRequest(new { message = "Código OTP inválido." });
+            var response = await _authService.LoginOtpAsync(requestParams);
+            if (!response.Success) return BadRequest(new { message = "Credenciales inválidas." });
+            var cookieOptions = _authService.SetRefreshTokenCookie(response.RefreshToken);
+            Response.Cookies.Append("refresh_token", response.RefreshToken, cookieOptions);
+            return Ok(response);
+
         }
         catch (Exception ex)
         {

@@ -41,7 +41,7 @@ public class DatabaseContext : DbContext
     {
         if (!optionsBuilder.IsConfigured) return;
         var connectionString = _configuration.GetConnectionString("DefaultConnection");
-        optionsBuilder.UseSqlServer(connectionString);
+        optionsBuilder.UseNpgsql(connectionString);
     }
 
     public DbSet<Area> Areas { get; set; }
