@@ -5,7 +5,6 @@ using Microsoft.IdentityModel.Tokens;
 using SGTD_WebApi.Configurations;
 using SGTD_WebApi.DbModels.Contexts;
 using System.Text;
-using Npgsql;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -28,10 +27,7 @@ if (builder.Environment.EnvironmentName == "Testing")
 }
 else
 {
-    string? connectionString = GetConnectionString();
-
-    Console.WriteLine($"Final connection string: {MaskPassword(connectionString)}");
-
+    string connectionString = GetConnectionString();
     builder.Services.AddDbContext<DatabaseContext>(options =>
         options.UseNpgsql(connectionString));
 }
@@ -43,10 +39,10 @@ builder.Services.AddCors(options =>
         {
             policy.WithOrigins(
                 "https://sgtd-client.vercel.app",
-                // "http://localhost:4200",
-                "https://*.railway.app")            
+                "http://localhost:4200",
+                "https://*.railway.app")
                 .AllowAnyMethod()
-                .AllowAnyHeader() // Allow necesary headers
+                .AllowAnyHeader()
                 .AllowCredentials();
         });
 });
@@ -80,60 +76,29 @@ var app = builder.Build();
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
-    var logger = services.GetRequiredService<ILogger<Program>>();
-
     try
     {
         var context = services.GetRequiredService<DatabaseContext>();
-
-        logger.LogInformation("Iniciando verificación de base de datos...");
-
-        string finalConnectionString = GetConnectionString();
-        logger.LogInformation("Using converted connection string: {ConnectionString}", MaskPassword(finalConnectionString));
-
-        // Crear conexión manual para testing
-        using var connection = new Npgsql.NpgsqlConnection(finalConnectionString);
-        logger.LogInformation("Intentando abrir conexión manual...");
-        await connection.OpenAsync();
-        logger.LogInformation("Conexión manual exitosa!");
-
-        if (await context.Database.CanConnectAsync())
-        {
-            logger.LogInformation("Conexión a base de datos exitosa.");
-
-            var pendingMigrations = await context.Database.GetPendingMigrationsAsync();
-            if (pendingMigrations.Any())
-            {
-                logger.LogInformation($"Aplicando {pendingMigrations.Count()} migraciones pendientes...");
-                await context.Database.MigrateAsync();
-                logger.LogInformation("Migraciones aplicadas exitosamente.");
-            }
-            else
-            {
-                logger.LogInformation("No hay migraciones pendientes.");
-            }
-        }
-        else
-        {
-            logger.LogWarning("CanConnectAsync() falló.");
-        }
+        await context.Database.MigrateAsync();
     }
     catch (Exception ex)
     {
-        logger.LogError(ex, "Error durante la migración: {Message}", ex.Message);
-        logger.LogWarning("Continuando sin base de datos.");
+        var logger = services.GetRequiredService<ILogger<Program>>();
+        logger.LogError(ex, "Ocurrió un error al migrar la base de datos.");
     }
 }
 
 // Configure the HTTP request pipeline.
-//if (app.Environment.IsDevelopment())
-//{
-//    app.UseSwagger();
-//    app.UseSwaggerUI();
-//}
-
-app.UseSwagger();
-app.UseSwaggerUI();
+if (app.Environment.IsDevelopment())
+{
+    app.UseSwagger();
+    app.UseSwaggerUI();
+}
+else
+{
+    app.UseSwagger();
+    app.UseSwaggerUI();
+}
 
 app.Use(async (context, next) =>
 {
@@ -148,40 +113,19 @@ app.UseAuthorization();
 
 app.MapControllers();
 
+await app.RunAsync();
+
 static string GetConnectionString()
 {
     string? databaseUrl = Environment.GetEnvironmentVariable("DATABASE_URL");
 
     if (!string.IsNullOrEmpty(databaseUrl) && databaseUrl.StartsWith("postgresql://"))
     {
-        try
-        {
-            var uri = new Uri(databaseUrl);
-            var userInfo = uri.UserInfo.Split(':');
-
-            return $"Host={uri.Host};Port={uri.Port};Database={uri.AbsolutePath.TrimStart('/')};Username={userInfo[0]};Password={userInfo[1]};SSL Mode=Require;Trust Server Certificate=true";
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Error parsing DATABASE_URL: {ex.Message}");
-            throw;
-        }
+        var uri = new Uri(databaseUrl);
+        var userInfo = uri.UserInfo.Split(':');
+        return $"Host={uri.Host};Port={uri.Port};Database={uri.AbsolutePath.TrimStart('/')};Username={userInfo[0]};Password={userInfo[1]};SSL Mode=Require;Trust Server Certificate=true";
     }
 
-    // Fallback para desarrollo local
     return Environment.GetEnvironmentVariable("DB_CONNECTION_STRING") ??
            "Host=localhost;Database=sgtd_db;Username=postgres;Password=tu_password;Port=5432";
 }
-
-static string MaskPassword(string? connectionString)
-{
-    if (string.IsNullOrEmpty(connectionString)) return "null";
-
-    return System.Text.RegularExpressions.Regex.Replace(
-        connectionString,
-        @"Password=([^;]+)",
-        "Password=***"
-    );
-}
-
-await app.RunAsync();

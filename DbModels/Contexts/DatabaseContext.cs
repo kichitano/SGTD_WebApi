@@ -1,8 +1,6 @@
 using System.Linq.Expressions;
 using System.Security.Claims;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Infrastructure;
-using Microsoft.EntityFrameworkCore.Storage;
 using Newtonsoft.Json;
 using SGTD_WebApi.DbModels.Entities;
 using SGTD_WebApi.DbModels.Enums;
@@ -23,26 +21,7 @@ public class DatabaseContext : DbContext
     {
         _configuration = configuration;
         _httpContextAccessor = httpContextAccessor;
-
-        //try
-        //{
-        //    if (this.GetService<IDatabaseCreator>() is not RelationalDatabaseCreator dbCreator) return;
-        //    if (!dbCreator.CanConnect())
-        //        dbCreator.Create();
-        //}
-        //catch (Exception e)
-        //{
-        //    Console.WriteLine(e);
-        //    throw;
-        //}
     }
-    
-    //protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-    //{
-    //    if (!optionsBuilder.IsConfigured) return;
-    //    var connectionString = _configuration.GetConnectionString("DefaultConnection");
-    //    optionsBuilder.UseNpgsql(connectionString);
-    //}
 
     public DbSet<Area> Areas { get; set; }
     public DbSet<AreaDependency> AreaDependencies { get; set; }
