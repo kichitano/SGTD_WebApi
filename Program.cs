@@ -8,6 +8,9 @@ using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
+var port = Environment.GetEnvironmentVariable("PORT") ?? "8080";
+builder.WebHost.UseUrls($"http://0.0.0.0:{port}");
+
 builder.Services.AddHttpClient();
 
 // Add services to the container.
@@ -24,10 +27,11 @@ if (builder.Environment.EnvironmentName == "Testing")
 }
 else
 {
-    string? connectionString = Environment.GetEnvironmentVariable("DB_CONNECTION_STRING") ??
-                               builder.Configuration.GetConnectionString("DefaultConnection");
+    string? connectionString = Environment.GetEnvironmentVariable("DATABASE_URL") ??
+                               Environment.GetEnvironmentVariable("DB_CONNECTION_STRING") ??
+                               builder.Configuration.GetConnectionString("DefaultConnection");    
     builder.Services.AddDbContext<DatabaseContext>(options =>
-        options.UseSqlServer(connectionString));
+        options.UseNpgsql(connectionString));
 }
 
 builder.Services.AddCors(options =>
@@ -35,7 +39,10 @@ builder.Services.AddCors(options =>
     options.AddPolicy("AllowAngularApp",
         policy =>
         {
-            policy.WithOrigins("http://localhost:4200")
+            policy.WithOrigins(
+                "https://sgtd-client.vercel.app",
+                // "http://localhost:4200",
+                "https://*.railway.app")            
                 .AllowAnyMethod()
                 .AllowAnyHeader() // Allow necesary headers
                 .AllowCredentials();
@@ -74,12 +81,23 @@ using (var scope = app.Services.CreateScope())
     try
     {
         var context = services.GetRequiredService<DatabaseContext>();
-        await context.Database.MigrateAsync();
+        await context.Database.EnsureCreatedAsync();
+
+        if (context.Database.GetPendingMigrations().Any())
+        {
+            await context.Database.MigrateAsync();
+        }
     }
     catch (Exception ex)
     {
         var logger = services.GetRequiredService<ILogger<Program>>();
-        logger.LogError(ex, "Ocurrió un error al migrar la base de datos.");
+        logger.LogError(ex, "Ocurrió un error al migrar la base de datos PostgreSQL.");
+
+        if (app.Environment.IsDevelopment())
+        {
+            Console.WriteLine($"Error de migración: {ex.Message}");
+            Console.WriteLine($"Stack trace: {ex.StackTrace}");
+        }
     }
 }
 
