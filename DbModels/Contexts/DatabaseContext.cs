@@ -37,12 +37,12 @@ public class DatabaseContext : DbContext
         }
     }
     
-    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-    {
-        if (!optionsBuilder.IsConfigured) return;
-        var connectionString = _configuration.GetConnectionString("DefaultConnection");
-        optionsBuilder.UseNpgsql(connectionString);
-    }
+    //protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+    //{
+    //    if (!optionsBuilder.IsConfigured) return;
+    //    var connectionString = _configuration.GetConnectionString("DefaultConnection");
+    //    optionsBuilder.UseNpgsql(connectionString);
+    //}
 
     public DbSet<Area> Areas { get; set; }
     public DbSet<AreaDependency> AreaDependencies { get; set; }
