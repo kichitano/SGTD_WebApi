@@ -5,6 +5,7 @@ using Microsoft.IdentityModel.Tokens;
 using SGTD_WebApi.Configurations;
 using SGTD_WebApi.DbModels.Contexts;
 using System.Text;
+using Npgsql;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -86,23 +87,20 @@ using (var scope = app.Services.CreateScope())
         var context = services.GetRequiredService<DatabaseContext>();
 
         logger.LogInformation("Iniciando verificación de base de datos...");
-        logger.LogInformation("Connection string: {ConnectionString}",
-            Environment.GetEnvironmentVariable("DATABASE_URL")?.Substring(0, 50) + "...");
 
-        // Intentar conexión con timeout específico
-        using var connection = context.Database.GetDbConnection();
-        connection.ConnectionString = Environment.GetEnvironmentVariable("DATABASE_URL");
+        string finalConnectionString = GetConnectionString();
+        logger.LogInformation("Using converted connection string: {ConnectionString}", MaskPassword(finalConnectionString));
 
-        logger.LogInformation("Intentando abrir conexión...");
+        // Crear conexión manual para testing
+        using var connection = new Npgsql.NpgsqlConnection(finalConnectionString);
+        logger.LogInformation("Intentando abrir conexión manual...");
         await connection.OpenAsync();
-        logger.LogInformation("Conexión abierta exitosamente!");
+        logger.LogInformation("Conexión manual exitosa!");
 
-        // Verificar si la base de datos puede conectarse
         if (await context.Database.CanConnectAsync())
         {
-            logger.LogInformation("CanConnectAsync() exitoso.");
+            logger.LogInformation("Conexión a base de datos exitosa.");
 
-            // Aplicar migraciones pendientes
             var pendingMigrations = await context.Database.GetPendingMigrationsAsync();
             if (pendingMigrations.Any())
             {
@@ -122,15 +120,11 @@ using (var scope = app.Services.CreateScope())
     }
     catch (Exception ex)
     {
-        logger.LogError(ex, "Error detallado: {Message}", ex.Message);
-        logger.LogError("Stack trace: {StackTrace}", ex.StackTrace);
-
-        if (!app.Environment.IsDevelopment())
-        {
-            logger.LogWarning("Continuando sin base de datos en producción.");
-        }
+        logger.LogError(ex, "Error durante la migración: {Message}", ex.Message);
+        logger.LogWarning("Continuando sin base de datos.");
     }
 }
+
 // Configure the HTTP request pipeline.
 //if (app.Environment.IsDevelopment())
 //{
