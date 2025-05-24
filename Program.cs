@@ -29,7 +29,11 @@ else
 {
     string? connectionString = Environment.GetEnvironmentVariable("DATABASE_URL") ??
                                Environment.GetEnvironmentVariable("DB_CONNECTION_STRING") ??
-                               builder.Configuration.GetConnectionString("DefaultConnection");    
+                               builder.Configuration.GetConnectionString("DefaultConnection");
+
+    Console.WriteLine($"DATABASE_URL from env: '{Environment.GetEnvironmentVariable("DATABASE_URL")}'");
+    Console.WriteLine($"Final connection string: '{connectionString}'");
+
     builder.Services.AddDbContext<DatabaseContext>(options =>
         options.UseNpgsql(connectionString));
 }
@@ -75,38 +79,41 @@ ServiceConfiguration.Configure(builder.Services);
 
 var app = builder.Build();
 
-using (var scope = app.Services.CreateScope())
-{
-    var services = scope.ServiceProvider;
-    try
-    {
-        var context = services.GetRequiredService<DatabaseContext>();
-        await context.Database.EnsureCreatedAsync();
+//using (var scope = app.Services.CreateScope())
+//{
+//    var services = scope.ServiceProvider;
+//    try
+//    {
+//        var context = services.GetRequiredService<DatabaseContext>();
+//        await context.Database.EnsureCreatedAsync();
 
-        if (context.Database.GetPendingMigrations().Any())
-        {
-            await context.Database.MigrateAsync();
-        }
-    }
-    catch (Exception ex)
-    {
-        var logger = services.GetRequiredService<ILogger<Program>>();
-        logger.LogError(ex, "Ocurrió un error al migrar la base de datos PostgreSQL.");
+//        if (context.Database.GetPendingMigrations().Any())
+//        {
+//            await context.Database.MigrateAsync();
+//        }
+//    }
+//    catch (Exception ex)
+//    {
+//        var logger = services.GetRequiredService<ILogger<Program>>();
+//        logger.LogError(ex, "Ocurrió un error al migrar la base de datos PostgreSQL.");
 
-        if (app.Environment.IsDevelopment())
-        {
-            Console.WriteLine($"Error de migración: {ex.Message}");
-            Console.WriteLine($"Stack trace: {ex.StackTrace}");
-        }
-    }
-}
+//        if (app.Environment.IsDevelopment())
+//        {
+//            Console.WriteLine($"Error de migración: {ex.Message}");
+//            Console.WriteLine($"Stack trace: {ex.StackTrace}");
+//        }
+//    }
+//}
 
 // Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
+//if (app.Environment.IsDevelopment())
+//{
+//    app.UseSwagger();
+//    app.UseSwaggerUI();
+//}
+
+app.UseSwagger();
+app.UseSwaggerUI();
 
 app.Use(async (context, next) =>
 {
