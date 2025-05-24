@@ -5,7 +5,6 @@ using SGTD_WebApi.DbModels.Contexts;
 using SGTD_WebApi.DbModels.Entities;
 using SGTD_WebApi.Helpers;
 using SGTD_WebApi.Models.Authenticator;
-using static System.Drawing.Imaging.ImageFormat;
 
 namespace SGTD_WebApi.Services.Implementation;
 
@@ -134,11 +133,9 @@ public class AuthenticatorService : IAuthenticatorService
     {
         using var qrGenerator = new QRCodeGenerator();
         using var qrCodeData = qrGenerator.CreateQrCode(qrCodeUri, QRCodeGenerator.ECCLevel.Q);
-        using var qrCode = new QRCode(qrCodeData);
-        using var qrBitmap = qrCode.GetGraphic(20);
-        using var stream = new MemoryStream();
-        qrBitmap.Save(stream, Png);
-        return Convert.ToBase64String(stream.ToArray());
+        using var qrCode = new PngByteQRCode(qrCodeData);
+        byte[] qrCodeBytes = qrCode.GetGraphic(20);
+        return Convert.ToBase64String(qrCodeBytes);
     }
 
     public string GenerateSecretKey()
