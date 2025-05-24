@@ -79,31 +79,55 @@ ServiceConfiguration.Configure(builder.Services);
 
 var app = builder.Build();
 
-//using (var scope = app.Services.CreateScope())
-//{
-//    var services = scope.ServiceProvider;
-//    try
-//    {
-//        var context = services.GetRequiredService<DatabaseContext>();
-//        await context.Database.EnsureCreatedAsync();
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    var logger = services.GetRequiredService<ILogger<Program>>();
 
-//        if (context.Database.GetPendingMigrations().Any())
-//        {
-//            await context.Database.MigrateAsync();
-//        }
-//    }
-//    catch (Exception ex)
-//    {
-//        var logger = services.GetRequiredService<ILogger<Program>>();
-//        logger.LogError(ex, "Ocurrió un error al migrar la base de datos PostgreSQL.");
+    try
+    {
+        var context = services.GetRequiredService<DatabaseContext>();
 
-//        if (app.Environment.IsDevelopment())
-//        {
-//            Console.WriteLine($"Error de migración: {ex.Message}");
-//            Console.WriteLine($"Stack trace: {ex.StackTrace}");
-//        }
-//    }
-//}
+        logger.LogInformation("Iniciando verificación de base de datos...");
+
+        // Verificar si la base de datos puede conectarse
+        if (await context.Database.CanConnectAsync())
+        {
+            logger.LogInformation("Conexión a base de datos exitosa.");
+
+            // Aplicar migraciones pendientes
+            var pendingMigrations = await context.Database.GetPendingMigrationsAsync();
+            if (pendingMigrations.Any())
+            {
+                logger.LogInformation($"Aplicando {pendingMigrations.Count()} migraciones pendientes...");
+                await context.Database.MigrateAsync();
+                logger.LogInformation("Migraciones aplicadas exitosamente.");
+            }
+            else
+            {
+                logger.LogInformation("No hay migraciones pendientes.");
+            }
+        }
+        else
+        {
+            logger.LogWarning("No se pudo conectar a la base de datos. Continuando sin migraciones.");
+        }
+    }
+    catch (Exception ex)
+    {
+        logger.LogError(ex, "Error durante la migración de base de datos: {Message}", ex.Message);
+
+        // En producción, continuar sin base de datos en lugar de fallar
+        if (!app.Environment.IsDevelopment())
+        {
+            logger.LogWarning("Continuando sin base de datos en producción.");
+        }
+        else
+        {
+            throw; // En desarrollo, fallar para debuggear
+        }
+    }
+}
 
 // Configure the HTTP request pipeline.
 //if (app.Environment.IsDevelopment())
