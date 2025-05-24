@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace SGTD_WebApi.DbModels.Entities;
 
-[Table("People")]
+[Table("Persons")]
 public class Person : Base
 {
     [Required]
