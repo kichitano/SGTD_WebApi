@@ -89,11 +89,21 @@ using (var scope = app.Services.CreateScope())
         var context = services.GetRequiredService<DatabaseContext>();
 
         logger.LogInformation("Iniciando verificación de base de datos...");
+        logger.LogInformation("Connection string: {ConnectionString}",
+            Environment.GetEnvironmentVariable("DATABASE_URL")?.Substring(0, 50) + "...");
+
+        // Intentar conexión con timeout específico
+        using var connection = context.Database.GetDbConnection();
+        connection.ConnectionString = Environment.GetEnvironmentVariable("DATABASE_URL");
+
+        logger.LogInformation("Intentando abrir conexión...");
+        await connection.OpenAsync();
+        logger.LogInformation("Conexión abierta exitosamente!");
 
         // Verificar si la base de datos puede conectarse
         if (await context.Database.CanConnectAsync())
         {
-            logger.LogInformation("Conexión a base de datos exitosa.");
+            logger.LogInformation("CanConnectAsync() exitoso.");
 
             // Aplicar migraciones pendientes
             var pendingMigrations = await context.Database.GetPendingMigrationsAsync();
@@ -110,25 +120,20 @@ using (var scope = app.Services.CreateScope())
         }
         else
         {
-            logger.LogWarning("No se pudo conectar a la base de datos. Continuando sin migraciones.");
+            logger.LogWarning("CanConnectAsync() falló.");
         }
     }
     catch (Exception ex)
     {
-        logger.LogError(ex, "Error durante la migración de base de datos: {Message}", ex.Message);
+        logger.LogError(ex, "Error detallado: {Message}", ex.Message);
+        logger.LogError("Stack trace: {StackTrace}", ex.StackTrace);
 
-        // En producción, continuar sin base de datos en lugar de fallar
         if (!app.Environment.IsDevelopment())
         {
             logger.LogWarning("Continuando sin base de datos en producción.");
         }
-        else
-        {
-            throw; // En desarrollo, fallar para debuggear
-        }
     }
 }
-
 // Configure the HTTP request pipeline.
 //if (app.Environment.IsDevelopment())
 //{
