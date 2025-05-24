@@ -31,7 +31,7 @@ public class JwtHelper
             issuer: _configuration["Jwt:Issuer"],
             audience: _configuration["Jwt:Audience"],
             claims: claims,
-            expires: DateTime.Now.AddMinutes(10),
+            expires: DateTime.UtcNow.AddMinutes(10),
             signingCredentials: credentials
         );
 

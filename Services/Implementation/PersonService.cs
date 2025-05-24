@@ -34,7 +34,7 @@ public class PersonService : IPersonService
             NationalityCode = requestParams.NationalityCode,
             DocumentNumber = requestParams.DocumentNumber,
             Gender = requestParams.Gender,
-            CreatedAt = DateTime.Now
+            CreatedAt = DateTime.UtcNow
         };
         _context.People.Add(person);
         await _context.SaveChangesAsync();
@@ -55,7 +55,7 @@ public class PersonService : IPersonService
         person.NationalityCode = requestParams.NationalityCode;
         person.DocumentNumber = requestParams.DocumentNumber;
         person.Gender = requestParams.Gender;
-        person.UpdatedAt = DateTime.Now;
+        person.UpdatedAt = DateTime.UtcNow;
 
         await _context.SaveChangesAsync();
     }

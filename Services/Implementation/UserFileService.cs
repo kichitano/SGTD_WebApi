@@ -77,7 +77,7 @@ public class UserFileService : IUserFileService
                     FileName = userFile.FileName,
                     FileSize = userFile.Length,
                     ContentType = Path.GetExtension(fileName).TrimStart('.'),
-                    CreatedAt = DateTime.Now
+                    CreatedAt = DateTime.UtcNow
                 };
                 await _context.UserFiles.AddAsync(file);
             }

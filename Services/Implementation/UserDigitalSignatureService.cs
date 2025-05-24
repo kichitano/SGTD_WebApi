@@ -49,7 +49,7 @@ public class UserDigitalSignatureService : IUserDigitalSignatureService
             {
                 Name = digitalSignatureName,
                 UserGuid = userGuid,
-                CreatedAt = DateTime.Now
+                CreatedAt = DateTime.UtcNow
             };
             await _context.UserDigitalSignatures.AddAsync(digitalSignature);
         }

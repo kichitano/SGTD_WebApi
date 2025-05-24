@@ -26,7 +26,7 @@ public class UserService : IUserService
             Password = _encryptHelper.PasswordEncrypt(requestParams.Password),
             StorageSize = requestParams.StorageSize,
             Status = requestParams.Status,
-            CreatedAt = DateTime.Now,
+            CreatedAt = DateTime.UtcNow,
             UserGuid = Guid.NewGuid(),
             FolderPath = GenerateFolderPath(),
             PositionId = requestParams.PositionId
@@ -120,7 +120,7 @@ public class UserService : IUserService
                 Password = BCrypt.Net.BCrypt.HashPassword(requestParams.Password, workFactor: 12),
                 StorageSize = requestParams.StorageSize,
                 Status = requestParams.Status,
-                CreatedAt = DateTime.Now,
+                CreatedAt = DateTime.UtcNow,
                 UserGuid = Guid.NewGuid(),
                 FolderPath = GenerateFolderPath(),
                 PositionId = requestParams.PositionId
