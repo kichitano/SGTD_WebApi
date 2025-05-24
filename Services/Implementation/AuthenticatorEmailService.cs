@@ -61,7 +61,7 @@ public class AuthenticatorEmailService : IAuthenticatorEmailService
 
         htmlContent = htmlContent
             .Replace("{{FullName}}", user.FullName)
-            .Replace("{{ActivationLink}}", $"http://localhost:4200/SGTD_Client/activate/{activationLink}");
+            .Replace("{{ActivationLink}}", $"{_configuration["DeploymentUrl:Url"]}/{activationLink}");
 
         var from = new EmailAddress(_configuration["SendGrid:FromEmail"], _configuration["SendGrid:FromName"]);
         var to = new EmailAddress(user.Email, user.FullName);
