@@ -5,6 +5,7 @@ using Microsoft.IdentityModel.Tokens;
 using SGTD_WebApi.Configurations;
 using SGTD_WebApi.DbModels.Contexts;
 using System.Text;
+using SendGrid.Helpers.Errors.Model;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -27,7 +28,7 @@ if (builder.Environment.EnvironmentName == "Testing")
 }
 else
 {
-    string connectionString = GetConnectionString();
+    string connectionString = GetConnectionString(builder.Configuration);
     builder.Services.AddDbContext<DatabaseContext>(options =>
         options.UseNpgsql(connectionString));
 }
@@ -115,7 +116,7 @@ app.MapControllers();
 
 await app.RunAsync();
 
-static string GetConnectionString()
+static string GetConnectionString(IConfiguration configuration)
 {
     string? databaseUrl = Environment.GetEnvironmentVariable("DATABASE_URL");
 
@@ -126,6 +127,5 @@ static string GetConnectionString()
         return $"Host={uri.Host};Port={uri.Port};Database={uri.AbsolutePath.TrimStart('/')};Username={userInfo[0]};Password={userInfo[1]};SSL Mode=Require;Trust Server Certificate=true";
     }
 
-    return Environment.GetEnvironmentVariable("DB_CONNECTION_STRING") ??
-           "Host=localhost;Database=sgtd_db;Username=postgres;Password=tu_password;Port=5432";
+    return configuration["ConnectionStrings:DefaultConnection"] ?? throw new BadRequestException("Error to connect to database");
 }
