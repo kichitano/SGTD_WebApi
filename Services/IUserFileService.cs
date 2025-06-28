@@ -8,4 +8,10 @@ public interface IUserFileService
     Task UploadFilesAsync(List<IFormFile> userFiles, Guid userGuid);
     Task<UserFileByteDto> DownloadFileAsync(int id);
     Task<byte[]> DownloadMultipleFilesAsync(List<int> ids);
+    Task<string> DeleteFileAsync(int id, Guid userGuid);
+    Task<string> DeleteMultipleFilesAsync(List<int> ids, Guid userGuid);
+    Task<FileShareInfoDto> GetFileShareInfoAsync(int fileId, Guid userGuid);
+    Task<string> ShareFileAsync(int fileId, List<int> userIds, Guid sharedByUserGuid);
+    Task<string> UnshareFileAsync(int fileId, int userId, Guid userGuid);
+    Task<List<UserFileShareDto>> GetSharedFilesAsync(Guid userGuid);
 }

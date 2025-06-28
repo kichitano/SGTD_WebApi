@@ -36,6 +36,7 @@ public class DatabaseContext : DbContext
     public DbSet<Person> People { get; set; }
     public DbSet<User> Users { get; set; }
     public DbSet<UserFile> UserFiles { get; set; }
+    public DbSet<UserFileShare> UserFileShares { get; set; }
     public DbSet<Role> Roles { get; set; }
     public DbSet<RoleComponentPermission> RoleComponentPermissions { get; set; }
     public DbSet<Permission> Permissions { get; set; }
@@ -196,5 +197,9 @@ public class DatabaseContext : DbContext
         ConfigureOneToManyRelationship<User, Person>(modelBuilder, u => u.Person, u => u.PersonId);
 
         ConfigureOneToManyRelationship<UserFile, User>(modelBuilder, u => u.User, u => u.UserId);
+        
+        ConfigureOneToManyRelationship<UserFileShare, UserFile>(modelBuilder, ufs => ufs.UserFile, ufs => ufs.UserFileId);
+        ConfigureOneToManyRelationship<UserFileShare, User>(modelBuilder, ufs => ufs.SharedWithUser, ufs => ufs.SharedWithUserId);
+        ConfigureOneToManyRelationship<UserFileShare, User>(modelBuilder, ufs => ufs.SharedByUser, ufs => ufs.SharedByUserId);
     }
 }

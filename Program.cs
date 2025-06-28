@@ -9,8 +9,16 @@ using SendGrid.Helpers.Errors.Model;
 
 var builder = WebApplication.CreateBuilder(args);
 
-var port = Environment.GetEnvironmentVariable("PORT") ?? "8080";
-builder.WebHost.UseUrls($"http://0.0.0.0:{port}");
+var port = Environment.GetEnvironmentVariable("PORT") ?? "44319";
+var isProduction = builder.Environment.IsProduction();
+if (isProduction)
+{
+    builder.WebHost.UseUrls($"http://0.0.0.0:{port}");
+}
+else
+{
+    builder.WebHost.UseUrls($"https://localhost:{port}");
+}
 
 builder.Services.AddHttpClient();
 

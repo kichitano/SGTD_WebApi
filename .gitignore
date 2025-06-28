@@ -400,3 +400,6 @@ obj/Debug/net8.0/SGP.AssemblyInfoInputs.cache
 obj/Debug/net8.0/SGP.AssemblyInfo.cs
 /obj/Debug
 appsettings.json
+
+# Custom file storage directories
+Storage/

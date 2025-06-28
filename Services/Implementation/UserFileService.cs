@@ -131,4 +131,297 @@ public class UserFileService : IUserFileService
         }
         return zipMemoryStream.ToArray();
     }
+
+    public async Task<string> DeleteFileAsync(int id, Guid userGuid)
+    {
+        var userFile = await _context.UserFiles
+            .Include(f => f.User)
+            .FirstOrDefaultAsync(f => f.Id == id);
+
+        if (userFile == null)
+        {
+            throw new ValidationException("Archivo no encontrado en la base de datos");
+        }
+
+        // Verificar que el usuario es el propietario del archivo
+        if (userFile.User.UserGuid != userGuid)
+        {
+            throw new UnauthorizedAccessException("No tiene permisos para eliminar este archivo");
+        }
+
+        var filePath = Path.Combine(_basePath, userFile.User.FolderPath, userFile.FileName);
+        var fileExists = File.Exists(filePath);
+
+        // Eliminar registro de la base de datos
+        _context.UserFiles.Remove(userFile);
+        await _context.SaveChangesAsync();
+
+        // Intentar eliminar archivo físico si existe
+        if (fileExists)
+        {
+            try
+            {
+                File.Delete(filePath);
+                return "Archivo eliminado correctamente";
+            }
+            catch (Exception ex)
+            {
+                return $"Registro eliminado de la base de datos, pero no se pudo eliminar el archivo físico: {ex.Message}";
+            }
+        }
+        else
+        {
+            return "Registro eliminado de la base de datos. Advertencia: El archivo físico no existía";
+        }
+    }
+
+    public async Task<string> DeleteMultipleFilesAsync(List<int> ids, Guid userGuid)
+    {
+        var userFiles = await _context.UserFiles
+            .Include(f => f.User)
+            .Where(f => ids.Contains(f.Id))
+            .ToListAsync();
+
+        if (!userFiles.Any())
+        {
+            throw new ValidationException("No se encontraron archivos para eliminar");
+        }
+
+        // Verificar que todos los archivos pertenecen al usuario
+        var unauthorizedFiles = userFiles.Where(f => f.User.UserGuid != userGuid).ToList();
+        if (unauthorizedFiles.Any())
+        {
+            throw new UnauthorizedAccessException("No tiene permisos para eliminar algunos archivos seleccionados");
+        }
+
+        var results = new List<string>();
+        var deletedCount = 0;
+        var warningCount = 0;
+        var errorCount = 0;
+
+        foreach (var userFile in userFiles)
+        {
+            var filePath = Path.Combine(_basePath, userFile.User.FolderPath, userFile.FileName);
+            var fileExists = File.Exists(filePath);
+
+            // Eliminar registro de la base de datos
+            _context.UserFiles.Remove(userFile);
+
+            // Intentar eliminar archivo físico si existe
+            if (fileExists)
+            {
+                try
+                {
+                    File.Delete(filePath);
+                    deletedCount++;
+                }
+                catch
+                {
+                    errorCount++;
+                }
+            }
+            else
+            {
+                warningCount++;
+            }
+        }
+
+        await _context.SaveChangesAsync();
+
+        var result = $"Eliminación completada: {deletedCount} archivos eliminados correctamente";
+        if (warningCount > 0)
+        {
+            result += $", {warningCount} registros eliminados (archivos físicos no existían)";
+        }
+        if (errorCount > 0)
+        {
+            result += $", {errorCount} archivos con errores al eliminar físicamente";
+        }
+
+        return result;
+    }
+
+    public async Task<FileShareInfoDto> GetFileShareInfoAsync(int fileId, Guid userGuid)
+    {
+        var userFile = await _context.UserFiles
+            .Include(f => f.User)
+            .ThenInclude(u => u.Person)
+            .FirstOrDefaultAsync(f => f.Id == fileId);
+
+        if (userFile == null)
+        {
+            throw new ValidationException("Archivo no encontrado");
+        }
+
+        // Verificar que el usuario es el propietario o tiene acceso compartido
+        if (userFile.User.UserGuid != userGuid)
+        {
+            var hasSharedAccess = await _context.UserFileShares
+                .Include(s => s.SharedWithUser)
+                .AnyAsync(s => s.UserFileId == fileId && s.SharedWithUser.UserGuid == userGuid);
+
+            if (!hasSharedAccess)
+            {
+                throw new UnauthorizedAccessException("No tiene permisos para ver la información de este archivo");
+            }
+        }
+
+        var sharedUsers = await _context.UserFileShares
+            .Include(s => s.SharedWithUser)
+            .ThenInclude(u => u.Person)
+            .Include(s => s.SharedByUser)
+            .ThenInclude(u => u.Person)
+            .Where(s => s.UserFileId == fileId)
+            .Select(s => new FileShareUserDto
+            {
+                UserId = s.SharedWithUserId,
+                Name = $"{s.SharedWithUser.Person.FirstName} {s.SharedWithUser.Person.LastName}",
+                SharedAt = s.SharedAt,
+                SharedByName = $"{s.SharedByUser.Person.FirstName} {s.SharedByUser.Person.LastName}"
+            })
+            .ToListAsync();
+
+        return new FileShareInfoDto
+        {
+            FileId = fileId,
+            OwnerName = $"{userFile.User.Person.FirstName} {userFile.User.Person.LastName}",
+            SharedUsers = sharedUsers
+        };
+    }
+
+    public async Task<string> ShareFileAsync(int fileId, List<int> userIds, Guid sharedByUserGuid)
+    {
+        var userFile = await _context.UserFiles
+            .Include(f => f.User)
+            .FirstOrDefaultAsync(f => f.Id == fileId);
+
+        if (userFile == null)
+        {
+            throw new ValidationException("Archivo no encontrado");
+        }
+
+        // Verificar que el usuario es el propietario del archivo
+        if (userFile.User.UserGuid != sharedByUserGuid)
+        {
+            throw new UnauthorizedAccessException("Solo el propietario puede compartir este archivo");
+        }
+
+        var sharedByUser = await _context.Users
+            .FirstOrDefaultAsync(u => u.UserGuid == sharedByUserGuid);
+
+        if (sharedByUser == null)
+        {
+            throw new ValidationException("Usuario que comparte no encontrado");
+        }
+
+        // Verificar que los usuarios a compartir existen
+        var usersToShare = await _context.Users
+            .Where(u => userIds.Contains(u.Id))
+            .ToListAsync();
+
+        if (usersToShare.Count != userIds.Count)
+        {
+            throw new ValidationException("Algunos usuarios seleccionados no existen");
+        }
+
+        // Verificar que no se intente compartir consigo mismo
+        if (usersToShare.Any(u => u.Id == sharedByUser.Id))
+        {
+            throw new ValidationException("No puede compartir un archivo consigo mismo");
+        }
+
+        // Obtener compartidos existentes
+        var existingShares = await _context.UserFileShares
+            .Where(s => s.UserFileId == fileId && userIds.Contains(s.SharedWithUserId))
+            .Select(s => s.SharedWithUserId)
+            .ToListAsync();
+
+        // Crear nuevos compartidos solo para usuarios que no tienen acceso
+        var newShares = userIds.Except(existingShares).ToList();
+
+        foreach (var userId in newShares)
+        {
+            await _context.UserFileShares.AddAsync(new UserFileShare
+            {
+                UserFileId = fileId,
+                SharedWithUserId = userId,
+                SharedByUserId = sharedByUser.Id,
+                SharedAt = DateTime.UtcNow
+            });
+        }
+
+        await _context.SaveChangesAsync();
+
+        var message = $"Archivo compartido con {newShares.Count} usuario(s)";
+        if (existingShares.Any())
+        {
+            message += $". {existingShares.Count} usuario(s) ya tenían acceso";
+        }
+
+        return message;
+    }
+
+    public async Task<string> UnshareFileAsync(int fileId, int userId, Guid userGuid)
+    {
+        var userFile = await _context.UserFiles
+            .Include(f => f.User)
+            .FirstOrDefaultAsync(f => f.Id == fileId);
+
+        if (userFile == null)
+        {
+            throw new ValidationException("Archivo no encontrado");
+        }
+
+        // Verificar que el usuario es el propietario del archivo
+        if (userFile.User.UserGuid != userGuid)
+        {
+            throw new UnauthorizedAccessException("Solo el propietario puede dejar de compartir este archivo");
+        }
+
+        var shareRecord = await _context.UserFileShares
+            .FirstOrDefaultAsync(s => s.UserFileId == fileId && s.SharedWithUserId == userId);
+
+        if (shareRecord == null)
+        {
+            throw new ValidationException("El archivo no está compartido con este usuario");
+        }
+
+        _context.UserFileShares.Remove(shareRecord);
+        await _context.SaveChangesAsync();
+
+        return "Acceso compartido eliminado correctamente";
+    }
+
+    public async Task<List<UserFileShareDto>> GetSharedFilesAsync(Guid userGuid)
+    {
+        var user = await _context.Users.FirstOrDefaultAsync(u => u.UserGuid == userGuid);
+
+        if (user == null)
+        {
+            throw new ValidationException("Usuario no encontrado");
+        }
+
+        var sharedFiles = await _context.UserFileShares
+            .Include(s => s.UserFile)
+            .ThenInclude(f => f.User)
+            .ThenInclude(u => u.Person)
+            .Include(s => s.SharedByUser)
+            .ThenInclude(u => u.Person)
+            .Where(s => s.SharedWithUserId == user.Id)
+            .Select(s => new UserFileShareDto
+            {
+                Id = s.UserFile.Id,
+                FileName = s.UserFile.FileName,
+                FileSize = s.UserFile.FileSize,
+                ContentType = s.UserFile.ContentType,
+                CreatedAt = s.UserFile.CreatedAt,
+                OwnerName = $"{s.UserFile.User.Person.FirstName} {s.UserFile.User.Person.LastName}",
+                SharedByName = $"{s.SharedByUser.Person.FirstName} {s.SharedByUser.Person.LastName}",
+                SharedAt = s.SharedAt,
+                IsOwner = false
+            })
+            .ToListAsync();
+
+        return sharedFiles;
+    }
 }

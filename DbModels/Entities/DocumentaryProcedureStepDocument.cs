@@ -14,4 +14,6 @@ public class DocumentaryProcedureStepDocument : Base
     
     [ForeignKey("DocumentTypeId")]
     public DocumentType DocumentType { get; set; }
+    
+    public bool RequiresSignature { get; set; } = false;
 }
