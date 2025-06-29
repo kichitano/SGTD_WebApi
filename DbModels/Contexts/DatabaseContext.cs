@@ -31,6 +31,10 @@ public class DatabaseContext : DbContext
     public DbSet<DocumentaryProcedure> DocumentaryProcedures { get; set; }
     public DbSet<DocumentaryProcedureStep> DocumentaryProcedureSteps { get; set; }
     public DbSet<DocumentaryProcedureStepDocument> DocumentaryProcedureStepDocuments { get; set; }
+    public DbSet<DocumentaryProcessInstance> DocumentaryProcessInstances { get; set; }
+    public DbSet<DocumentaryProcessStepInstance> DocumentaryProcessStepInstances { get; set; }
+    public DbSet<DocumentaryProcessDocument> DocumentaryProcessDocuments { get; set; }
+    public DbSet<DocumentaryProcessNotification> DocumentaryProcessNotifications { get; set; }
     public DbSet<Position> Positions { get; set; }
     public DbSet<PositionDependency> PositionsDependency { get; set; }
     public DbSet<Person> People { get; set; }
@@ -195,6 +199,73 @@ public class DatabaseContext : DbContext
 
         ConfigureOneToManyRelationship<DocumentaryProcedureStepDocument, DocumentaryProcedureStep>(modelBuilder, dpsd => dpsd.DocumentaryProcedureStep, dpsd => dpsd.DocumentaryProcedureStepId);
         ConfigureOneToManyRelationship<DocumentaryProcedureStepDocument, DocumentType>(modelBuilder, dpsd => dpsd.DocumentType, dpsd => dpsd.DocumentTypeId);
+
+        // Configuraciones específicas para entidades de procesos documentarios
+        modelBuilder.Entity<DocumentaryProcessInstance>()
+            .HasOne(dpi => dpi.DocumentaryProcedure)
+            .WithMany()
+            .HasForeignKey(dpi => dpi.DocumentaryProcedureId)
+            .OnDelete(DeleteBehavior.NoAction);
+
+        modelBuilder.Entity<DocumentaryProcessInstance>()
+            .HasOne(dpi => dpi.RequestedByUser)
+            .WithMany()
+            .HasForeignKey(dpi => dpi.RequestedByUserId)
+            .OnDelete(DeleteBehavior.NoAction);
+
+        modelBuilder.Entity<DocumentaryProcessStepInstance>()
+            .HasOne(dpsi => dpsi.DocumentaryProcessInstance)
+            .WithMany(dpi => dpi.StepInstances)
+            .HasForeignKey(dpsi => dpsi.DocumentaryProcessInstanceId)
+            .OnDelete(DeleteBehavior.NoAction);
+
+        modelBuilder.Entity<DocumentaryProcessStepInstance>()
+            .HasOne(dpsi => dpsi.DocumentaryProcedureStep)
+            .WithMany()
+            .HasForeignKey(dpsi => dpsi.DocumentaryProcedureStepId)
+            .OnDelete(DeleteBehavior.NoAction);
+
+        modelBuilder.Entity<DocumentaryProcessStepInstance>()
+            .HasOne(dpsi => dpsi.AssignedToUser)
+            .WithMany()
+            .HasForeignKey(dpsi => dpsi.AssignedToUserId)
+            .OnDelete(DeleteBehavior.NoAction);
+
+        modelBuilder.Entity<DocumentaryProcessDocument>()
+            .HasOne(dpd => dpd.DocumentaryProcessInstance)
+            .WithMany(dpi => dpi.Documents)
+            .HasForeignKey(dpd => dpd.DocumentaryProcessInstanceId)
+            .OnDelete(DeleteBehavior.NoAction);
+
+        modelBuilder.Entity<DocumentaryProcessDocument>()
+            .HasOne(dpd => dpd.DocumentaryProcessStepInstance)
+            .WithMany(dpsi => dpsi.Documents)
+            .HasForeignKey(dpd => dpd.DocumentaryProcessStepInstanceId)
+            .OnDelete(DeleteBehavior.NoAction);
+
+        modelBuilder.Entity<DocumentaryProcessDocument>()
+            .HasOne(dpd => dpd.DocumentType)
+            .WithMany()
+            .HasForeignKey(dpd => dpd.DocumentTypeId)
+            .OnDelete(DeleteBehavior.NoAction);
+
+        modelBuilder.Entity<DocumentaryProcessDocument>()
+            .HasOne(dpd => dpd.UploadedByUser)
+            .WithMany()
+            .HasForeignKey(dpd => dpd.UploadedByUserId)
+            .OnDelete(DeleteBehavior.NoAction);
+
+        modelBuilder.Entity<DocumentaryProcessNotification>()
+            .HasOne(dpn => dpn.DocumentaryProcessInstance)
+            .WithMany()
+            .HasForeignKey(dpn => dpn.DocumentaryProcessInstanceId)
+            .OnDelete(DeleteBehavior.NoAction);
+
+        modelBuilder.Entity<DocumentaryProcessNotification>()
+            .HasOne(dpn => dpn.User)
+            .WithMany()
+            .HasForeignKey(dpn => dpn.UserId)
+            .OnDelete(DeleteBehavior.NoAction);
 
         ConfigureOneToManyRelationship<PositionDependency, Position>(modelBuilder, pd => pd.ParentPosition, pd => pd.ParentPositionId);
         ConfigureOneToManyRelationship<PositionDependency, Position>(modelBuilder, pd => pd.ChildPosition, pd => pd.ChildPositionId);

@@ -25,6 +25,7 @@ public static class ServiceConfiguration
         services.AddScoped<IComponentService, ComponentService>();
         services.AddScoped<ICountryService, CountryService>();
         services.AddScoped<IDocumentaryProcedureService, DocumentaryProcedureService>();
+        services.AddScoped<IDocumentaryProcessService, DocumentaryProcessService>();
         services.AddScoped<IDocumentTypeService, DocumentTypeService>();
         services.AddScoped<IPermissionService, PermissionService>();
         services.AddScoped<IPersonService, PersonService>();
