@@ -33,7 +33,7 @@ public class DocumentaryProcedureService : IDocumentaryProcedureService
         }
         else
         {
-            throw new InvalidOperationException("Documentary procedure name already exists.");
+            throw new InvalidOperationException("Ya existe un trámite documentario con ese nombre.");
         }
     }
 
@@ -110,9 +110,9 @@ public class DocumentaryProcedureService : IDocumentaryProcedureService
             throw new InvalidOperationException("Documentary procedure not found.");
         }
 
-        if (existingProcedure.Name != requestParams.Name && !await IsProcedureNameUniqueAsync(requestParams.Name))
+        if (existingProcedure.Name != requestParams.Name && !await IsProcedureNameUniqueAsync(requestParams.Name, requestParams.Id.Value))
         {
-            throw new InvalidOperationException("Documentary procedure name already exists.");
+            throw new InvalidOperationException("Ya existe otro trámite documentario con ese nombre.");
         }
 
         existingProcedure.Name = requestParams.Name;
@@ -137,15 +137,27 @@ public class DocumentaryProcedureService : IDocumentaryProcedureService
             throw new InvalidOperationException("Documentary procedure not found.");
         }
 
-        await DeleteExistingStepsAsync(id);
-        _context.DocumentaryProcedures.Remove(procedure);
+        // Realizar eliminación lógica en lugar de física
+        procedure.IsDeleted = true;
+        procedure.DeletedAt = DateTime.UtcNow;
+        procedure.UpdatedAt = DateTime.UtcNow;
+
+        // También realizar eliminación lógica de pasos relacionados
+        await DeleteExistingStepsLogicallyAsync(id);
+        
         await _context.SaveChangesAsync();
     }
 
-    private async Task<bool> IsProcedureNameUniqueAsync(string name)
+    private async Task<bool> IsProcedureNameUniqueAsync(string name, int? excludeId = null)
     {
-        return !await _context.DocumentaryProcedures
-            .AnyAsync(p => p.Name.ToLower() == name.ToLower());
+        var trimmedName = name?.Trim() ?? string.Empty;
+        var query = _context.DocumentaryProcedures
+            .Where(p => p.Name.Trim().ToLower() == trimmedName.ToLower());
+            
+        if (excludeId.HasValue)
+            query = query.Where(p => p.Id != excludeId.Value);
+            
+        return !await query.AnyAsync();
     }
 
     private async Task CreateStepsAsync(int procedureId, List<DocumentaryProcedureStepRequestParams> steps)
@@ -204,6 +216,31 @@ public class DocumentaryProcedureService : IDocumentaryProcedureService
         }
 
         _context.DocumentaryProcedureSteps.RemoveRange(existingSteps);
+    }
+
+    private async Task DeleteExistingStepsLogicallyAsync(int procedureId)
+    {
+        var existingSteps = await _context.DocumentaryProcedureSteps
+            .Where(s => s.DocumentaryProcedureId == procedureId && !s.IsDeleted)
+            .ToListAsync();
+
+        foreach (var step in existingSteps)
+        {
+            var existingDocuments = await _context.DocumentaryProcedureStepDocuments
+                .Where(d => d.DocumentaryProcedureStepId == step.Id && !d.IsDeleted)
+                .ToListAsync();
+
+            foreach (var doc in existingDocuments)
+            {
+                doc.IsDeleted = true;
+                doc.DeletedAt = DateTime.UtcNow;
+                doc.UpdatedAt = DateTime.UtcNow;
+            }
+
+            step.IsDeleted = true;
+            step.DeletedAt = DateTime.UtcNow;
+            step.UpdatedAt = DateTime.UtcNow;
+        }
     }
 
     private async Task<List<DocumentaryProcedureStepDto>> GetStepsByProcedureIdAsync(int procedureId)

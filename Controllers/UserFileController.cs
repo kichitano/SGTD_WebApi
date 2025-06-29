@@ -32,6 +32,8 @@ public class UserFileController : ControllerBase
     }
 
     [HttpPost("upload/{userGuid}")]
+    [RequestSizeLimit(50 * 1024 * 1024)] // 50MB
+    [RequestFormLimits(MultipartBodyLengthLimit = 50 * 1024 * 1024)]
     public async Task<ActionResult> UploadFilesAsync([FromForm] List<IFormFile> files, Guid userGuid)
     {
         try

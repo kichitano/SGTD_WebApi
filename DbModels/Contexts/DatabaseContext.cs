@@ -158,6 +158,18 @@ public class DatabaseContext : DbContext
     {
         base.OnModelCreating(modelBuilder);
 
+        // Configure global query filters for logical deletion
+        foreach (var entityType in modelBuilder.Model.GetEntityTypes())
+        {
+            if (typeof(Base).IsAssignableFrom(entityType.ClrType))
+            {
+                var parameter = Expression.Parameter(entityType.ClrType, "e");
+                var property = Expression.Property(parameter, nameof(Base.IsDeleted));
+                var filter = Expression.Lambda(Expression.Equal(property, Expression.Constant(false)), parameter);
+                modelBuilder.Entity(entityType.ClrType).HasQueryFilter(filter);
+            }
+        }
+
         void ConfigureOneToManyRelationship<TEntity, TRelated>(
             ModelBuilder mBuilder,
             Expression<Func<TEntity, TRelated>> navigationPropertyExpression,

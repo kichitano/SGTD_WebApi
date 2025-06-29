@@ -69,7 +69,7 @@ public class UserFileService : IUserFileService
                 await stream.WriteAsync(encryptedContent, 0, encryptedContent.Length);
             }
 
-            if (Path.Exists(filePath))
+            if (File.Exists(filePath))
             {
                 var file = new UserFile
                 {
@@ -159,8 +159,10 @@ public class UserFileService : IUserFileService
         var filePath = Path.Combine(_basePath, userFile.User.FolderPath, userFile.FileName);
         var fileExists = File.Exists(filePath);
 
-        // Eliminar registro de la base de datos
-        _context.UserFiles.Remove(userFile);
+        // Realizar eliminación lógica en lugar de física
+        userFile.IsDeleted = true;
+        userFile.DeletedAt = DateTime.UtcNow;
+        userFile.UpdatedAt = DateTime.UtcNow;
         await _context.SaveChangesAsync();
 
         // Intentar eliminar archivo físico si existe
@@ -218,8 +220,10 @@ public class UserFileService : IUserFileService
             var filePath = Path.Combine(_basePath, userFile.User.FolderPath, userFile.FileName);
             var fileExists = File.Exists(filePath);
 
-            // Eliminar registro de la base de datos
-            _context.UserFiles.Remove(userFile);
+            // Realizar eliminación lógica en lugar de física
+            userFile.IsDeleted = true;
+            userFile.DeletedAt = DateTime.UtcNow;
+            userFile.UpdatedAt = DateTime.UtcNow;
 
             // Intentar eliminar archivo físico si existe
             if (fileExists)
@@ -289,16 +293,22 @@ public class UserFileService : IUserFileService
             .Select(s => new FileShareUserDto
             {
                 UserId = s.SharedWithUserId,
-                Name = $"{s.SharedWithUser.Person.FirstName} {s.SharedWithUser.Person.LastName}",
+                Name = s.SharedWithUser.Person != null 
+                    ? $"{s.SharedWithUser.Person.FirstName ?? ""} {s.SharedWithUser.Person.LastName ?? ""}".Trim()
+                    : s.SharedWithUser.Email ?? "Usuario sin nombre",
                 SharedAt = s.SharedAt,
-                SharedByName = $"{s.SharedByUser.Person.FirstName} {s.SharedByUser.Person.LastName}"
+                SharedByName = s.SharedByUser.Person != null 
+                    ? $"{s.SharedByUser.Person.FirstName ?? ""} {s.SharedByUser.Person.LastName ?? ""}".Trim()
+                    : s.SharedByUser.Email ?? "Usuario sin nombre"
             })
             .ToListAsync();
 
         return new FileShareInfoDto
         {
             FileId = fileId,
-            OwnerName = $"{userFile.User.Person.FirstName} {userFile.User.Person.LastName}",
+            OwnerName = userFile.User.Person != null 
+                ? $"{userFile.User.Person.FirstName ?? ""} {userFile.User.Person.LastName ?? ""}".Trim()
+                : userFile.User.Email ?? "Usuario sin nombre",
             SharedUsers = sharedUsers
         };
     }

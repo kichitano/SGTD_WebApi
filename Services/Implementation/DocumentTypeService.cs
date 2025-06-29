@@ -15,6 +15,16 @@ public class DocumentTypeService : IDocumentTypeService
 
     public async Task CreateAsync(DocumentTypeRequestParams requestParams)
     {
+        // Verificar si ya existe un tipo de documento con el mismo nombre
+        var trimmedName = requestParams.Name?.Trim() ?? string.Empty;
+        var existingDocumentType = await _context.DocumentTypes
+            .AnyAsync(dt => dt.Name.Trim().ToLower() == trimmedName.ToLower());
+            
+        if (existingDocumentType)
+        {
+            throw new InvalidOperationException("Ya existe un tipo de documento con ese nombre.");
+        }
+
         var documentType = new DocumentType
         {
             Name = requestParams.Name,
@@ -31,8 +41,20 @@ public class DocumentTypeService : IDocumentTypeService
         var documentType = await _context.DocumentTypes.FirstOrDefaultAsync(c => c.Id == requestParams.Id);
         if (documentType == null)
             throw new KeyNotFoundException("DocumentType not found.");
+
+        // Verificar si ya existe otro tipo de documento con el mismo nombre (excluyendo el actual)
+        var trimmedName = requestParams.Name?.Trim() ?? string.Empty;
+        var existingDocumentType = await _context.DocumentTypes
+            .AnyAsync(dt => dt.Id != requestParams.Id && dt.Name.Trim().ToLower() == trimmedName.ToLower());
+            
+        if (existingDocumentType)
+        {
+            throw new InvalidOperationException("Ya existe otro tipo de documento con ese nombre.");
+        }
+
         documentType.Name = requestParams.Name;
         documentType.IsUploadable = requestParams.IsUploadable;
+        documentType.UpdatedAt = DateTime.UtcNow;
         await _context.SaveChangesAsync();
     }
 
@@ -66,7 +88,19 @@ public class DocumentTypeService : IDocumentTypeService
         var documentType = await _context.DocumentTypes.FirstOrDefaultAsync(q => q.Id == id);
         if (documentType == null)
             throw new KeyNotFoundException("DocumentType not found.");
-        _context.DocumentTypes.Remove(documentType);
+
+        // Verificar si el tipo de documento está siendo usado por pasos de procedimientos documentarios activos
+        var hasActiveProcedureSteps = await _context.DocumentaryProcedureStepDocuments.AnyAsync(dpsd => dpsd.DocumentTypeId == id && !dpsd.IsDeleted);
+        if (hasActiveProcedureSteps)
+        {
+            throw new InvalidOperationException("No se puede eliminar el tipo de documento porque está siendo usado por procedimientos documentarios activos.");
+        }
+
+        // Realizar eliminación lógica en lugar de física
+        documentType.IsDeleted = true;
+        documentType.DeletedAt = DateTime.UtcNow;
+        documentType.UpdatedAt = DateTime.UtcNow;
+
         await _context.SaveChangesAsync();
     }
 }

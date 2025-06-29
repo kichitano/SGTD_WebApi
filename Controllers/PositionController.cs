@@ -118,4 +118,49 @@ public class PositionController : Controller
             return BadRequest(ex.Message);
         }
     }
+
+    [Route("available-managers/{currentAreaId}")]
+    [HttpGet]
+    public async Task<ActionResult> GetAvailableDirectManagersAsync(int currentAreaId, [FromQuery] int? excludePositionId = null)
+    {
+        try
+        {
+            var response = await _positionService.GetAvailableDirectManagersAsync(currentAreaId, excludePositionId);
+            return Ok(response);
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(ex.Message);
+        }
+    }
+
+    [Route("area/{areaId}/has-max-authority")]
+    [HttpGet]
+    public async Task<ActionResult> AreaHasMaxAuthorityAsync(int areaId, [FromQuery] int? excludePositionId = null)
+    {
+        try
+        {
+            var response = await _positionService.AreaHasMaxAuthorityAsync(areaId, excludePositionId);
+            return Ok(response);
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(ex.Message);
+        }
+    }
+
+    [Route("area/{areaId}/max-authority")]
+    [HttpGet]
+    public async Task<ActionResult> GetMaxAuthorityByAreaAsync(int areaId, [FromQuery] int? excludePositionId = null)
+    {
+        try
+        {
+            var response = await _positionService.GetMaxAuthorityByAreaAsync(areaId, excludePositionId);
+            return Ok(response);
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(ex.Message);
+        }
+    }
 }

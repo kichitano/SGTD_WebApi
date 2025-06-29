@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using SGTD_WebApi.DbModels.Contexts;
@@ -11,9 +12,11 @@ using SGTD_WebApi.DbModels.Contexts;
 namespace SGTD_WebApi.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-    partial class DatabaseContextModelSnapshot : ModelSnapshot
+    [Migration("20250629114123_AddLogicalDeletion")]
+    partial class AddLogicalDeletion
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -461,9 +464,6 @@ namespace SGTD_WebApi.Migrations
                         .HasMaxLength(200)
                         .HasColumnType("character varying(200)");
 
-                    b.Property<int?>("DirectManagerPositionId")
-                        .HasColumnType("integer");
-
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("boolean");
 
@@ -478,8 +478,6 @@ namespace SGTD_WebApi.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("AreaId");
-
-                    b.HasIndex("DirectManagerPositionId");
 
                     b.ToTable("Positions");
                 });
@@ -930,13 +928,7 @@ namespace SGTD_WebApi.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("SGTD_WebApi.DbModels.Entities.Position", "DirectManagerPosition")
-                        .WithMany()
-                        .HasForeignKey("DirectManagerPositionId");
-
                     b.Navigation("Area");
-
-                    b.Navigation("DirectManagerPosition");
                 });
 
             modelBuilder.Entity("SGTD_WebApi.DbModels.Entities.PositionDependency", b =>

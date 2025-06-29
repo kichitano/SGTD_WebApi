@@ -17,4 +17,6 @@ public class PositionRequestParams
     public int AreaId { get; set; }
 
     public int? ParentPositionId { get; set; }
+
+    public int? DirectManagerPositionId { get; set; }
 }   

@@ -106,7 +106,14 @@ public class AreaService : IAreaService
             await _areaDependencyService.DeleteByIdAsync(existingDependency.Id);
         }
 
-        await _context.SaveChangesAsync();
+        try
+        {
+            await _context.SaveChangesAsync();
+        }
+        catch (DbUpdateException ex)
+        {
+            throw new InvalidOperationException("Error al actualizar el área: " + ex.Message, ex);
+        }
     }
 
     public async Task<List<AreaDto>> GetAllAsync()
@@ -154,14 +161,56 @@ public class AreaService : IAreaService
         if (area == null)
             throw new KeyNotFoundException("Area not found.");
 
-        _context.Areas.Remove(area);
-        await _context.SaveChangesAsync();
+        // Verificar si el área tiene dependencias activas (áreas hijas)
+        var hasActiveChildAreas = await _context.AreaDependencies
+            .AnyAsync(ad => ad.ParentAreaId == id && !ad.IsDeleted);
+        
+        if (hasActiveChildAreas)
+        {
+            throw new InvalidOperationException("No se puede eliminar el área porque tiene áreas dependientes activas.");
+        }
+
+        // Verificar si el área está siendo usada por posiciones activas
+        var hasActivePositions = await _context.Positions
+            .AnyAsync(p => p.AreaId == id && !p.IsDeleted);
+            
+        if (hasActivePositions)
+        {
+            throw new InvalidOperationException("No se puede eliminar el área porque tiene posiciones asociadas activas.");
+        }
+
+        // Realizar eliminación lógica en lugar de física
+        area.IsDeleted = true;
+        area.DeletedAt = DateTime.UtcNow;
+        area.UpdatedAt = DateTime.UtcNow;
+
+        // También realizar eliminación lógica de dependencias del área donde es padre o hijo
+        var dependencies = await _context.AreaDependencies
+            .Where(ad => (ad.ParentAreaId == id || ad.ChildAreaId == id) && !ad.IsDeleted)
+            .ToListAsync();
+        
+        foreach (var dep in dependencies)
+        {
+            dep.IsDeleted = true;
+            dep.DeletedAt = DateTime.UtcNow;
+            dep.UpdatedAt = DateTime.UtcNow;
+        }
+
+        try
+        {
+            await _context.SaveChangesAsync();
+        }
+        catch (DbUpdateException ex)
+        {
+            throw new InvalidOperationException("Error al eliminar el área: " + ex.Message, ex);
+        }
     }
     
     public async Task<bool> IsAreaNameUniqueAsync(string name, int? excludeAreaId = null)
     {
+        var trimmedName = name?.Trim() ?? string.Empty;
         var query = _context.Areas
-            .Where(a => a.Name == name);
+            .Where(a => a.Name.Trim().ToLower() == trimmedName.ToLower());
 
         if (excludeAreaId.HasValue)
             query = query.Where(a => a.Id != excludeAreaId.Value);

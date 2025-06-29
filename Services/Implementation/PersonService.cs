@@ -18,12 +18,14 @@ public class PersonService : IPersonService
     public async Task CreateAsync(PersonRequestParams requestParams)
     {
         var personExists = await _context.People
-            .Where(q => q.Phone.Equals(requestParams.Phone) || q.DocumentNumber.Equals(requestParams.DocumentNumber))
+            .Where(q => q.Phone.Equals(requestParams.Phone) || 
+                       q.DocumentNumber.Equals(requestParams.DocumentNumber) ||
+                       (q.FirstName.Equals(requestParams.FirstName) && q.LastName.Equals(requestParams.LastName)))
             .AnyAsync();
 
         if (personExists)
         {
-            throw new ValidationException("Ya existe una persona con el mismo número de teléfono o DNI");
+            throw new ValidationException("Ya existe una persona con el mismo nombre, número de teléfono o DNI");
         }
 
         var person = new Person
@@ -48,6 +50,19 @@ public class PersonService : IPersonService
         var person = await _context.People.FirstOrDefaultAsync(p => p.Id == requestParams.Id);
         if (person == null)
             throw new KeyNotFoundException("Person not found.");
+
+        // Verificar si ya existe otra persona con los mismos datos (excluyendo la actual)
+        var duplicateExists = await _context.People
+            .Where(q => q.Id != requestParams.Id && 
+                       (q.Phone.Equals(requestParams.Phone) || 
+                        q.DocumentNumber.Equals(requestParams.DocumentNumber) ||
+                        (q.FirstName.Equals(requestParams.FirstName) && q.LastName.Equals(requestParams.LastName))))
+            .AnyAsync();
+
+        if (duplicateExists)
+        {
+            throw new ValidationException("Ya existe otra persona con el mismo nombre, número de teléfono o DNI");
+        }
 
         person.FirstName = requestParams.FirstName;
         person.LastName = requestParams.LastName;

@@ -17,4 +17,9 @@ public class Position : Base
 
     [ForeignKey("AreaId")]
     public Area Area { get; set; }
+
+    public int? DirectManagerPositionId { get; set; }
+
+    [ForeignKey("DirectManagerPositionId")]
+    public Position? DirectManagerPosition { get; set; }
 }

@@ -7,4 +7,7 @@ public class PositionDto
     public string Description { get; set; }
     public int AreaId { get; set; }
     public int? ParentPositionId { get; set; }
+    public int? DirectManagerPositionId { get; set; }
+    public string? DirectManagerPositionName { get; set; }
+    public string? AreaName { get; set; }
 }

@@ -6,6 +6,8 @@ using SGTD_WebApi.Configurations;
 using SGTD_WebApi.DbModels.Contexts;
 using System.Text;
 using SendGrid.Helpers.Errors.Model;
+using Microsoft.AspNetCore.Http.Features;
+using Microsoft.AspNetCore.Server.IIS;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -27,6 +29,19 @@ builder.Services.AddControllers(options =>
 {
     options.Conventions.Insert(0, new RoutePrefixConfiguration("api"));
     options.Filters.Add(new AuthorizeFilter());
+});
+
+// Configure file upload limits
+builder.Services.Configure<FormOptions>(options =>
+{
+    options.ValueLengthLimit = int.MaxValue;
+    options.MultipartBodyLengthLimit = 50 * 1024 * 1024; // 50MB
+    options.MultipartHeadersLengthLimit = int.MaxValue;
+});
+
+builder.Services.Configure<IISServerOptions>(options =>
+{
+    options.MaxRequestBodySize = 50 * 1024 * 1024; // 50MB
 });
 
 if (builder.Environment.EnvironmentName == "Testing")

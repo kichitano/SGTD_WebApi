@@ -15,6 +15,16 @@ public class ComponentService : IComponentService
 
     public async Task CreateAsync(ComponentRequestParams requestParams)
     {
+        // Verificar si ya existe un componente con el mismo nombre
+        var trimmedName = requestParams.Name?.Trim() ?? string.Empty;
+        var existingComponent = await _context.Components
+            .AnyAsync(c => c.Name.Trim().ToLower() == trimmedName.ToLower());
+            
+        if (existingComponent)
+        {
+            throw new InvalidOperationException("Ya existe un módulo con ese nombre.");
+        }
+
         var component = new Component
         {
             Name = requestParams.Name
@@ -30,7 +40,19 @@ public class ComponentService : IComponentService
         var component = await _context.Components.FirstOrDefaultAsync(c => c.Id == requestParams.Id);
         if (component == null)
             throw new KeyNotFoundException("Component not found.");
+
+        // Verificar si ya existe otro componente con el mismo nombre (excluyendo el actual)
+        var trimmedName = requestParams.Name?.Trim() ?? string.Empty;
+        var existingComponent = await _context.Components
+            .AnyAsync(c => c.Id != requestParams.Id && c.Name.Trim().ToLower() == trimmedName.ToLower());
+            
+        if (existingComponent)
+        {
+            throw new InvalidOperationException("Ya existe otro módulo con ese nombre.");
+        }
+
         component.Name = requestParams.Name;
+        component.UpdatedAt = DateTime.UtcNow;
         await _context.SaveChangesAsync();
     }
 
@@ -62,7 +84,26 @@ public class ComponentService : IComponentService
         var component = await _context.Components.FirstOrDefaultAsync(c => c.Id == id);
         if (component == null)
             throw new KeyNotFoundException("Component not found.");
-        _context.Components.Remove(component);
+
+        // Verificar si el componente tiene permisos de roles asociados activos
+        var hasActiveRolePermissions = await _context.RoleComponentPermissions.AnyAsync(rcp => rcp.ComponentId == id && !rcp.IsDeleted);
+        if (hasActiveRolePermissions)
+        {
+            // Realizar eliminación lógica de permisos relacionados
+            var permissions = await _context.RoleComponentPermissions.Where(rcp => rcp.ComponentId == id && !rcp.IsDeleted).ToListAsync();
+            foreach (var permission in permissions)
+            {
+                permission.IsDeleted = true;
+                permission.DeletedAt = DateTime.UtcNow;
+                permission.UpdatedAt = DateTime.UtcNow;
+            }
+        }
+
+        // Realizar eliminación lógica en lugar de física
+        component.IsDeleted = true;
+        component.DeletedAt = DateTime.UtcNow;
+        component.UpdatedAt = DateTime.UtcNow;
+
         await _context.SaveChangesAsync();
     }
 }

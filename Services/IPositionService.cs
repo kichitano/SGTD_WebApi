@@ -13,5 +13,8 @@ public interface IPositionService
 
     Task<int> CreateReturnIdAsync(PositionRequestParams requestParams);
     Task<List<PositionDto>> GetAllByAreaIdAsync(int areaId);
+    Task<List<PositionDto>> GetAvailableDirectManagersAsync(int currentAreaId, int? excludePositionId = null);
+    Task<bool> AreaHasMaxAuthorityAsync(int areaId, int? excludePositionId = null);
+    Task<PositionDto?> GetMaxAuthorityByAreaAsync(int areaId, int? excludePositionId = null);
 
 }
