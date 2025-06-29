@@ -396,10 +396,71 @@ FodyWeavers.xsd
 
 # JetBrains Rider
 *.sln.iml
-obj/Debug/net8.0/SGP.AssemblyInfoInputs.cache
-obj/Debug/net8.0/SGP.AssemblyInfo.cs
-/obj/Debug
+
+# Configuration files (contain sensitive data)
 appsettings.json
+appsettings.*.json
+appsettings.Development.json
+appsettings.Production.json
+appsettings.Staging.json
+appsettings.Test.json
+appsettings.Local.json
+secrets.json
+launchSettings.json
+
+# Environment files
+.env
+.env.local
+.env.development
+.env.production
+.env.staging
+.env.test
+*.env
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+
+# Key files and certificates
+*.key
+*.pem
+*.p12
+*.p7b
+*.crt
+*.cer
+*.der
+*.pfx
 
 # Custom file storage directories
 Storage/
+Uploads/
+Files/
+wwwroot/uploads/
+wwwroot/files/
+
+# IDE and editor files
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Docker
+.dockerignore
+docker-compose.override.yml
+
+# Logs
+*.log
+logs/
+Logs/
+appsettings.Development.json

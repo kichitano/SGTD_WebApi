@@ -134,13 +134,20 @@ public class UserFileService : IUserFileService
 
     public async Task<string> DeleteFileAsync(int id, Guid userGuid)
     {
+        // Verificar que el usuario existe primero
+        var user = await _context.Users.FirstOrDefaultAsync(u => u.UserGuid == userGuid);
+        if (user == null)
+        {
+            throw new UnauthorizedAccessException("Usuario no encontrado");
+        }
+
         var userFile = await _context.UserFiles
             .Include(f => f.User)
             .FirstOrDefaultAsync(f => f.Id == id);
 
         if (userFile == null)
         {
-            throw new ValidationException("Archivo no encontrado en la base de datos");
+            return $"Archivo con ID {id} no existe en la base de datos (ya fue eliminado previamente)";
         }
 
         // Verificar que el usuario es el propietario del archivo
@@ -177,6 +184,13 @@ public class UserFileService : IUserFileService
 
     public async Task<string> DeleteMultipleFilesAsync(List<int> ids, Guid userGuid)
     {
+        // Verificar que el usuario existe primero
+        var user = await _context.Users.FirstOrDefaultAsync(u => u.UserGuid == userGuid);
+        if (user == null)
+        {
+            throw new UnauthorizedAccessException("Usuario no encontrado");
+        }
+
         var userFiles = await _context.UserFiles
             .Include(f => f.User)
             .Where(f => ids.Contains(f.Id))
@@ -184,7 +198,7 @@ public class UserFileService : IUserFileService
 
         if (!userFiles.Any())
         {
-            throw new ValidationException("No se encontraron archivos para eliminar");
+            return $"Ninguno de los {ids.Count} archivos seleccionados existe en la base de datos (ya fueron eliminados previamente)";
         }
 
         // Verificar que todos los archivos pertenecen al usuario

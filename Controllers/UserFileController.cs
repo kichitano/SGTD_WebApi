@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using SGTD_WebApi.Services;
 using System.ComponentModel.DataAnnotations;
+using SGTD_WebApi.Models.UserFile;
 
 namespace SGTD_WebApi.Controllers;
 
@@ -72,13 +73,13 @@ public class UserFileController : ControllerBase
         }
     }
 
-    [HttpDelete("{id}/{userGuid}")]
-    public async Task<ActionResult> DeleteFileAsync(int id, Guid userGuid)
+    [HttpPost("delete")]
+    public async Task<ActionResult> DeleteFileAsync([FromBody] DeleteFileRequestDto request)
     {
         try
         {
-            Console.WriteLine($"DELETE request received - ID: {id}, UserGuid: {userGuid}");
-            var result = await _fileService.DeleteFileAsync(id, userGuid);
+            Console.WriteLine($"DELETE request received - ID: {request.FileId}, UserGuid: {request.UserGuid}");
+            var result = await _fileService.DeleteFileAsync(request.FileId, request.UserGuid);
             Console.WriteLine($"DELETE result: {result}");
             return Ok(new { message = result });
         }
@@ -90,7 +91,7 @@ public class UserFileController : ControllerBase
         catch (UnauthorizedAccessException ex)
         {
             Console.WriteLine($"UnauthorizedAccessException: {ex.Message}");
-            return Forbid(new { error = ex.Message });
+            return StatusCode(403, new { error = ex.Message });
         }
         catch (Exception ex)
         {
@@ -99,13 +100,13 @@ public class UserFileController : ControllerBase
         }
     }
 
-    [HttpPost("delete-multiple/{userGuid}")]
-    public async Task<ActionResult> DeleteMultipleFilesAsync([FromBody] List<int> ids, Guid userGuid)
+    [HttpPost("delete-multiple")]
+    public async Task<ActionResult> DeleteMultipleFilesAsync([FromBody] DeleteMultipleFilesRequestDto request)
     {
         try
         {
-            Console.WriteLine($"DELETE MULTIPLE request received - IDs: [{string.Join(", ", ids)}], UserGuid: {userGuid}");
-            var result = await _fileService.DeleteMultipleFilesAsync(ids, userGuid);
+            Console.WriteLine($"DELETE MULTIPLE request received - IDs: [{string.Join(", ", request.FileIds)}], UserGuid: {request.UserGuid}");
+            var result = await _fileService.DeleteMultipleFilesAsync(request.FileIds, request.UserGuid);
             Console.WriteLine($"DELETE MULTIPLE result: {result}");
             return Ok(new { message = result });
         }
@@ -117,7 +118,7 @@ public class UserFileController : ControllerBase
         catch (UnauthorizedAccessException ex)
         {
             Console.WriteLine($"UnauthorizedAccessException (Multiple): {ex.Message}");
-            return Forbid(new { error = ex.Message });
+            return StatusCode(403, new { error = ex.Message });
         }
         catch (Exception ex)
         {
