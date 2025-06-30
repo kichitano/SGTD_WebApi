@@ -32,11 +32,11 @@ public class UserRoleService : IUserRoleService
     public async Task UpdateAsync(UserRoleRequestParams requestParams)
     {
         if (requestParams.Id == null)
-            throw new ArgumentNullException(nameof(requestParams.Id), "UserRoles Id is required for update.");
+            throw new ArgumentNullException(nameof(requestParams.Id), "ID de rol de usuario requerido para actualización.");
 
         var userRole = await _context.UserRoles.FirstOrDefaultAsync(pr => pr.Id == requestParams.Id);
         if (userRole == null)
-            throw new KeyNotFoundException("UserRole not found.");
+            throw new KeyNotFoundException("Rol de usuario no encontrado.");
 
         var user = await _userService.GetIdByGuidAsync(requestParams.UserGuid);
         userRole.UserId = user.Id ?? 0;
@@ -60,7 +60,7 @@ public class UserRoleService : IUserRoleService
     {
         var userRole = await _context.UserRoles.FirstOrDefaultAsync(pr => pr.Id == id);
         if (userRole == null)
-            throw new KeyNotFoundException("UserRole not found.");
+            throw new KeyNotFoundException("Rol de usuario no encontrado.");
 
         return new UserRoleDto
         {
@@ -73,11 +73,24 @@ public class UserRoleService : IUserRoleService
     public async Task DeleteByUserGuidAsync(Guid userGuid)
     {
         var user = await _userService.GetIdByGuidAsync(userGuid);
-        var userRole = await _context.UserRoles.FirstOrDefaultAsync(pr => pr.Id == user.Id);
-        if (userRole == null)
-            throw new KeyNotFoundException("UserRole not found.");
+        if (user?.Id == null)
+            throw new KeyNotFoundException("Usuario no encontrado.");
 
-        _context.UserRoles.Remove(userRole);
+        var userRoles = await _context.UserRoles
+            .Where(pr => pr.UserId == user.Id && !pr.IsDeleted)
+            .ToListAsync();
+
+        if (!userRoles.Any())
+            return; // No hay roles que eliminar, no es un error
+
+        // Eliminación lógica de todos los roles del usuario
+        foreach (var userRole in userRoles)
+        {
+            userRole.IsDeleted = true;
+            userRole.DeletedAt = DateTime.UtcNow;
+            userRole.UpdatedAt = DateTime.UtcNow;
+        }
+
         await _context.SaveChangesAsync();
     }
 
@@ -85,7 +98,7 @@ public class UserRoleService : IUserRoleService
     {
         var user = await _userService.GetIdByGuidAsync(userGuid);
         return await _context.UserRoles
-            .Where(pr => pr.UserId == user.Id)
+            .Where(pr => pr.UserId == user.Id && !pr.IsDeleted)
             .Select(pr => new UserRoleDto
             {
                 Id = pr.Id,

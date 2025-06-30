@@ -82,6 +82,11 @@ public class UserRoleController : Controller
     {
         try
         {
+            if (requestParams == null || requestParams.Guid == Guid.Empty)
+            {
+                return BadRequest("GUID de usuario inválido.");
+            }
+
             await _userRoleService.DeleteByUserGuidAsync(requestParams.Guid);
             return Ok();
         }
