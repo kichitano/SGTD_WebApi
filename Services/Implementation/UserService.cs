@@ -100,6 +100,7 @@ public class UserService : IUserService
         var users = await _context.Users
             .Select(q => new UserDto
             {
+                Id = q.Id,
                 UserGuid = q.UserGuid,
                 PersonId = q.PersonId,
                 Email = q.Email,
