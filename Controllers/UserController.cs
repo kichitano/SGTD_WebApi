@@ -68,7 +68,23 @@ public class UserController : Controller
     {
         try
         {
-            if (requestParams == null || requestParams.Id <= 0)
+            // Verificar si el modelo es válido
+            if (!ModelState.IsValid)
+            {
+                var errors = ModelState
+                    .Where(x => x.Value.Errors.Count > 0)
+                    .Select(x => new { Field = x.Key, Errors = x.Value.Errors.Select(e => e.ErrorMessage) })
+                    .ToList();
+                
+                return BadRequest(new { message = "Errores de validación", errors = errors });
+            }
+
+            if (requestParams == null)
+            {
+                return BadRequest("Parámetros de solicitud requeridos.");
+            }
+
+            if (requestParams.Id <= 0)
             {
                 return BadRequest("ID de usuario inválido.");
             }
