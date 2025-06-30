@@ -56,11 +56,11 @@ public class UserService : IUserService
     public async Task UpdateAsync(UserRequestParams requestParams)
     {
         if (requestParams.UserGuid == null)
-            throw new ArgumentNullException(nameof(requestParams.UserGuid), "User Id is required for update.");
+            throw new ArgumentNullException(nameof(requestParams.UserGuid), "ID de usuario requerido para actualización.");
 
         var user = await _context.Users.FirstOrDefaultAsync(u => u.UserGuid == requestParams.UserGuid);
         if (user == null)
-            throw new KeyNotFoundException("User not found.");
+            throw new KeyNotFoundException("Usuario no encontrado.");
 
         // Verificar si ya existe otro usuario con el mismo email (excluyendo el actual)
         var existingUserByEmail = await _context.Users
@@ -130,7 +130,7 @@ public class UserService : IUserService
             }).FirstOrDefaultAsync(u => u.Id == id);
 
         if (user == null)
-            throw new KeyNotFoundException("User not found.");
+            throw new KeyNotFoundException("Usuario no encontrado.");
 
         return user;
     }
@@ -234,7 +234,7 @@ public class UserService : IUserService
             .FirstOrDefaultAsync();
 
         if (user == null)
-            throw new KeyNotFoundException("User not found.");
+            throw new KeyNotFoundException("Usuario no encontrado.");
 
         return user;
     }
@@ -257,7 +257,7 @@ public class UserService : IUserService
             .FirstOrDefaultAsync();
 
         if (user == null)
-            throw new KeyNotFoundException("User not found.");
+            throw new KeyNotFoundException("Usuario no encontrado.");
 
         return user;
     }

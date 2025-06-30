@@ -82,6 +82,11 @@ public class PositionController : Controller
     {
         try
         {
+            if (requestParams == null || requestParams.Id <= 0)
+            {
+                return BadRequest("ID de posición inválido.");
+            }
+
             await _positionService.DeleteByIdAsync(requestParams.Id);
             return Ok();
         }

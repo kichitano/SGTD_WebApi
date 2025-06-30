@@ -68,6 +68,11 @@ public class UserController : Controller
     {
         try
         {
+            if (requestParams == null || requestParams.Id <= 0)
+            {
+                return BadRequest("ID de usuario inválido.");
+            }
+
             await _userService.DeleteByIdAsync(requestParams.Id);
             return Ok();
         }
