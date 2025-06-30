@@ -6,6 +6,7 @@ public interface IDocumentaryProcessService
 {
     Task<List<DocumentaryProcessInstanceDto>> GetMyProcessesAsync(int userId);
     Task<List<DocumentaryProcessInstanceDto>> GetPendingProcessesForUserAsync(int userId);
+    Task<List<DocumentaryProcessInstanceDto>> GetAvailableProcessesForUserAreaAsync(int userId);
     Task<DocumentaryProcessInstanceDto?> GetProcessByIdAsync(int processId, int userId);
     Task<DocumentaryProcessInstanceDto> CreateProcessAsync(CreateDocumentaryProcessInstanceDto createDto, int userId);
     Task<DocumentaryProcessInstanceDto> TakeProcessStepAsync(int processStepInstanceId, int userId);

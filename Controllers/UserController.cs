@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using SGTD_WebApi.Models.User;
+using SGTD_WebApi.Models;
 using SGTD_WebApi.Services;
 using System;
 
@@ -61,12 +62,13 @@ public class UserController : Controller
         }
     }
 
-    [HttpDelete("{id}")]
-    public async Task<ActionResult> DeleteByIdAsync(int id)
+    [Route("delete")]
+    [HttpPost]
+    public async Task<ActionResult> DeleteByIdAsync([FromBody] DeleteRequestParams requestParams)
     {
         try
         {
-            await _userService.DeleteByIdAsync(id);
+            await _userService.DeleteByIdAsync(requestParams.Id);
             return Ok();
         }
         catch (Exception ex)

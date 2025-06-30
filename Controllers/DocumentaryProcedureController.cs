@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using SGTD_WebApi.Models.DocumentaryProcedure;
+using SGTD_WebApi.Models;
 using SGTD_WebApi.Services;
 
 namespace SGTD_WebApi.Controllers;
@@ -75,13 +76,13 @@ public class DocumentaryProcedureController : Controller
         }
     }
 
-    [Route("{id}")]
-    [HttpDelete]
-    public async Task<ActionResult> DeleteAsync(int id)
+    [Route("delete")]
+    [HttpPost]
+    public async Task<ActionResult> DeleteAsync([FromBody] DeleteRequestParams requestParams)
     {
         try
         {
-            await _documentaryProcedureService.DeleteAsync(id);
+            await _documentaryProcedureService.DeleteAsync(requestParams.Id);
             return Ok();
         }
         catch (Exception ex)

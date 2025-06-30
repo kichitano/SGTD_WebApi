@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using SGTD_WebApi.Models.Component;
+using SGTD_WebApi.Models;
 using SGTD_WebApi.Services;
 
 namespace SGTD_WebApi.Controllers;
@@ -75,12 +76,13 @@ public class ComponentController : Controller
         }
     }
 
-    [HttpDelete("{id}")]
-    public async Task<ActionResult> DeleteByIdAsync(int id)
+    [Route("delete")]
+    [HttpPost]
+    public async Task<ActionResult> DeleteByIdAsync([FromBody] DeleteRequestParams requestParams)
     {
         try
         {
-            await _componentService.DeleteByIdAsync(id);
+            await _componentService.DeleteByIdAsync(requestParams.Id);
             return Ok();
         }
         catch (Exception ex)

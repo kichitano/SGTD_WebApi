@@ -91,6 +91,56 @@ public class DocumentaryProcessService : IDocumentaryProcessService
         return processes.Select(p => MapToDto(p, userId)).ToList();
     }
 
+    public async Task<List<DocumentaryProcessInstanceDto>> GetAvailableProcessesForUserAreaAsync(int userId)
+    {
+        var user = await _context.Users
+            .Include(u => u.Position)
+                .ThenInclude(p => p.Area)
+            .FirstOrDefaultAsync(u => u.Id == userId);
+
+        if (user?.Position?.AreaId == null)
+            return new List<DocumentaryProcessInstanceDto>();
+
+        // Get processes that have unassigned steps in the user's area
+        var availableSteps = await _context.DocumentaryProcessStepInstances
+            .Include(si => si.DocumentaryProcessInstance)
+                .ThenInclude(pi => pi.DocumentaryProcedure)
+            .Include(si => si.DocumentaryProcessInstance)
+                .ThenInclude(pi => pi.RequestedByUser)
+                    .ThenInclude(u => u.Person)
+            .Include(si => si.DocumentaryProcedureStep)
+                .ThenInclude(ps => ps.Area)
+            .Include(si => si.DocumentaryProcedureStep)
+                .ThenInclude(ps => ps.Position)
+            .Where(si => si.DocumentaryProcedureStep.AreaId == user.Position.AreaId && 
+                        si.Status == DocumentaryStepStatus.Pending &&
+                        si.AssignedToUserId == null &&
+                        si.DocumentaryProcessInstance.Status == DocumentaryProcessStatus.InProgress)
+            .ToListAsync();
+
+        var processIds = availableSteps.Select(si => si.DocumentaryProcessInstanceId).Distinct();
+
+        var processes = await _context.DocumentaryProcessInstances
+            .Include(p => p.DocumentaryProcedure)
+            .Include(p => p.RequestedByUser)
+                .ThenInclude(u => u.Person)
+            .Include(p => p.StepInstances)
+                .ThenInclude(si => si.DocumentaryProcedureStep)
+                    .ThenInclude(ps => ps.Area)
+            .Include(p => p.StepInstances)
+                .ThenInclude(si => si.DocumentaryProcedureStep)
+                    .ThenInclude(ps => ps.Position)
+            .Include(p => p.StepInstances)
+                .ThenInclude(si => si.AssignedToUser)
+                    .ThenInclude(u => u.Person)
+            .Include(p => p.Documents)
+                .ThenInclude(d => d.DocumentType)
+            .Where(p => processIds.Contains(p.Id))
+            .ToListAsync();
+
+        return processes.Select(p => MapToDto(p)).ToList();
+    }
+
     public async Task<DocumentaryProcessInstanceDto?> GetProcessByIdAsync(int processId, int userId)
     {
         var process = await _context.DocumentaryProcessInstances

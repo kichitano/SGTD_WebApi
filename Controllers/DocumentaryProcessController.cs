@@ -54,6 +54,21 @@ public class DocumentaryProcessController : ControllerBase
         }
     }
 
+    [HttpGet("available-processes")]
+    public async Task<ActionResult<List<DocumentaryProcessInstanceDto>>> GetAvailableProcesses()
+    {
+        try
+        {
+            var userId = GetCurrentUserId();
+            var processes = await _documentaryProcessService.GetAvailableProcessesForUserAreaAsync(userId);
+            return Ok(processes);
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(ex.Message);
+        }
+    }
+
     [HttpGet("{processId}")]
     public async Task<ActionResult<DocumentaryProcessInstanceDto>> GetProcessById(int processId)
     {

@@ -1,6 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Mvc;
 using SGTD_WebApi.Models.Person;
+using SGTD_WebApi.Models;
 using SGTD_WebApi.Services;
 
 namespace SGTD_WebApi.Controllers;
@@ -84,12 +85,13 @@ public class PersonController : Controller
         }
     }
 
-    [HttpDelete("{id}")]
-    public async Task<ActionResult> DeleteByIdAsync(int id)
+    [Route("delete")]
+    [HttpPost]
+    public async Task<ActionResult> DeleteByIdAsync([FromBody] DeleteRequestParams requestParams)
     {
         try
         {
-            await _personService.DeleteByIdAsync(id);
+            await _personService.DeleteByIdAsync(requestParams.Id);
             return Ok();
         }
         catch (Exception ex)

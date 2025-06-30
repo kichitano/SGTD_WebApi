@@ -173,12 +173,13 @@ public class UserFileController : ControllerBase
         }
     }
 
-    [HttpDelete("unshare/{fileId}/{userId}/{userGuid}")]
-    public async Task<ActionResult> UnshareFileAsync(int fileId, int userId, Guid userGuid)
+    [Route("unshare")]
+    [HttpPost]
+    public async Task<ActionResult> UnshareFileAsync([FromBody] UnshareFileRequestParams requestParams)
     {
         try
         {
-            var result = await _fileService.UnshareFileAsync(fileId, userId, userGuid);
+            var result = await _fileService.UnshareFileAsync(requestParams.FileId, requestParams.UserId, requestParams.UserGuid);
             return Ok(new { message = result });
         }
         catch (ValidationException ex)

@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using SGTD_WebApi.Models.PositionRole;
+using SGTD_WebApi.Models;
 using SGTD_WebApi.Services;
 
 namespace SGTD_WebApi.Controllers;
@@ -75,12 +76,13 @@ public class UserRoleController : Controller
         }
     }
 
-    [HttpDelete("{userGuid}")]
-    public async Task<ActionResult> DeleteByUserGuidAsync(Guid userGuid)
+    [Route("delete")]
+    [HttpPost]
+    public async Task<ActionResult> DeleteByUserGuidAsync([FromBody] DeleteByGuidRequestParams requestParams)
     {
         try
         {
-            await _userRoleService.DeleteByUserGuidAsync(userGuid);
+            await _userRoleService.DeleteByUserGuidAsync(requestParams.Guid);
             return Ok();
         }
         catch (Exception ex)

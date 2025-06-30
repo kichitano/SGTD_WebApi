@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using SGTD_WebApi.Models.Role;
+using SGTD_WebApi.Models;
 using SGTD_WebApi.Services;
 
 namespace SGTD_WebApi.Controllers
@@ -75,12 +76,13 @@ namespace SGTD_WebApi.Controllers
             }
         }
 
-        [HttpDelete("{id}")]
-        public async Task<ActionResult> DeleteByIdAsync(int id)
+        [Route("delete")]
+        [HttpPost]
+        public async Task<ActionResult> DeleteByIdAsync([FromBody] DeleteRequestParams requestParams)
         {
             try
             {
-                await _roleService.DeleteByIdAsync(id);
+                await _roleService.DeleteByIdAsync(requestParams.Id);
                 return Ok();
             }
             catch (Exception ex)
