@@ -13,10 +13,12 @@ public class UserFileService : IUserFileService
     private readonly DatabaseContext _context;
     private readonly EncryptHelper _encryptHelper;
     private readonly string _basePath;
+    private readonly IUserService _userService;
 
-    public UserFileService(DatabaseContext context, IConfiguration configuration)
+    public UserFileService(DatabaseContext context, IConfiguration configuration, IUserService userService)
     {
         _context = context;
+        _userService = userService;
         _encryptHelper = new EncryptHelper(configuration);
         _basePath = configuration["FilesPath:BasePath"] ?? string.Empty;
     }
@@ -285,35 +287,30 @@ public class UserFileService : IUserFileService
         }
 
         var sharedUsers = await _context.UserFileShares
-            .Include(s => s.SharedWithUser)
-            .ThenInclude(u => u.Person)
-            .Include(s => s.SharedByUser)
-            .ThenInclude(u => u.Person)
-            .Where(s => s.UserFileId == fileId)
+            .Where(s => s.UserFileId == fileId && !s.IsDeleted)
             .Select(s => new FileShareUserDto
             {
-                UserId = s.SharedWithUserId,
-                Name = s.SharedWithUser.Person != null 
-                    ? $"{s.SharedWithUser.Person.FirstName ?? ""} {s.SharedWithUser.Person.LastName ?? ""}".Trim()
-                    : s.SharedWithUser.Email ?? "Usuario sin nombre",
+                PersonId = s.SharedWithUserId,
+                Name = _context.People
+                    .Where(p => p.Id == s.SharedWithUserId)
+                    .Select(p => (p.FirstName ?? "") + " " + (p.LastName ?? ""))
+                    .FirstOrDefault()!
+                    .Trim(),
                 SharedAt = s.SharedAt,
-                SharedByName = s.SharedByUser.Person != null 
-                    ? $"{s.SharedByUser.Person.FirstName ?? ""} {s.SharedByUser.Person.LastName ?? ""}".Trim()
-                    : s.SharedByUser.Email ?? "Usuario sin nombre"
+                SharedByName = $"{s.SharedByUser.Person.FirstName ?? ""} {s.SharedByUser.Person.LastName ?? ""}".Trim()
             })
             .ToListAsync();
 
         return new FileShareInfoDto
         {
             FileId = fileId,
-            OwnerName = userFile.User.Person != null 
-                ? $"{userFile.User.Person.FirstName ?? ""} {userFile.User.Person.LastName ?? ""}".Trim()
-                : userFile.User.Email ?? "Usuario sin nombre",
+            OwnerName = $"{userFile.User.Person.FirstName ?? ""} {userFile.User.Person.LastName ?? ""}".Trim(),
             SharedUsers = sharedUsers
         };
+
     }
 
-    public async Task<string> ShareFileAsync(int fileId, List<int> userIds, Guid sharedByUserGuid)
+    public async Task<string> ShareFileAsync(int fileId, List<int> personIds, Guid sharedByUserGuid)
     {
         var userFile = await _context.UserFiles
             .Include(f => f.User)
@@ -340,10 +337,10 @@ public class UserFileService : IUserFileService
 
         // Verificar que los usuarios a compartir existen
         var usersToShare = await _context.Users
-            .Where(u => userIds.Contains(u.Id))
+            .Where(u => personIds.Contains(u.PersonId))
             .ToListAsync();
 
-        if (usersToShare.Count != userIds.Count)
+        if (usersToShare.Count != personIds.Count)
         {
             throw new ValidationException("Algunos usuarios seleccionados no existen");
         }
@@ -356,12 +353,12 @@ public class UserFileService : IUserFileService
 
         // Obtener compartidos existentes
         var existingShares = await _context.UserFileShares
-            .Where(s => s.UserFileId == fileId && userIds.Contains(s.SharedWithUserId))
+            .Where(s => s.UserFileId == fileId && personIds.Contains(s.SharedWithUserId))
             .Select(s => s.SharedWithUserId)
             .ToListAsync();
 
         // Crear nuevos compartidos solo para usuarios que no tienen acceso
-        var newShares = userIds.Except(existingShares).ToList();
+        var newShares = personIds.Except(existingShares).ToList();
 
         foreach (var userId in newShares)
         {
@@ -401,7 +398,7 @@ public class UserFileService : IUserFileService
         {
             throw new UnauthorizedAccessException("Solo el propietario puede dejar de compartir este archivo");
         }
-
+        
         var shareRecord = await _context.UserFileShares
             .FirstOrDefaultAsync(s => s.UserFileId == fileId && s.SharedWithUserId == userId);
 
@@ -431,7 +428,7 @@ public class UserFileService : IUserFileService
             .ThenInclude(u => u.Person)
             .Include(s => s.SharedByUser)
             .ThenInclude(u => u.Person)
-            .Where(s => s.SharedWithUserId == user.Id)
+            .Where(s => s.SharedWithUserId == user.PersonId)
             .Select(s => new UserFileShareDto
             {
                 Id = s.UserFile.Id,

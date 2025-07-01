@@ -10,16 +10,13 @@ public class PositionService : IPositionService
 {
     private readonly DatabaseContext _context;
     private readonly IPositionDependencyService _positionDependencyService;
-    private readonly IUserRoleService _userRoleService;
 
     public PositionService(
         DatabaseContext context,
-        IPositionDependencyService positionDependencyService,
-        IUserRoleService userRoleService)
+        IPositionDependencyService positionDependencyService)
     {
         _context = context;
         _positionDependencyService = positionDependencyService;
-        _userRoleService = userRoleService;
     }
 
     public async Task CreateAsync(PositionRequestParams requestParams)

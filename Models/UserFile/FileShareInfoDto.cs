@@ -9,7 +9,7 @@ public class FileShareInfoDto
 
 public class FileShareUserDto
 {
-    public int UserId { get; set; }
+    public int PersonId { get; set; }
     public string Name { get; set; } = string.Empty;
     public DateTime SharedAt { get; set; }
     public string SharedByName { get; set; } = string.Empty;

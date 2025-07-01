@@ -8,7 +8,7 @@ public interface IUserService
     Task UpdateAsync(UserRequestParams requestParams);
     Task<List<UserDto>> GetAllAsync();
     Task<UserDto> GetByIdAsync(int id);
-    Task DeleteByIdAsync(int id);
+    Task DeleteByGuidAsync(UserDeletedRequestParams requestParams);
     Task<Guid> CreateReturnGuidAsync(UserRequestParams requestParams);
     Task<UserDto> GetByGuidAsync(Guid guid);
     Task<UserDto> GetIdByGuidAsync(Guid guid);

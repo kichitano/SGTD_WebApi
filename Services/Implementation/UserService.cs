@@ -110,6 +110,7 @@ public class UserService : IUserService
                 PositionId = q.Position!.Id,
                 PositionName = q.Position.Name
             })
+            .Where(q => q.Status)
             .ToListAsync();
 
         return users;
@@ -136,9 +137,15 @@ public class UserService : IUserService
         return user;
     }
 
-    public async Task DeleteByIdAsync(int id)
+    public async Task DeleteByGuidAsync(UserDeletedRequestParams requestParams)
     {
-        var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == id);
+        if (requestParams.UserGuid == null)
+            throw new KeyNotFoundException("Usuario no encontrado.");
+
+        var user = await _context.Users
+            .Where(u => u.UserGuid.Equals(requestParams.UserGuid))
+            .FirstOrDefaultAsync();
+
         if (user == null)
             throw new KeyNotFoundException("Usuario no encontrado.");
 

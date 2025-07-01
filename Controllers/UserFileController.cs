@@ -152,11 +152,11 @@ public class UserFileController : ControllerBase
     }
 
     [HttpPost("share/{fileId}/{userGuid}")]
-    public async Task<ActionResult> ShareFileAsync(int fileId, [FromBody] List<int> userIds, Guid userGuid)
+    public async Task<ActionResult> ShareFileAsync(int fileId, [FromBody] List<int> personIds, Guid userGuid)
     {
         try
         {
-            var result = await _fileService.ShareFileAsync(fileId, userIds, userGuid);
+            var result = await _fileService.ShareFileAsync(fileId, personIds, userGuid);
             return Ok(new { message = result });
         }
         catch (ValidationException ex)

@@ -262,7 +262,7 @@ public class AreaServiceUnitTest : IDisposable
     }
     #endregion
 
-    #region DeleteByIdAsync Tests
+    #region DeleteByGuidAsync Tests
     [Fact]
     public async Task DeleteByIdAsync_WithValidId_ShouldDeleteArea()
     {

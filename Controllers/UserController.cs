@@ -1,8 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using SGTD_WebApi.Models.User;
-using SGTD_WebApi.Models;
 using SGTD_WebApi.Services;
-using System;
 
 namespace SGTD_WebApi.Controllers;
 
@@ -64,32 +62,11 @@ public class UserController : Controller
 
     [Route("delete")]
     [HttpPost]
-    public async Task<ActionResult> DeleteByIdAsync([FromBody] DeleteRequestParams requestParams)
+    public async Task<ActionResult> DeleteByGuidAsync(UserDeletedRequestParams requestParams)
     {
         try
         {
-            // Verificar si el modelo es válido
-            if (!ModelState.IsValid)
-            {
-                var errors = ModelState
-                    .Where(x => x.Value.Errors.Count > 0)
-                    .Select(x => new { Field = x.Key, Errors = x.Value.Errors.Select(e => e.ErrorMessage) })
-                    .ToList();
-                
-                return BadRequest(new { message = "Errores de validación", errors = errors });
-            }
-
-            if (requestParams == null)
-            {
-                return BadRequest("Parámetros de solicitud requeridos.");
-            }
-
-            if (requestParams.Id <= 0)
-            {
-                return BadRequest("ID de usuario inválido.");
-            }
-
-            await _userService.DeleteByIdAsync(requestParams.Id);
+            await _userService.DeleteByGuidAsync(requestParams);
             return Ok();
         }
         catch (Exception ex)
