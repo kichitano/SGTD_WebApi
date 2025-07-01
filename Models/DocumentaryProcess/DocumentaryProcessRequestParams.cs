@@ -5,6 +5,8 @@ namespace SGTD_WebApi.Models.DocumentaryProcess;
 public class DocumentaryProcessRequestParams
 {
     public int? Id { get; set; }
+    
+    public Guid? UserGuid { get; set; }
 
     [Required]
     public int DocumentaryProcessId { get; set; }

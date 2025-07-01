@@ -14,16 +14,28 @@ namespace SGTD_WebApi.Controllers;
 public class DocumentaryProcessController : Controller
 {
     private readonly IDocumentaryProcessService _documentaryProcessService;
+    private readonly IUserService _userService;
 
-    public DocumentaryProcessController(IDocumentaryProcessService documentaryProcessService)
+    public DocumentaryProcessController(IDocumentaryProcessService documentaryProcessService, IUserService userService)
     {
         _documentaryProcessService = documentaryProcessService;
+        _userService = userService;
     }
 
     private int GetCurrentUserId()
     {
         var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         return int.TryParse(userIdClaim, out int userId) ? userId : 0;
+    }
+
+    private async Task<int> GetUserIdFromGuidAsync(Guid? userGuid)
+    {
+        if (userGuid.HasValue)
+        {
+            var user = await _userService.GetByGuidAsync(userGuid.Value);
+            return user?.Id ?? 0;
+        }
+        return GetCurrentUserId();
     }
 
     // Standard CRUD Methods following Area/Position pattern
@@ -33,7 +45,7 @@ public class DocumentaryProcessController : Controller
     {
         try
         {
-            var userId = GetCurrentUserId();
+            var userId = await GetUserIdFromGuidAsync(requestParams.UserGuid);
             await _documentaryProcessService.CreateAsync(requestParams, userId);
             return Ok();
         }
@@ -57,7 +69,7 @@ public class DocumentaryProcessController : Controller
     {
         try
         {
-            var userId = GetCurrentUserId();
+            var userId = await GetUserIdFromGuidAsync(requestParams.UserGuid);
             await _documentaryProcessService.UpdateAsync(requestParams, userId);
             return Ok();
         }
@@ -77,11 +89,11 @@ public class DocumentaryProcessController : Controller
 
     [Route("")]
     [HttpGet]
-    public async Task<ActionResult> GetAllAsync()
+    public async Task<ActionResult> GetAllAsync([FromQuery] Guid? userGuid = null)
     {
         try
         {
-            var userId = GetCurrentUserId();
+            var userId = await GetUserIdFromGuidAsync(userGuid);
             var response = await _documentaryProcessService.GetAllAsync(userId);
             return Ok(response);
         }
@@ -97,7 +109,7 @@ public class DocumentaryProcessController : Controller
     {
         try
         {
-            var userId = GetCurrentUserId();
+            var userId = GetCurrentUserId(); // Delete usa el usuario actual del token
             await _documentaryProcessService.DeleteByIdAsync(requestParams.Id, userId);
             return Ok();
         }
@@ -110,11 +122,11 @@ public class DocumentaryProcessController : Controller
     // Domain-specific methods
 
     [HttpGet("my-processes")]
-    public async Task<ActionResult<List<DocumentaryProcessInstanceDto>>> GetMyProcesses()
+    public async Task<ActionResult<List<DocumentaryProcessInstanceDto>>> GetMyProcesses([FromQuery] Guid? userGuid = null)
     {
         try
         {
-            var userId = GetCurrentUserId();
+            var userId = await GetUserIdFromGuidAsync(userGuid);
             var processes = await _documentaryProcessService.GetMyProcessesAsync(userId);
             return Ok(processes);
         }
@@ -125,11 +137,11 @@ public class DocumentaryProcessController : Controller
     }
 
     [HttpGet("pending-processes")]
-    public async Task<ActionResult<List<DocumentaryProcessInstanceDto>>> GetPendingProcesses()
+    public async Task<ActionResult<List<DocumentaryProcessInstanceDto>>> GetPendingProcesses([FromQuery] Guid? userGuid = null)
     {
         try
         {
-            var userId = GetCurrentUserId();
+            var userId = await GetUserIdFromGuidAsync(userGuid);
             var processes = await _documentaryProcessService.GetPendingProcessesForUserAsync(userId);
             return Ok(processes);
         }
@@ -140,11 +152,11 @@ public class DocumentaryProcessController : Controller
     }
 
     [HttpGet("available-processes")]
-    public async Task<ActionResult<List<DocumentaryProcessInstanceDto>>> GetAvailableProcesses()
+    public async Task<ActionResult<List<DocumentaryProcessInstanceDto>>> GetAvailableProcesses([FromQuery] Guid? userGuid = null)
     {
         try
         {
-            var userId = GetCurrentUserId();
+            var userId = await GetUserIdFromGuidAsync(userGuid);
             var processes = await _documentaryProcessService.GetAvailableProcessesForUserAreaAsync(userId);
             return Ok(processes);
         }
@@ -156,11 +168,11 @@ public class DocumentaryProcessController : Controller
 
     [Route("{id}")]
     [HttpGet]
-    public async Task<ActionResult<DocumentaryProcessInstanceDto>> GetByIdAsync(int id)
+    public async Task<ActionResult<DocumentaryProcessInstanceDto>> GetByIdAsync(int id, [FromQuery] Guid? userGuid = null)
     {
         try
         {
-            var userId = GetCurrentUserId();
+            var userId = await GetUserIdFromGuidAsync(userGuid);
             var process = await _documentaryProcessService.GetProcessByIdAsync(id, userId);
             
             if (process == null)
