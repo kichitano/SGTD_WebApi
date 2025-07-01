@@ -2,6 +2,9 @@
 
 namespace SGTD_WebApi.Models.Position;
 
+/// <summary>
+/// Parámetros de solicitud para operaciones de puestos de trabajo.
+/// </summary>
 public class PositionRequestParams
 {
     public int? Id { get; set; }

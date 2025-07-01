@@ -2,6 +2,9 @@
 
 namespace SGTD_WebApi.Models.ComponentPermission;
 
+/// <summary>
+/// Parámetros de solicitud para operaciones de permisos de componentes
+/// </summary>
 public class ComponentPermissionRequestParams
 {
     public int? Id { get; set; }

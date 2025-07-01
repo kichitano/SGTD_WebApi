@@ -5,17 +5,29 @@ using SGTD_WebApi.Services;
 
 namespace SGTD_WebApi.Controllers;
 
+/// <summary>
+/// Controlador para gestionar los puestos de trabajo del sistema
+/// </summary>
 [Route("[controller]")]
 [ApiController]
 public class PositionController : Controller
 {
     private readonly IPositionService _positionService;
 
+    /// <summary>
+    /// Inicializa una nueva instancia del controlador de puestos
+    /// </summary>
+    /// <param name="positionService">Servicio para gestionar puestos</param>
     public PositionController(IPositionService positionService)
     {
         _positionService = positionService;
     }
 
+    /// <summary>
+    /// Crea un nuevo puesto de trabajo
+    /// </summary>
+    /// <param name="requestParams">Parámetros para crear el puesto</param>
+    /// <returns>Resultado de la operación</returns>
     [Route("")]
     [HttpPost]
     public async Task<ActionResult> CreateAsync(PositionRequestParams requestParams)
@@ -31,6 +43,11 @@ public class PositionController : Controller
         }
     }
 
+    /// <summary>
+    /// Actualiza un puesto de trabajo existente
+    /// </summary>
+    /// <param name="requestParams">Parámetros para actualizar el puesto</param>
+    /// <returns>Resultado de la operación</returns>
     [Route("")]
     [HttpPut]
     public async Task<ActionResult> UpdateAsync(PositionRequestParams requestParams)
@@ -46,6 +63,10 @@ public class PositionController : Controller
         }
     }
 
+    /// <summary>
+    /// Obtiene todos los puestos de trabajo disponibles
+    /// </summary>
+    /// <returns>Lista de puestos</returns>
     [Route("")]
     [HttpGet]
     public async Task<ActionResult> GetAllAsync()
@@ -61,6 +82,11 @@ public class PositionController : Controller
         }
     }
 
+    /// <summary>
+    /// Obtiene un puesto de trabajo por su identificador
+    /// </summary>
+    /// <param name="id">Identificador del puesto</param>
+    /// <returns>Puesto solicitado</returns>
     [Route("{id}")]
     [HttpGet]
     public async Task<ActionResult> GetByIdAsync(int id)
@@ -76,6 +102,11 @@ public class PositionController : Controller
         }
     }
 
+    /// <summary>
+    /// Elimina un puesto de trabajo por su identificador
+    /// </summary>
+    /// <param name="requestParams">Parámetros con el identificador del puesto a eliminar</param>
+    /// <returns>Resultado de la operación</returns>
     [Route("delete")]
     [HttpPost]
     public async Task<ActionResult> DeleteByIdAsync([FromBody] DeleteRequestParams requestParams)
@@ -96,6 +127,11 @@ public class PositionController : Controller
         }
     }
 
+    /// <summary>
+    /// Crea un nuevo puesto de trabajo y retorna su identificador
+    /// </summary>
+    /// <param name="requestParams">Parámetros para crear el puesto</param>
+    /// <returns>Identificador del puesto creado</returns>
     [Route("return")]
     [HttpPost]
     public async Task<ActionResult> CreateReturnIdAsync(PositionRequestParams requestParams)
@@ -111,6 +147,11 @@ public class PositionController : Controller
         }
     }
 
+    /// <summary>
+    /// Obtiene todos los puestos de trabajo de un área específica
+    /// </summary>
+    /// <param name="areaId">Identificador del área</param>
+    /// <returns>Lista de puestos del área</returns>
     [Route("area/{areaId}")]
     [HttpGet]
     public async Task<ActionResult> GetAllByAreaIdAsync(int areaId)
@@ -126,6 +167,12 @@ public class PositionController : Controller
         }
     }
 
+    /// <summary>
+    /// Obtiene los jefes directos disponibles para un área, excluyendo opcionalmente un puesto
+    /// </summary>
+    /// <param name="currentAreaId">Identificador del área actual</param>
+    /// <param name="excludePositionId">Identificador del puesto a excluir (opcional)</param>
+    /// <returns>Lista de jefes directos disponibles</returns>
     [Route("available-managers/{currentAreaId}")]
     [HttpGet]
     public async Task<ActionResult> GetAvailableDirectManagersAsync(int currentAreaId, [FromQuery] int? excludePositionId = null)
@@ -141,6 +188,12 @@ public class PositionController : Controller
         }
     }
 
+    /// <summary>
+    /// Verifica si un área tiene la máxima autoridad disponible
+    /// </summary>
+    /// <param name="areaId">Identificador del área</param>
+    /// <param name="excludePositionId">Identificador del puesto a excluir (opcional)</param>
+    /// <returns>Indicador de si el área tiene máxima autoridad</returns>
     [Route("area/{areaId}/has-max-authority")]
     [HttpGet]
     public async Task<ActionResult> AreaHasMaxAuthorityAsync(int areaId, [FromQuery] int? excludePositionId = null)
@@ -156,6 +209,12 @@ public class PositionController : Controller
         }
     }
 
+    /// <summary>
+    /// Obtiene el puesto con máxima autoridad en un área específica
+    /// </summary>
+    /// <param name="areaId">Identificador del área</param>
+    /// <param name="excludePositionId">Identificador del puesto a excluir (opcional)</param>
+    /// <returns>Puesto con máxima autoridad en el área</returns>
     [Route("area/{areaId}/max-authority")]
     [HttpGet]
     public async Task<ActionResult> GetMaxAuthorityByAreaAsync(int areaId, [FromQuery] int? excludePositionId = null)

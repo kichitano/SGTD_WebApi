@@ -1,5 +1,8 @@
 namespace SGTD_WebApi.Models.DocumentaryProcedure;
 
+/// <summary>
+/// DTO que representa un procedimiento documental del sistema
+/// </summary>
 public class DocumentaryProcedureDto
 {
     public int Id { get; set; }
@@ -13,6 +16,9 @@ public class DocumentaryProcedureDto
     public List<DocumentaryProcedureStepDto> Steps { get; set; } = new List<DocumentaryProcedureStepDto>();
 }
 
+/// <summary>
+/// DTO que representa un paso de un procedimiento documental
+/// </summary>
 public class DocumentaryProcedureStepDto
 {
     public int Id { get; set; }
@@ -27,6 +33,9 @@ public class DocumentaryProcedureStepDto
     public List<DocumentaryProcedureStepDocumentDto> Documents { get; set; } = new List<DocumentaryProcedureStepDocumentDto>();
 }
 
+/// <summary>
+/// DTO que representa un documento requerido en un paso del procedimiento
+/// </summary>
 public class DocumentaryProcedureStepDocumentDto
 {
     public int Id { get; set; }

@@ -5,6 +5,9 @@ using SGTD_WebApi.Services;
 
 namespace SGTD_WebApi.Controllers;
 
+/// <summary>
+/// Controlador para la gestión de componentes del sistema.
+/// </summary>
 [Route("[controller]")]
 [ApiController]
 public class ComponentController : Controller
@@ -16,6 +19,11 @@ public class ComponentController : Controller
         _componentService = componentService;
     }
 
+    /// <summary>
+    /// Crea un nuevo componente en el sistema.
+    /// </summary>
+    /// <param name="requestParams">Parámetros del nuevo componente a crear.</param>
+    /// <returns>Resultado de la operación de creación.</returns>
     [Route("")]
     [HttpPost]
     public async Task<ActionResult> CreateAsync(ComponentRequestParams requestParams)
@@ -31,6 +39,11 @@ public class ComponentController : Controller
         }
     }
 
+    /// <summary>
+    /// Actualiza un componente existente en el sistema.
+    /// </summary>
+    /// <param name="requestParams">Parámetros del componente a actualizar.</param>
+    /// <returns>Resultado de la operación de actualización.</returns>
     [Route("")]
     [HttpPut]
     public async Task<ActionResult> UpdateAsync(ComponentRequestParams requestParams)
@@ -46,6 +59,10 @@ public class ComponentController : Controller
         }
     }
 
+    /// <summary>
+    /// Obtiene todos los componentes registrados en el sistema.
+    /// </summary>
+    /// <returns>Lista de todos los componentes disponibles.</returns>
     [Route("")]
     [HttpGet]
     public async Task<ActionResult> GetAllAsync()
@@ -61,6 +78,11 @@ public class ComponentController : Controller
         }
     }
 
+    /// <summary>
+    /// Obtiene un componente específico por su identificador.
+    /// </summary>
+    /// <param name="id">Identificador único del componente.</param>
+    /// <returns>Datos del componente solicitado.</returns>
     [Route("{id}")]
     [HttpGet]
     public async Task<ActionResult> GetByIdAsync(int id)
@@ -76,6 +98,11 @@ public class ComponentController : Controller
         }
     }
 
+    /// <summary>
+    /// Elimina un componente específico del sistema.
+    /// </summary>
+    /// <param name="requestParams">Parámetros de eliminación que contienen el ID del componente.</param>
+    /// <returns>Resultado de la operación de eliminación.</returns>
     [Route("delete")]
     [HttpPost]
     public async Task<ActionResult> DeleteByIdAsync([FromBody] DeleteRequestParams requestParams)

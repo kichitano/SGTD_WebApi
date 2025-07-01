@@ -1,6 +1,9 @@
 ﻿namespace SGTD_WebApi.Models.User;
 using DbModels.Entities;
 
+/// <summary>
+/// DTO que representa un usuario del sistema.
+/// </summary>
 public class UserDto
 {
     public int? Id { get; set; }

@@ -6,17 +6,32 @@ using SGTD_WebApi.Models.UserToken;
 
 namespace SGTD_WebApi.Services.Implementation;
 
+/// <summary>
+/// Servicio para gestionar tokens de autenticación de usuarios.
+/// Proporciona funcionalidades para generar, validar, renovar y revocar tokens JWT y refresh tokens.
+/// </summary>
 public class UserTokenService : IUserTokenService
 {
     private readonly DatabaseContext _context;
     private readonly JwtHelper _jwtHelper;
 
+    /// <summary>
+    /// Inicializa una nueva instancia del servicio de tokens de usuarios.
+    /// </summary>
+    /// <param name="context">Contexto de base de datos para acceder a las entidades.</param>
+    /// <param name="configuration">Configuración de la aplicación para configuraciones JWT.</param>
     public UserTokenService(DatabaseContext context, IConfiguration configuration)
     {
         _context = context;
         _jwtHelper = new JwtHelper(configuration);
     }
 
+    /// <summary>
+    /// Genera un nuevo token JWT para un usuario de forma asíncrona.
+    /// Invalida todos los tokens previos del usuario excepto el recién generado.
+    /// </summary>
+    /// <param name="userGuid">El identificador único del usuario.</param>
+    /// <returns>El token JWT generado, o cadena vacía si el usuario no existe.</returns>
     public async Task<string> GenerateTokenAsync(Guid userGuid)
     {
         var user = await _context.Users
@@ -49,6 +64,11 @@ public class UserTokenService : IUserTokenService
         return token;
     }
 
+    /// <summary>
+    /// Obtiene el identificador de usuario a partir de un refresh token de forma asíncrona.
+    /// </summary>
+    /// <param name="refreshToken">El refresh token a validar.</param>
+    /// <returns>El GUID del usuario si el refresh token es válido, null en caso contrario.</returns>
     public async Task<Guid?> GetUserGuidFromRefreshTokenAsync(string refreshToken)
     {
         var userToken = await _context.UserTokens
@@ -56,6 +76,11 @@ public class UserTokenService : IUserTokenService
         return userToken?.UserGuid;
     }
 
+    /// <summary>
+    /// Obtiene y renueva el refresh token asociado a un token JWT de forma asíncrona.
+    /// </summary>
+    /// <param name="token">El token JWT para el cual se solicita el refresh token.</param>
+    /// <returns>Un nuevo refresh token si el token es válido, cadena vacía en caso contrario.</returns>
     public async Task<string> GetUserRefreshTokenFromGeneratedTokenAsync(string token)
     {
         var userToken = await _context.UserTokens
@@ -72,6 +97,12 @@ public class UserTokenService : IUserTokenService
         return newRefreshToken;
     }
 
+    /// <summary>
+    /// Invalida todos los tokens de un usuario de forma asíncrona.
+    /// Opcionalmente excluye un token específico de la invalidación.
+    /// </summary>
+    /// <param name="userTokenModel">Modelo que contiene el GUID del usuario y opcionalmente un token a excluir.</param>
+    /// <returns>Una tarea que representa la operación asíncrona.</returns>
     public async Task InvalidateAllTokensAsync(UserTokenModel userTokenModel)
     {
         var userTokens = await _context.UserTokens
@@ -93,6 +124,11 @@ public class UserTokenService : IUserTokenService
         }
     }
 
+    /// <summary>
+    /// Valida un token JWT verificando su existencia, estado activo y fecha de expiración de forma asíncrona.
+    /// </summary>
+    /// <param name="token">El token JWT a validar.</param>
+    /// <returns>True si el token es válido y activo, false en caso contrario.</returns>
     public async Task<bool> ValidateTokenAsync(string token)
     {
         var response = false;
@@ -117,6 +153,11 @@ public class UserTokenService : IUserTokenService
         return response;
     }
 
+    /// <summary>
+    /// Revoca un refresh token específico marcándolo como inactivo de forma asíncrona.
+    /// </summary>
+    /// <param name="refreshToken">El refresh token a revocar.</param>
+    /// <returns>Una tarea que representa la operación asíncrona.</returns>
     public async Task RevokeRefreshTokenAsync(string refreshToken)
     {
         var userToken = await _context.UserTokens

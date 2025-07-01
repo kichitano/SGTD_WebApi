@@ -6,6 +6,9 @@ using System.ComponentModel.DataAnnotations;
 
 namespace SGTD_WebApi.Controllers;
 
+/// <summary>
+/// Controlador para la gestión de autenticación y autorización de usuarios.
+/// </summary>
 [Route("[controller]")]
 [ApiController]
 public class AuthController : ControllerBase
@@ -19,6 +22,11 @@ public class AuthController : ControllerBase
         _userTokenService = userTokenService;
     }
 
+    /// <summary>
+    /// Autentica un usuario en el sistema mediante credenciales.
+    /// </summary>
+    /// <param name="requestParams">Parámetros de autenticación del usuario.</param>
+    /// <returns>Token de acceso y datos de sesión si la autenticación es exitosa.</returns>
     [AllowAnonymous]
     [HttpPost("login")]
     public async Task<ActionResult> LoginAsync(AuthRequestParams requestParams)
@@ -39,6 +47,11 @@ public class AuthController : ControllerBase
         }
     }
 
+    /// <summary>
+    /// Cierra la sesión de un usuario autenticado.
+    /// </summary>
+    /// <param name="requestParams">Parámetros para el cierre de sesión.</param>
+    /// <returns>Confirmación del cierre de sesión.</returns>
     [HttpPost("logout")]
     public async Task<ActionResult> LogoutAsync(LogoutRequestParams requestParams)
     {
@@ -47,6 +60,10 @@ public class AuthController : ControllerBase
         return Ok();
     }
 
+    /// <summary>
+    /// Renueva el token de acceso utilizando el refresh token almacenado en cookies.
+    /// </summary>
+    /// <returns>Nuevo token de acceso si la renovación es exitosa.</returns>
     [AllowAnonymous]
     [HttpPost("refresh-token")]
     public async Task<ActionResult> RefreshTokenAsync()

@@ -5,17 +5,34 @@ using SGTD_WebApi.Models.DocumentaryProcess;
 
 namespace SGTD_WebApi.Services.Implementation;
 
+/// <summary>
+/// Servicio para gestionar instancias de procesos documentarios.
+/// Proporciona funcionalidades completas para el ciclo de vida de procesos documentarios,
+/// incluyendo creación, seguimiento, gestión de pasos, documentos y notificaciones.
+/// </summary>
 public class DocumentaryProcessService : IDocumentaryProcessService
 {
     private readonly DatabaseContext _context;
     private readonly IConfiguration _configuration;
 
+    /// <summary>
+    /// Inicializa una nueva instancia del servicio de procesos documentarios.
+    /// </summary>
+    /// <param name="context">Contexto de base de datos para acceder a las entidades.</param>
+    /// <param name="configuration">Configuración de la aplicación para acceder a rutas de archivos.</param>
     public DocumentaryProcessService(DatabaseContext context, IConfiguration configuration)
     {
         _context = context;
         _configuration = configuration;
     }
 
+    /// <summary>
+    /// Crea una nueva instancia de proceso documentario de forma asíncrona.
+    /// </summary>
+    /// <param name="requestParams">Parámetros que contienen la información del proceso a crear.</param>
+    /// <param name="userId">El identificador del usuario que crea el proceso.</param>
+    /// <returns>Una tarea que representa la operación asíncrona.</returns>
+    /// <exception cref="ArgumentException">Se lanza cuando ya existe un proceso con el mismo nombre.</exception>
     public async Task CreateAsync(DocumentaryProcessRequestParams requestParams, int userId)
     {
         var existingProcess = await _context.DocumentaryProcessInstances
@@ -39,6 +56,15 @@ public class DocumentaryProcessService : IDocumentaryProcessService
         await _context.SaveChangesAsync();
     }
 
+    /// <summary>
+    /// Actualiza una instancia de proceso documentario existente de forma asíncrona.
+    /// </summary>
+    /// <param name="requestParams">Parámetros que contienen la información actualizada del proceso.</param>
+    /// <param name="userId">El identificador del usuario que actualiza el proceso.</param>
+    /// <returns>Una tarea que representa la operación asíncrona.</returns>
+    /// <exception cref="ArgumentNullException">Se lanza cuando el ID del proceso es nulo.</exception>
+    /// <exception cref="ArgumentException">Se lanza cuando el proceso no se encuentra.</exception>
+    /// <exception cref="UnauthorizedAccessException">Se lanza cuando el usuario no tiene permisos para editar el proceso.</exception>
     public async Task UpdateAsync(DocumentaryProcessRequestParams requestParams, int userId)
     {
         if (!requestParams.Id.HasValue)
@@ -60,6 +86,11 @@ public class DocumentaryProcessService : IDocumentaryProcessService
         await _context.SaveChangesAsync();
     }
 
+    /// <summary>
+    /// Obtiene todas las instancias de procesos documentarios visibles para el usuario de forma asíncrona.
+    /// </summary>
+    /// <param name="userId">El identificador del usuario que consulta los procesos.</param>
+    /// <returns>Una lista de objetos DTO que representan las instancias de procesos documentarios.</returns>
     public async Task<List<DocumentaryProcessInstanceDto>> GetAllAsync(int userId)
     {
         var processes = await _context.DocumentaryProcessInstances
@@ -89,6 +120,15 @@ public class DocumentaryProcessService : IDocumentaryProcessService
         return filteredProcesses.Select(p => MapToDto(p, userId)).ToList();
     }
 
+    /// <summary>
+    /// Elimina una instancia de proceso documentario por su identificador de forma asíncrona.
+    /// </summary>
+    /// <param name="id">El identificador único del proceso a eliminar.</param>
+    /// <param name="userId">El identificador del usuario que elimina el proceso.</param>
+    /// <returns>Una tarea que representa la operación asíncrona.</returns>
+    /// <exception cref="ArgumentException">Se lanza cuando el proceso no se encuentra.</exception>
+    /// <exception cref="UnauthorizedAccessException">Se lanza cuando el usuario no tiene permisos para eliminar el proceso.</exception>
+    /// <exception cref="InvalidOperationException">Se lanza cuando se intenta eliminar un proceso en progreso.</exception>
     public async Task DeleteByIdAsync(int id, int userId)
     {
         var entity = await _context.DocumentaryProcessInstances
@@ -107,6 +147,11 @@ public class DocumentaryProcessService : IDocumentaryProcessService
         await _context.SaveChangesAsync();
     }
 
+    /// <summary>
+    /// Obtiene los procesos documentarios creados por el usuario de forma asíncrona.
+    /// </summary>
+    /// <param name="userId">El identificador del usuario que consulta sus procesos.</param>
+    /// <returns>Una lista de objetos DTO que representan los procesos del usuario.</returns>
     public async Task<List<DocumentaryProcessInstanceDto>> GetMyProcessesAsync(int userId)
     {
         var processes = await _context.DocumentaryProcessInstances
@@ -131,6 +176,11 @@ public class DocumentaryProcessService : IDocumentaryProcessService
         return processes.Select(p => MapToDto(p)).ToList();
     }
 
+    /// <summary>
+    /// Obtiene los procesos documentarios pendientes asignados al usuario de forma asíncrona.
+    /// </summary>
+    /// <param name="userId">El identificador del usuario que consulta los procesos pendientes.</param>
+    /// <returns>Una lista de objetos DTO que representan los procesos pendientes asignados al usuario.</returns>
     public async Task<List<DocumentaryProcessInstanceDto>> GetPendingProcessesForUserAsync(int userId)
     {
         var user = await _context.Users
@@ -182,6 +232,11 @@ public class DocumentaryProcessService : IDocumentaryProcessService
         return processes.Select(p => MapToDto(p, userId)).ToList();
     }
 
+    /// <summary>
+    /// Obtiene los procesos documentarios disponibles para tomar en el área del usuario de forma asíncrona.
+    /// </summary>
+    /// <param name="userId">El identificador del usuario que consulta los procesos disponibles.</param>
+    /// <returns>Una lista de objetos DTO que representan los procesos disponibles en el área del usuario.</returns>
     public async Task<List<DocumentaryProcessInstanceDto>> GetAvailableProcessesForUserAreaAsync(int userId)
     {
         var user = await _context.Users
@@ -231,6 +286,12 @@ public class DocumentaryProcessService : IDocumentaryProcessService
         return processes.Select(p => MapToDto(p)).ToList();
     }
 
+    /// <summary>
+    /// Obtiene una instancia específica de proceso documentario por su identificador de forma asíncrona.
+    /// </summary>
+    /// <param name="processId">El identificador único del proceso.</param>
+    /// <param name="userId">El identificador del usuario que consulta el proceso.</param>
+    /// <returns>Un objeto DTO que representa el proceso, o null si no se encuentra o no tiene acceso.</returns>
     public async Task<DocumentaryProcessInstanceDto?> GetProcessByIdAsync(int processId, int userId)
     {
         var process = await _context.DocumentaryProcessInstances

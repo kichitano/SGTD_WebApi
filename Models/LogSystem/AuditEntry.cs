@@ -3,6 +3,9 @@ using SGTD_WebApi.DbModels.Enums;
 
 namespace SGTD_WebApi.Models.LogSystem;
 
+/// <summary>
+/// Entrada de auditoría que registra cambios en entidades del sistema.
+/// </summary>
 public class AuditEntry
 {
     public AuditEntry(EntityEntry entry)

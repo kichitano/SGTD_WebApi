@@ -2,6 +2,9 @@
 
 namespace SGTD_WebApi.Models.Permission;
 
+/// <summary>
+/// Parámetros de solicitud para operaciones de permisos.
+/// </summary>
 public class PermissionRequestParams
 {
     public int? Id { get; set; }

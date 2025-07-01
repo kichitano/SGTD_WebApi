@@ -5,15 +5,28 @@ using SGTD_WebApi.Models.PositionDependency;
 
 namespace SGTD_WebApi.Services.Implementation;
 
+/// <summary>
+/// Servicio para gestionar las dependencias entre cargos o posiciones.
+/// Permite crear, actualizar, consultar y eliminar relaciones jerárquicas entre posiciones.
+/// </summary>
 public class PositionDependencyService : IPositionDependencyService
 {
     private readonly DatabaseContext _context;
 
+    /// <summary>
+    /// Inicializa una nueva instancia del servicio de dependencias de posiciones.
+    /// </summary>
+    /// <param name="context">Contexto de base de datos para acceder a las entidades.</param>
     public PositionDependencyService(DatabaseContext context)
     {
         _context = context;
     }
 
+    /// <summary>
+    /// Crea una nueva dependencia entre posiciones de forma asíncrona.
+    /// </summary>
+    /// <param name="requestParams">Parámetros que contienen los identificadores de la posición padre e hija.</param>
+    /// <returns>Una tarea que representa la operación asíncrona.</returns>
     public async Task CreateAsync(PositionDependencyRequestParams requestParams)
     {
         var areaDependency = new PositionDependency
@@ -25,6 +38,13 @@ public class PositionDependencyService : IPositionDependencyService
         await _context.SaveChangesAsync();
     }
 
+    /// <summary>
+    /// Actualiza una dependencia existente entre posiciones de forma asíncrona.
+    /// </summary>
+    /// <param name="requestParams">Parámetros que contienen el ID de la dependencia y los nuevos identificadores de posiciones.</param>
+    /// <returns>Una tarea que representa la operación asíncrona.</returns>
+    /// <exception cref="ArgumentNullException">Se lanza cuando el ID de la dependencia es nulo.</exception>
+    /// <exception cref="KeyNotFoundException">Se lanza cuando la dependencia no se encuentra.</exception>
     public async Task UpdateAsync(PositionDependencyRequestParams requestParams)
     {
         if (requestParams.Id == null)
@@ -40,6 +60,10 @@ public class PositionDependencyService : IPositionDependencyService
         await _context.SaveChangesAsync();
     }
 
+    /// <summary>
+    /// Obtiene todas las dependencias entre posiciones de forma asíncrona.
+    /// </summary>
+    /// <returns>Una lista de objetos DTO que representan las dependencias entre posiciones.</returns>
     public async Task<List<PositionDependencyDto>> GetAllAsync()
     {
         return await _context.PositionsDependency
@@ -54,6 +78,12 @@ public class PositionDependencyService : IPositionDependencyService
             .ToListAsync();
     }
 
+    /// <summary>
+    /// Obtiene una dependencia específica entre posiciones por su identificador de forma asíncrona.
+    /// </summary>
+    /// <param name="id">El identificador único de la dependencia.</param>
+    /// <returns>Un objeto DTO que representa la dependencia entre posiciones.</returns>
+    /// <exception cref="KeyNotFoundException">Se lanza cuando la dependencia no se encuentra.</exception>
     public async Task<PositionDependencyDto> GetByIdAsync(int id)
     {
         var areaDependency = await _context.PositionsDependency
@@ -72,6 +102,12 @@ public class PositionDependencyService : IPositionDependencyService
         };
     }
 
+    /// <summary>
+    /// Elimina una dependencia entre posiciones por su identificador de forma asíncrona.
+    /// </summary>
+    /// <param name="id">El identificador único de la dependencia a eliminar.</param>
+    /// <returns>Una tarea que representa la operación asíncrona.</returns>
+    /// <exception cref="KeyNotFoundException">Se lanza cuando la dependencia no se encuentra.</exception>
     public async Task DeleteByIdAsync(int id)
     {
         var areaDependency = await _context.PositionsDependency.FirstOrDefaultAsync(ad => ad.Id == id);

@@ -6,6 +6,9 @@ using SGTD_WebApi.Services;
 
 namespace SGTD_WebApi.Controllers;
 
+/// <summary>
+/// Controlador para la gestión de áreas organizacionales del sistema.
+/// </summary>
 [Route("[controller]")]
 [ApiController]
 public class AreaController : Controller
@@ -17,6 +20,11 @@ public class AreaController : Controller
         _areaService = areaService;
     }
 
+    /// <summary>
+    /// Crea una nueva área en el sistema.
+    /// </summary>
+    /// <param name="requestParams">Parámetros de la nueva área a crear.</param>
+    /// <returns>Resultado de la operación de creación.</returns>
     [Route("")]
     [HttpPost]
     public async Task<ActionResult> CreateAsync(AreaRequestParams requestParams)
@@ -32,6 +40,11 @@ public class AreaController : Controller
         }
     }
 
+    /// <summary>
+    /// Actualiza una área existente en el sistema.
+    /// </summary>
+    /// <param name="requestParams">Parámetros de la área a actualizar.</param>
+    /// <returns>Resultado de la operación de actualización.</returns>
     [Route("")]
     [HttpPut]
     public async Task<ActionResult> UpdateAsync(AreaRequestParams requestParams)
@@ -55,6 +68,10 @@ public class AreaController : Controller
         }
     }
 
+    /// <summary>
+    /// Obtiene todas las áreas registradas en el sistema.
+    /// </summary>
+    /// <returns>Lista de todas las áreas disponibles.</returns>
     [Route("")]
     [HttpGet]
     public async Task<ActionResult> GetAllAsync()
@@ -70,6 +87,11 @@ public class AreaController : Controller
         }
     }
 
+    /// <summary>
+    /// Obtiene una área específica por su identificador.
+    /// </summary>
+    /// <param name="id">Identificador único del área.</param>
+    /// <returns>Datos de la área solicitada.</returns>
     [Route("{id}")]
     [HttpGet]
     public async Task<ActionResult> GetByIdAsync(int id)
@@ -85,6 +107,15 @@ public class AreaController : Controller
         }
     }
 
+    /// <summary>
+    /// Elimina una área específica del sistema.
+    /// </summary>
+    /// <remarks>
+    /// Cambios:
+    /// <para>2025-07-01 - Christian Cespedes Medina - Ruta de controlador creada.</para>
+    /// </remarks>
+    /// <param name="requestParams">Parámetros de eliminación que contienen el ID del área.</param>
+    /// <returns>Resultado de la operación de eliminación.</returns>
     [Route("delete")]
     [HttpPost]
     public async Task<ActionResult> DeleteByIdAsync([FromBody] DeleteRequestParams requestParams)

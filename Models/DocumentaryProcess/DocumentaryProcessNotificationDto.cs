@@ -2,6 +2,9 @@ using SGTD_WebApi.DbModels.Entities;
 
 namespace SGTD_WebApi.Models.DocumentaryProcess;
 
+/// <summary>
+/// DTO que representa una notificación del proceso documental
+/// </summary>
 public class DocumentaryProcessNotificationDto
 {
     public int Id { get; set; }
@@ -18,6 +21,9 @@ public class DocumentaryProcessNotificationDto
     public DateTime? ReadAt { get; set; }
 }
 
+/// <summary>
+/// DTO para marcar una notificación como leída
+/// </summary>
 public class MarkNotificationAsReadDto
 {
     public int NotificationId { get; set; }

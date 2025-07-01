@@ -2,6 +2,9 @@ using System.ComponentModel.DataAnnotations;
 
 namespace SGTD_WebApi.Models.DocumentaryProcess;
 
+/// <summary>
+/// Parámetros de solicitud para operaciones de procesos documentales
+/// </summary>
 public class DocumentaryProcessRequestParams
 {
     public int? Id { get; set; }

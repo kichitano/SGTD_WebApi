@@ -2,6 +2,9 @@
 
 namespace SGTD_WebApi.Models.UserPosition;
 
+/// <summary>
+/// Parámetros de solicitud para operaciones de asignación usuario-posición.
+/// </summary>
 public class UserPositionRequestParams
 {
     [Required]

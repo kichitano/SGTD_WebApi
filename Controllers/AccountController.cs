@@ -4,6 +4,9 @@ using SGTD_WebApi.Models.Authenticator;
 
 namespace SGTD_WebApi.Controllers;
 
+/// <summary>
+/// Controlador para la gestión de cuentas de usuario, incluyendo firmas digitales y autenticación.
+/// </summary>
 [Route("[controller]")]
 [ApiController]
 public class AccountController : ControllerBase
@@ -22,6 +25,12 @@ public class AccountController : ControllerBase
         _userService = userService;
     }
 
+    /// <summary>
+    /// Sube la firma digital de un usuario al sistema.
+    /// </summary>
+    /// <param name="userDigitalSignature">Archivo de imagen de la firma digital.</param>
+    /// <param name="userGuid">Identificador único del usuario.</param>
+    /// <returns>Resultado de la operación de carga.</returns>
     [Route("upload-user-digital-signature/{userGuid}")]
     [HttpPost]
     public async Task<ActionResult> UploadUserDigitialSignatureAsync([FromForm] IFormFile userDigitalSignature, Guid userGuid)
@@ -37,6 +46,11 @@ public class AccountController : ControllerBase
         }
     }
 
+    /// <summary>
+    /// Verifica si un usuario tiene una firma digital registrada en el sistema.
+    /// </summary>
+    /// <param name="userGuid">Identificador único del usuario.</param>
+    /// <returns>Estado de verificación de la firma digital.</returns>
     [Route("verify-user-digital-signature/{userGuid}")]
     [HttpGet]
     public async Task<ActionResult> VerifyUserDigitalSignatureAsync(Guid userGuid)
@@ -52,6 +66,14 @@ public class AccountController : ControllerBase
         }
     }
 
+    /// <summary>
+    /// Sube la firma digital de un usuario validando previamente un código OTP.
+    /// </summary>
+    /// <param name="userDigitalSignature">Archivo de imagen de la firma digital.</param>
+    /// <param name="email">Correo electrónico del usuario para validación.</param>
+    /// <param name="otpCode">Código OTP para autenticación.</param>
+    /// <param name="userGuid">Identificador único del usuario.</param>
+    /// <returns>Resultado de la operación de carga con validación OTP.</returns>
     [Route("upload-user-digital-signature-with-otp/{userGuid}")]
     [HttpPost]
     public async Task<ActionResult> UploadUserDigitalSignatureWithOtpAsync(

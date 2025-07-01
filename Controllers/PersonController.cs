@@ -6,17 +6,29 @@ using SGTD_WebApi.Services;
 
 namespace SGTD_WebApi.Controllers;
 
+/// <summary>
+/// Controlador para gestionar las personas del sistema
+/// </summary>
 [Route("[controller]")]
 [ApiController]
 public class PersonController : Controller
 {
     private readonly IPersonService _personService;
 
+    /// <summary>
+    /// Inicializa una nueva instancia del controlador de personas
+    /// </summary>
+    /// <param name="personService">Servicio para gestionar personas</param>
     public PersonController(IPersonService personService)
     {
         _personService = personService;
     }
 
+    /// <summary>
+    /// Crea una nueva persona
+    /// </summary>
+    /// <param name="requestParams">Parámetros para crear la persona</param>
+    /// <returns>Resultado de la operación</returns>
     [Route("")]
     [HttpPost]
     public async Task<ActionResult> CreateAsync(PersonRequestParams requestParams)
@@ -36,6 +48,11 @@ public class PersonController : Controller
         }
     }
 
+    /// <summary>
+    /// Actualiza una persona existente
+    /// </summary>
+    /// <param name="requestParams">Parámetros para actualizar la persona</param>
+    /// <returns>Resultado de la operación</returns>
     [Route("")]
     [HttpPut]
     public async Task<ActionResult> UpdateAsync(PersonRequestParams requestParams)
@@ -55,6 +72,10 @@ public class PersonController : Controller
         }
     }
 
+    /// <summary>
+    /// Obtiene todas las personas disponibles
+    /// </summary>
+    /// <returns>Lista de personas</returns>
     [Route("")]
     [HttpGet]
     public async Task<ActionResult> GetAllAsync()
@@ -70,6 +91,11 @@ public class PersonController : Controller
         }
     }
 
+    /// <summary>
+    /// Obtiene una persona por su identificador
+    /// </summary>
+    /// <param name="id">Identificador de la persona</param>
+    /// <returns>Persona solicitada</returns>
     [Route("{id}")]
     [HttpGet]
     public async Task<ActionResult> GetByIdAsync(int id)
@@ -85,6 +111,11 @@ public class PersonController : Controller
         }
     }
 
+    /// <summary>
+    /// Elimina una persona por su identificador
+    /// </summary>
+    /// <param name="requestParams">Parámetros con el identificador de la persona a eliminar</param>
+    /// <returns>Resultado de la operación</returns>
     [Route("delete")]
     [HttpPost]
     public async Task<ActionResult> DeleteByIdAsync([FromBody] DeleteRequestParams requestParams)

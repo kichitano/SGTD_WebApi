@@ -5,6 +5,9 @@ using SGTD_WebApi.Services;
 
 namespace SGTD_WebApi.Controllers;
 
+/// <summary>
+/// Controlador para la gestión de autenticación de doble factor mediante códigos OTP.
+/// </summary>
 [Route("[controller]")]
 [ApiController]
 public class AuthenticatorController : Controller
@@ -23,6 +26,11 @@ public class AuthenticatorController : Controller
         _authService = authService;
     }
 
+    /// <summary>
+    /// Envía un correo electrónico con código de autenticación al usuario.
+    /// </summary>
+    /// <param name="requestParams">Parámetros del correo de autenticación.</param>
+    /// <returns>Confirmación del envío del correo.</returns>
     [HttpPost("send-authenticator-email")]
     public async Task<ActionResult> SendAuthenticatorEmail([FromBody] AuthenticatorEmailRequestParams requestParams)
     {
@@ -37,6 +45,11 @@ public class AuthenticatorController : Controller
         }
     }
 
+    /// <summary>
+    /// Activa un token de autenticación mediante un enlace enviado por correo.
+    /// </summary>
+    /// <param name="token">Token de activación a verificar.</param>
+    /// <returns>Resultado de la activación del token.</returns>
     [AllowAnonymous]
     [HttpGet("activate-authenticator-token")]
     public async Task<ActionResult> ActivateAuthenticatorToken(string token)
@@ -52,6 +65,11 @@ public class AuthenticatorController : Controller
         }
     }
 
+    /// <summary>
+    /// Verifica un código OTP y autentica al usuario si el código es válido.
+    /// </summary>
+    /// <param name="requestParams">Parámetros de verificación OTP incluyendo email y código.</param>
+    /// <returns>Token de acceso si la verificación es exitosa.</returns>
     [AllowAnonymous]
     [HttpPost("verify-authenticator-otp")]
     public async Task<ActionResult> VerifyAuthenticatorOtp([FromBody] AuthenticatorOtpRequestParams requestParams)

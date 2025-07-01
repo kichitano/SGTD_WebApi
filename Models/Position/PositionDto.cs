@@ -1,5 +1,8 @@
 ﻿namespace SGTD_WebApi.Models.Position;
 
+/// <summary>
+/// DTO que representa un puesto de trabajo en el sistema.
+/// </summary>
 public class PositionDto
 {
     public int Id { get; set; }

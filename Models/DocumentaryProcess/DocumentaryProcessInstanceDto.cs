@@ -4,6 +4,9 @@ using SGTD_WebApi.Models.User;
 
 namespace SGTD_WebApi.Models.DocumentaryProcess;
 
+/// <summary>
+/// DTO que representa una instancia de proceso documental
+/// </summary>
 public class DocumentaryProcessInstanceDto
 {
     public int Id { get; set; }
@@ -25,6 +28,9 @@ public class DocumentaryProcessInstanceDto
     public List<DocumentaryProcessDocumentDto> AvailableDownloadDocuments { get; set; } = new();
 }
 
+/// <summary>
+/// DTO para crear una nueva instancia de proceso documental
+/// </summary>
 public class CreateDocumentaryProcessInstanceDto
 {
     public int DocumentaryProcedureId { get; set; }
@@ -32,6 +38,9 @@ public class CreateDocumentaryProcessInstanceDto
     public List<UploadDocumentDto> UploadDocuments { get; set; } = new();
 }
 
+/// <summary>
+/// DTO para actualizar el estado de un paso del proceso
+/// </summary>
 public class UpdateProcessStepDto
 {
     public int ProcessStepInstanceId { get; set; }
@@ -40,6 +49,9 @@ public class UpdateProcessStepDto
     public List<UploadDocumentDto> Documents { get; set; } = new();
 }
 
+/// <summary>
+/// DTO para subir documentos al proceso
+/// </summary>
 public class UploadDocumentDto
 {
     public int DocumentTypeId { get; set; }

@@ -5,8 +5,15 @@ using SGTD_WebApi.Services.Implementation;
 
 namespace SGTD_WebApi.Configurations;
 
+/// <summary>
+/// Clase estática que centraliza la configuración e inyección de dependencias de todos los servicios de la aplicación
+/// </summary>
 public static class ServiceConfiguration
 {
+    /// <summary>
+    /// Configura e inyecta todas las dependencias de servicios, clientes y utilidades necesarias para la aplicación
+    /// </summary>
+    /// <param name="services">Colección de servicios donde se registran las dependencias</param>
     public static void Configure(IServiceCollection services)
     {
         services.AddHttpContextAccessor();

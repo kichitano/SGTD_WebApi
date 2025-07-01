@@ -6,17 +6,32 @@ using SGTD_WebApi.Models.Role;
 
 namespace SGTD_WebApi.Services.Implementation;
 
+/// <summary>
+/// Servicio para gestionar las asignaciones de roles a usuarios.
+/// Proporciona funcionalidades para crear, actualizar, consultar y eliminar
+/// las relaciones entre usuarios y roles del sistema.
+/// </summary>
 public class UserRoleService : IUserRoleService
 {
     private readonly DatabaseContext _context;
     private readonly IUserService _userService;
 
+    /// <summary>
+    /// Inicializa una nueva instancia del servicio de roles de usuarios.
+    /// </summary>
+    /// <param name="context">Contexto de base de datos para acceder a las entidades.</param>
+    /// <param name="userService">Servicio de usuarios para operaciones relacionadas.</param>
     public UserRoleService(DatabaseContext context, IUserService userService)
     {
         _context = context;
         _userService = userService;
     }
 
+    /// <summary>
+    /// Crea una nueva asignación de rol a un usuario de forma asíncrona.
+    /// </summary>
+    /// <param name="requestParams">Parámetros que contienen la información de la asignación de rol.</param>
+    /// <returns>Una tarea que representa la operación asíncrona.</returns>
     public async Task CreateAsync(UserRoleRequestParams requestParams)
     {
         var user = await _userService.GetIdByGuidAsync(requestParams.UserGuid);
@@ -29,6 +44,13 @@ public class UserRoleService : IUserRoleService
         await _context.SaveChangesAsync();
     }
 
+    /// <summary>
+    /// Actualiza una asignación existente de rol a usuario de forma asíncrona.
+    /// </summary>
+    /// <param name="requestParams">Parámetros que contienen la información actualizada de la asignación de rol.</param>
+    /// <returns>Una tarea que representa la operación asíncrona.</returns>
+    /// <exception cref="ArgumentNullException">Se lanza cuando el ID de la asignación es nulo.</exception>
+    /// <exception cref="KeyNotFoundException">Se lanza cuando la asignación de rol no se encuentra.</exception>
     public async Task UpdateAsync(UserRoleRequestParams requestParams)
     {
         if (requestParams.Id == null)
@@ -44,6 +66,10 @@ public class UserRoleService : IUserRoleService
         await _context.SaveChangesAsync();
     }
 
+    /// <summary>
+    /// Obtiene todas las asignaciones de roles a usuarios de forma asíncrona.
+    /// </summary>
+    /// <returns>Una lista de objetos DTO que representan todas las asignaciones de roles.</returns>
     public async Task<List<UserRoleDto>> GetAllAsync()
     {
         return await _context.UserRoles
@@ -56,6 +82,12 @@ public class UserRoleService : IUserRoleService
             .ToListAsync();
     }
 
+    /// <summary>
+    /// Obtiene una asignación específica de rol por su identificador de forma asíncrona.
+    /// </summary>
+    /// <param name="id">El identificador único de la asignación de rol.</param>
+    /// <returns>Un objeto DTO que representa la asignación de rol.</returns>
+    /// <exception cref="KeyNotFoundException">Se lanza cuando la asignación de rol no se encuentra.</exception>
     public async Task<UserRoleDto> GetByIdAsync(int id)
     {
         var userRole = await _context.UserRoles.FirstOrDefaultAsync(pr => pr.Id == id);
@@ -70,6 +102,12 @@ public class UserRoleService : IUserRoleService
         };
     }
 
+    /// <summary>
+    /// Elimina todas las asignaciones de roles de un usuario por su identificador de forma asíncrona.
+    /// </summary>
+    /// <param name="userGuid">El identificador único del usuario.</param>
+    /// <returns>Una tarea que representa la operación asíncrona.</returns>
+    /// <exception cref="KeyNotFoundException">Se lanza cuando el usuario no se encuentra.</exception>
     public async Task DeleteByUserGuidAsync(Guid userGuid)
     {
         var user = await _userService.GetIdByGuidAsync(userGuid);
@@ -93,6 +131,11 @@ public class UserRoleService : IUserRoleService
         await _context.SaveChangesAsync();
     }
 
+    /// <summary>
+    /// Obtiene todas las asignaciones de roles de un usuario específico de forma asíncrona.
+    /// </summary>
+    /// <param name="userGuid">El identificador único del usuario.</param>
+    /// <returns>Una lista de objetos DTO que representan las asignaciones de roles del usuario.</returns>
     public async Task<List<UserRoleDto>> GetByUserGuidAsync(Guid userGuid)
     {
         var user = await _userService.GetIdByGuidAsync(userGuid);

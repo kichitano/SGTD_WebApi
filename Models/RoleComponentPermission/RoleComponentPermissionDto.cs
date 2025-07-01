@@ -1,5 +1,8 @@
 ﻿namespace SGTD_WebApi.Models.RoleComponentPermission;
 
+/// <summary>
+/// DTO que representa la asignación de permisos de componentes a roles.
+/// </summary>
 public class RoleComponentPermissionDto
 {
     public int Id { get; set; }

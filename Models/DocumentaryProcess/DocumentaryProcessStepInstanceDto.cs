@@ -2,6 +2,9 @@ using SGTD_WebApi.DbModels.Entities;
 
 namespace SGTD_WebApi.Models.DocumentaryProcess;
 
+/// <summary>
+/// DTO que representa una instancia de paso en el proceso documental
+/// </summary>
 public class DocumentaryProcessStepInstanceDto
 {
     public int Id { get; set; }
@@ -24,6 +27,9 @@ public class DocumentaryProcessStepInstanceDto
     public bool IsCurrentStep { get; set; }
 }
 
+/// <summary>
+/// DTO que representa un documento requerido en un paso del proceso
+/// </summary>
 public class RequiredDocumentDto
 {
     public int DocumentTypeId { get; set; }

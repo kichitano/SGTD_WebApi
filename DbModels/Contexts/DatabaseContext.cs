@@ -8,12 +8,21 @@ using SGTD_WebApi.Models.LogSystem;
 
 namespace SGTD_WebApi.DbModels.Contexts;
 
+/// <summary>
+/// Contexto de base de datos principal del sistema SGTD que maneja todas las entidades y auditoría
+/// </summary>
 public class DatabaseContext : DbContext
 {
     private readonly IConfiguration _configuration;
     private readonly IHttpContextAccessor _httpContextAccessor;
     private readonly ActionTypeEnum? _currentAction;
 
+    /// <summary>
+    /// Inicializa una nueva instancia del contexto de base de datos
+    /// </summary>
+    /// <param name="options">Opciones de configuración para el contexto</param>
+    /// <param name="configuration">Configuración de la aplicación</param>
+    /// <param name="httpContextAccessor">Acceso al contexto HTTP para auditoría</param>
     public DatabaseContext(DbContextOptions<DatabaseContext> options, 
         IConfiguration configuration, 
         IHttpContextAccessor httpContextAccessor)
@@ -49,6 +58,11 @@ public class DatabaseContext : DbContext
     public DbSet<UserDigitalSignature> UserDigitalSignatures { get; set; }
     public DbSet<LogSystem> LogSystems { get; set; }
 
+    /// <summary>
+    /// Guarda los cambios en la base de datos de forma asíncrona con auditoría automática
+    /// </summary>
+    /// <param name="cancellationToken">Token de cancelación para la operación asíncrona</param>
+    /// <returns>El número de entidades afectadas</returns>
     public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
         return await SaveChangesAsyncWithAudit(cancellationToken);

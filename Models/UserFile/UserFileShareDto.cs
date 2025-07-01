@@ -1,5 +1,8 @@
 namespace SGTD_WebApi.Models.UserFile;
 
+/// <summary>
+/// DTO que representa un archivo compartido entre usuarios.
+/// </summary>
 public class UserFileShareDto
 {
     public int Id { get; set; }

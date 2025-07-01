@@ -6,17 +6,33 @@ using SGTD_WebApi.Models.User;
 
 namespace SGTD_WebApi.Services.Implementation;
 
+/// <summary>
+/// Servicio para gestionar usuarios del sistema.
+/// Proporciona funcionalidades completas para crear, actualizar, consultar y eliminar usuarios,
+/// incluyendo encriptación de contraseñas y gestión de tokens y roles asociados.
+/// </summary>
 public class UserService : IUserService
 {
     private readonly DatabaseContext _context;
     private readonly EncryptHelper _encryptHelper;
 
+    /// <summary>
+    /// Inicializa una nueva instancia del servicio de usuarios.
+    /// </summary>
+    /// <param name="context">Contexto de base de datos para acceder a las entidades.</param>
+    /// <param name="configuration">Configuración de la aplicación para configuraciones de encriptación.</param>
     public UserService(DatabaseContext context, IConfiguration configuration)
     {
         _context = context;
         _encryptHelper = new EncryptHelper(configuration);
     }
 
+    /// <summary>
+    /// Crea un nuevo usuario de forma asíncrona.
+    /// </summary>
+    /// <param name="requestParams">Parámetros que contienen la información del usuario a crear.</param>
+    /// <returns>Una tarea que representa la operación asíncrona.</returns>
+    /// <exception cref="InvalidOperationException">Se lanza cuando ya existe un usuario con el mismo email o persona asignada.</exception>
     public async Task CreateAsync(UserRequestParams requestParams)
     {
         var existingUserByEmail = await _context.Users
@@ -51,6 +67,14 @@ public class UserService : IUserService
         await _context.SaveChangesAsync();
     }
 
+    /// <summary>
+    /// Actualiza un usuario existente de forma asíncrona.
+    /// </summary>
+    /// <param name="requestParams">Parámetros que contienen la información actualizada del usuario.</param>
+    /// <returns>Una tarea que representa la operación asíncrona.</returns>
+    /// <exception cref="ArgumentNullException">Se lanza cuando el GUID del usuario es nulo.</exception>
+    /// <exception cref="KeyNotFoundException">Se lanza cuando el usuario no se encuentra.</exception>
+    /// <exception cref="InvalidOperationException">Se lanza cuando ya existe otro usuario con el mismo email o persona asignada.</exception>
     public async Task UpdateAsync(UserRequestParams requestParams)
     {
         if (requestParams.UserGuid == null)
@@ -91,6 +115,10 @@ public class UserService : IUserService
         await _context.SaveChangesAsync();
     }
 
+    /// <summary>
+    /// Obtiene todos los usuarios activos de forma asíncrona.
+    /// </summary>
+    /// <returns>Una lista de objetos DTO que representan todos los usuarios activos.</returns>
     public async Task<List<UserDto>> GetAllAsync()
     {
         var users = await _context.Users

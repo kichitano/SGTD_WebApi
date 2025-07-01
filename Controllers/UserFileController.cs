@@ -5,17 +5,29 @@ using SGTD_WebApi.Models.UserFile;
 
 namespace SGTD_WebApi.Controllers;
 
+/// <summary>
+/// Controlador para gestionar archivos de usuarios del sistema
+/// </summary>
 [Route("[controller]")]
 [ApiController]
 public class UserFileController : ControllerBase
 {
     private readonly IUserFileService _fileService;
 
+    /// <summary>
+    /// Constructor del controlador de archivos de usuario
+    /// </summary>
+    /// <param name="fileService">Servicio para gestionar archivos de usuario</param>
     public UserFileController(IUserFileService fileService)
     {
         _fileService = fileService;
     }
 
+    /// <summary>
+    /// Obtiene todos los archivos asociados a un usuario específico
+    /// </summary>
+    /// <param name="userGuid">GUID del usuario para buscar archivos</param>
+    /// <returns>Lista de archivos del usuario especificado</returns>
     [Route("{userGuid}")]
     [HttpGet]
     public async Task<ActionResult> GetByUserGuIdAsync(Guid userGuid)
@@ -31,6 +43,12 @@ public class UserFileController : ControllerBase
         }
     }
 
+    /// <summary>
+    /// Sube múltiples archivos para un usuario específico
+    /// </summary>
+    /// <param name="files">Lista de archivos a subir</param>
+    /// <param name="userGuid">GUID del usuario propietario de los archivos</param>
+    /// <returns>Resultado de la operación de subida</returns>
     [HttpPost("upload/{userGuid}")]
     [RequestSizeLimit(50 * 1024 * 1024)]
     [RequestFormLimits(MultipartBodyLengthLimit = 50 * 1024 * 1024)]
@@ -47,6 +65,11 @@ public class UserFileController : ControllerBase
         }
     }
 
+    /// <summary>
+    /// Descarga un archivo específico mediante su ID
+    /// </summary>
+    /// <param name="id">ID del archivo a descargar</param>
+    /// <returns>Archivo como stream para descarga</returns>
     [HttpGet("download/{id}")]
     public async Task<ActionResult> DownloadFileAsync(int id)
     {
@@ -61,6 +84,11 @@ public class UserFileController : ControllerBase
         }
     }
 
+    /// <summary>
+    /// Descarga múltiples archivos comprimidos en un archivo ZIP
+    /// </summary>
+    /// <param name="ids">Lista de IDs de archivos a descargar</param>
+    /// <returns>Archivo ZIP con los archivos solicitados</returns>
     [HttpPost("download")]
     public async Task<ActionResult> DownloadMultipleFilesAsync(List<int> ids)
     {
@@ -75,6 +103,11 @@ public class UserFileController : ControllerBase
         }
     }
 
+    /// <summary>
+    /// Elimina un archivo específico del usuario
+    /// </summary>
+    /// <param name="request">Datos de la solicitud con ID del archivo y GUID del usuario</param>
+    /// <returns>Resultado de la operación de eliminación</returns>
     [HttpPost("delete")]
     public async Task<ActionResult> DeleteFileAsync([FromBody] DeleteFileRequestDto request)
     {
@@ -102,6 +135,11 @@ public class UserFileController : ControllerBase
         }
     }
 
+    /// <summary>
+    /// Elimina múltiples archivos del usuario en una sola operación
+    /// </summary>
+    /// <param name="request">Datos de la solicitud con IDs de archivos y GUID del usuario</param>
+    /// <returns>Resultado de la operación de eliminación múltiple</returns>
     [HttpPost("delete-multiple")]
     public async Task<ActionResult> DeleteMultipleFilesAsync([FromBody] DeleteMultipleFilesRequestDto request)
     {
@@ -129,6 +167,12 @@ public class UserFileController : ControllerBase
         }
     }
 
+    /// <summary>
+    /// Obtiene información de compartición de un archivo específico
+    /// </summary>
+    /// <param name="fileId">ID del archivo</param>
+    /// <param name="userGuid">GUID del usuario propietario</param>
+    /// <returns>Información de compartición del archivo</returns>
     [HttpGet("share-info/{fileId}/{userGuid}")]
     public async Task<ActionResult> GetFileShareInfoAsync(int fileId, Guid userGuid)
     {
@@ -151,6 +195,13 @@ public class UserFileController : ControllerBase
         }
     }
 
+    /// <summary>
+    /// Comparte un archivo con personas específicas
+    /// </summary>
+    /// <param name="fileId">ID del archivo a compartir</param>
+    /// <param name="personIds">Lista de IDs de personas con las que compartir</param>
+    /// <param name="userGuid">GUID del usuario propietario del archivo</param>
+    /// <returns>Resultado de la operación de compartición</returns>
     [HttpPost("share/{fileId}/{userGuid}")]
     public async Task<ActionResult> ShareFileAsync(int fileId, [FromBody] List<int> personIds, Guid userGuid)
     {
@@ -173,6 +224,11 @@ public class UserFileController : ControllerBase
         }
     }
 
+    /// <summary>
+    /// Deja de compartir un archivo con un usuario específico
+    /// </summary>
+    /// <param name="requestParams">Parámetros con información del archivo y usuario</param>
+    /// <returns>Resultado de la operación de descompartir</returns>
     [Route("unshare")]
     [HttpPost]
     public async Task<ActionResult> UnshareFileAsync([FromBody] UnshareFileRequestParams requestParams)
@@ -196,6 +252,11 @@ public class UserFileController : ControllerBase
         }
     }
 
+    /// <summary>
+    /// Obtiene todos los archivos compartidos con un usuario específico
+    /// </summary>
+    /// <param name="userGuid">GUID del usuario para buscar archivos compartidos</param>
+    /// <returns>Lista de archivos compartidos con el usuario</returns>
     [HttpGet("shared/{userGuid}")]
     public async Task<ActionResult> GetSharedFilesAsync(Guid userGuid)
     {

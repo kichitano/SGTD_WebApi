@@ -2,6 +2,9 @@
 
 namespace SGTD_WebApi.Models.PositionRole;
 
+/// <summary>
+/// Parámetros de solicitud para operaciones de asignación de roles a usuarios.
+/// </summary>
 public class UserRoleRequestParams
 {
     public int? Id { get; set; }

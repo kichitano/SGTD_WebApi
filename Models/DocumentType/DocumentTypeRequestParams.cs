@@ -2,6 +2,9 @@
 
 namespace SGTD_WebApi.Models.DocumentType;
 
+/// <summary>
+/// Parámetros de solicitud para operaciones de tipos de documento
+/// </summary>
 public class DocumentTypeRequestParams
 {
     public int? Id { get; set; }

@@ -2,6 +2,9 @@
 
 namespace SGTD_WebApi.Models.RoleComponentPermission;
 
+/// <summary>
+/// Parámetros de solicitud para operaciones de permisos de componentes por rol.
+/// </summary>
 public class RoleComponentPermissionRequestParams
 {
     public int? Id { get; set; }

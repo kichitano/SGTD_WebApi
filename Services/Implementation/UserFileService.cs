@@ -8,6 +8,11 @@ using SGTD_WebApi.Helpers;
 
 namespace SGTD_WebApi.Services.Implementation;
 
+/// <summary>
+/// Servicio para gestionar archivos de usuarios.
+/// Proporciona funcionalidades completas para subir, descargar, eliminar y compartir archivos,
+/// con encriptación de contenido y sistema de permisos de acceso.
+/// </summary>
 public class UserFileService : IUserFileService
 {
     private readonly DatabaseContext _context;
@@ -15,6 +20,12 @@ public class UserFileService : IUserFileService
     private readonly string _basePath;
     private readonly IUserService _userService;
 
+    /// <summary>
+    /// Inicializa una nueva instancia del servicio de archivos de usuarios.
+    /// </summary>
+    /// <param name="context">Contexto de base de datos para acceder a las entidades.</param>
+    /// <param name="configuration">Configuración de la aplicación para acceder a rutas y configuraciones de encriptación.</param>
+    /// <param name="userService">Servicio de usuarios para operaciones relacionadas.</param>
     public UserFileService(DatabaseContext context, IConfiguration configuration, IUserService userService)
     {
         _context = context;
@@ -23,6 +34,12 @@ public class UserFileService : IUserFileService
         _basePath = configuration["FilesPath:BasePath"] ?? string.Empty;
     }
 
+    /// <summary>
+    /// Obtiene todos los archivos de un usuario por su identificador de forma asíncrona.
+    /// </summary>
+    /// <param name="userGuid">El identificador único del usuario.</param>
+    /// <returns>Una lista de objetos DTO que representan los archivos del usuario.</returns>
+    /// <exception cref="ValidationException">Se lanza cuando el usuario no se encuentra.</exception>
     public async Task<List<UserFileDto>> GetByUserGuIdAsync(Guid userGuid)
     {
         var user = await _context.Users.FirstOrDefaultAsync(u => u.UserGuid == userGuid);
@@ -45,6 +62,15 @@ public class UserFileService : IUserFileService
             .ToListAsync();
     }
 
+    /// <summary>
+    /// Sube múltiples archivos para un usuario de forma asíncrona.
+    /// Los archivos se encriptan antes de almacenarse en el sistema de archivos.
+    /// </summary>
+    /// <param name="userFiles">Lista de archivos a subir.</param>
+    /// <param name="userGuid">El identificador único del usuario propietario de los archivos.</param>
+    /// <returns>Una tarea que representa la operación asíncrona.</returns>
+    /// <exception cref="ValidationException">Se lanza cuando el usuario no se encuentra.</exception>
+    /// <exception cref="FileNotFoundException">Se lanza cuando no se puede guardar algún archivo correctamente.</exception>
     public async Task UploadFilesAsync(List<IFormFile> userFiles, Guid userGuid)
     {
         var user = await _context.Users.FirstOrDefaultAsync(u => u.UserGuid == userGuid);
@@ -91,6 +117,13 @@ public class UserFileService : IUserFileService
         await _context.SaveChangesAsync();
     }
 
+    /// <summary>
+    /// Descarga un archivo por su identificador de forma asíncrona.
+    /// El archivo se desencripta antes de retornarlo.
+    /// </summary>
+    /// <param name="id">El identificador único del archivo a descargar.</param>
+    /// <returns>Un objeto DTO que contiene el archivo desencriptado y su nombre.</returns>
+    /// <exception cref="FileNotFoundException">Se lanza cuando el archivo no se encuentra.</exception>
     public async Task<UserFileByteDto> DownloadFileAsync(int id)
     {
         var userFile = await _context.UserFiles
@@ -118,6 +151,11 @@ public class UserFileService : IUserFileService
         };
     }
 
+    /// <summary>
+    /// Descarga múltiples archivos comprimidos en un archivo ZIP de forma asíncrona.
+    /// </summary>
+    /// <param name="ids">Lista de identificadores de archivos a descargar.</param>
+    /// <returns>Un array de bytes que representa el archivo ZIP con todos los archivos solicitados.</returns>
     public async Task<byte[]> DownloadMultipleFilesAsync(List<int> ids)
     {
         using var zipMemoryStream = new MemoryStream();
@@ -134,6 +172,14 @@ public class UserFileService : IUserFileService
         return zipMemoryStream.ToArray();
     }
 
+    /// <summary>
+    /// Elimina un archivo por su identificador de forma asíncrona.
+    /// Verifica que el usuario tenga permisos para eliminar el archivo.
+    /// </summary>
+    /// <param name="id">El identificador único del archivo a eliminar.</param>
+    /// <param name="userGuid">El identificador único del usuario que solicita la eliminación.</param>
+    /// <returns>Un mensaje descriptivo del resultado de la operación.</returns>
+    /// <exception cref="UnauthorizedAccessException">Se lanza cuando el usuario no tiene permisos para eliminar el archivo.</exception>
     public async Task<string> DeleteFileAsync(int id, Guid userGuid)
     {
         var user = await _context.Users.FirstOrDefaultAsync(u => u.UserGuid == userGuid);
@@ -182,6 +228,14 @@ public class UserFileService : IUserFileService
         }
     }
 
+    /// <summary>
+    /// Elimina múltiples archivos de forma asíncrona.
+    /// Verifica que el usuario tenga permisos para eliminar todos los archivos seleccionados.
+    /// </summary>
+    /// <param name="ids">Lista de identificadores de archivos a eliminar.</param>
+    /// <param name="userGuid">El identificador único del usuario que solicita la eliminación.</param>
+    /// <returns>Un mensaje descriptivo del resultado de la operación con estadísticas de eliminación.</returns>
+    /// <exception cref="UnauthorizedAccessException">Se lanza cuando el usuario no tiene permisos para eliminar algunos archivos.</exception>
     public async Task<string> DeleteMultipleFilesAsync(List<int> ids, Guid userGuid)
     {
         var user = await _context.Users.FirstOrDefaultAsync(u => u.UserGuid == userGuid);

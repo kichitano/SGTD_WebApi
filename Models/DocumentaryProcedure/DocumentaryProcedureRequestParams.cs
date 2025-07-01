@@ -2,6 +2,9 @@ using System.ComponentModel.DataAnnotations;
 
 namespace SGTD_WebApi.Models.DocumentaryProcedure;
 
+/// <summary>
+/// Parámetros de solicitud para operaciones de procedimientos documentales
+/// </summary>
 public class DocumentaryProcedureRequestParams
 {
     public int? Id { get; set; }
@@ -21,6 +24,9 @@ public class DocumentaryProcedureRequestParams
     public List<DocumentaryProcedureStepRequestParams> Steps { get; set; } = new List<DocumentaryProcedureStepRequestParams>();
 }
 
+/// <summary>
+/// Parámetros de solicitud para pasos de procedimientos documentales
+/// </summary>
 public class DocumentaryProcedureStepRequestParams
 {
     public int? Id { get; set; }
@@ -38,6 +44,9 @@ public class DocumentaryProcedureStepRequestParams
     public List<DocumentaryProcedureStepDocumentRequestParams> Documents { get; set; } = new List<DocumentaryProcedureStepDocumentRequestParams>();
 }
 
+/// <summary>
+/// Parámetros de solicitud para documentos de pasos de procedimientos
+/// </summary>
 public class DocumentaryProcedureStepDocumentRequestParams
 {
     public int? Id { get; set; }

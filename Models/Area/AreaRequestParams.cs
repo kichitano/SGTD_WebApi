@@ -2,6 +2,9 @@
 
 namespace SGTD_WebApi.Models.Area;
 
+/// <summary>
+/// Parámetros de solicitud para operaciones con áreas organizacionales
+/// </summary>
 public class AreaRequestParams
 {
     public int? Id { get; set; }

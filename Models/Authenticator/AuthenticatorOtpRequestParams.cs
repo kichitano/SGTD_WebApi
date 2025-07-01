@@ -1,5 +1,8 @@
 ﻿namespace SGTD_WebApi.Models.Authenticator;
 
+/// <summary>
+/// Parámetros de solicitud para autenticación con código OTP
+/// </summary>
 public class AuthenticatorOtpRequestParams
 {
     public string Email { get; set; }

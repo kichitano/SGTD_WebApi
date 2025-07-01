@@ -1,5 +1,8 @@
 namespace SGTD_WebApi.Models.DocumentaryProcess;
 
+/// <summary>
+/// DTO que representa un documento asociado a una instancia de proceso documental
+/// </summary>
 public class DocumentaryProcessDocumentDto
 {
     public int Id { get; set; }

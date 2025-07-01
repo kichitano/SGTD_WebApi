@@ -5,14 +5,29 @@ using SGTD_WebApi.Models.DocumentType;
 
 namespace SGTD_WebApi.Services.Implementation;
 
+/// <summary>
+/// Servicio para gestionar tipos de documentos del sistema.
+/// Proporciona funcionalidades para crear, actualizar, consultar y eliminar tipos de documentos,
+/// con validación de nombres únicos y control de dependencias con procedimientos documentarios.
+/// </summary>
 public class DocumentTypeService : IDocumentTypeService
 {
     private readonly DatabaseContext _context;
+    /// <summary>
+    /// Inicializa una nueva instancia del servicio de tipos de documentos.
+    /// </summary>
+    /// <param name="context">Contexto de base de datos para acceder a las entidades.</param>
     public DocumentTypeService(DatabaseContext context)
     {
         _context = context;
     }
 
+    /// <summary>
+    /// Crea un nuevo tipo de documento de forma asíncrona.
+    /// </summary>
+    /// <param name="requestParams">Parámetros que contienen la información del tipo de documento a crear.</param>
+    /// <returns>Una tarea que representa la operación asíncrona.</returns>
+    /// <exception cref="InvalidOperationException">Se lanza cuando ya existe un tipo de documento con el mismo nombre.</exception>
     public async Task CreateAsync(DocumentTypeRequestParams requestParams)
     {
         var trimmedName = requestParams.Name?.Trim() ?? string.Empty;
@@ -33,6 +48,14 @@ public class DocumentTypeService : IDocumentTypeService
         await _context.SaveChangesAsync();
     }
 
+    /// <summary>
+    /// Actualiza un tipo de documento existente de forma asíncrona.
+    /// </summary>
+    /// <param name="requestParams">Parámetros que contienen la información actualizada del tipo de documento.</param>
+    /// <returns>Una tarea que representa la operación asíncrona.</returns>
+    /// <exception cref="ArgumentNullException">Se lanza cuando el ID del tipo de documento es nulo.</exception>
+    /// <exception cref="KeyNotFoundException">Se lanza cuando el tipo de documento no se encuentra.</exception>
+    /// <exception cref="InvalidOperationException">Se lanza cuando ya existe otro tipo de documento con el mismo nombre.</exception>
     public async Task UpdateAsync(DocumentTypeRequestParams requestParams)
     {
         if (requestParams.Id == null)
@@ -56,6 +79,10 @@ public class DocumentTypeService : IDocumentTypeService
         await _context.SaveChangesAsync();
     }
 
+    /// <summary>
+    /// Obtiene todos los tipos de documentos de forma asíncrona.
+    /// </summary>
+    /// <returns>Una lista de objetos DTO que representan todos los tipos de documentos.</returns>
     public async Task<List<DocumentTypeDto>> GetAllAsync()
     {
         return await _context.DocumentTypes
@@ -68,6 +95,12 @@ public class DocumentTypeService : IDocumentTypeService
             .ToListAsync();
     }
 
+    /// <summary>
+    /// Obtiene un tipo de documento específico por su identificador de forma asíncrona.
+    /// </summary>
+    /// <param name="id">El identificador único del tipo de documento.</param>
+    /// <returns>Un objeto DTO que representa el tipo de documento.</returns>
+    /// <exception cref="KeyNotFoundException">Se lanza cuando el tipo de documento no se encuentra.</exception>
     public async Task<DocumentTypeDto> GetByIdAsync(int id)
     {
         var documentType = await _context.DocumentTypes.FirstOrDefaultAsync(q => q.Id == id);
@@ -81,6 +114,14 @@ public class DocumentTypeService : IDocumentTypeService
         };
     }
 
+    /// <summary>
+    /// Elimina un tipo de documento por su identificador de forma asíncrona.
+    /// Verifica que el tipo de documento no esté siendo usado por procedimientos documentarios activos.
+    /// </summary>
+    /// <param name="id">El identificador único del tipo de documento a eliminar.</param>
+    /// <returns>Una tarea que representa la operación asíncrona.</returns>
+    /// <exception cref="KeyNotFoundException">Se lanza cuando el tipo de documento no se encuentra.</exception>
+    /// <exception cref="InvalidOperationException">Se lanza cuando el tipo de documento está siendo usado por procedimientos activos.</exception>
     public async Task DeleteByIdAsync(int id)
     {
         var documentType = await _context.DocumentTypes.FirstOrDefaultAsync(q => q.Id == id);

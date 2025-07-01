@@ -2,6 +2,9 @@
 
 namespace SGTD_WebApi.Models.Person;
 
+/// <summary>
+/// DTO que representa los datos de una persona en el sistema.
+/// </summary>
 public class PersonDto
 {
     public int? Id { get; set; }

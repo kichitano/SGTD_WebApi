@@ -2,6 +2,9 @@
 
 namespace SGTD_WebApi.Models.Role;
 
+/// <summary>
+/// Parámetros de solicitud para operaciones de roles.
+/// </summary>
 public class RoleRequestParams
 {
     public int? Id { get; set; }

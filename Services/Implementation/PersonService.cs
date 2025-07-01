@@ -6,15 +6,30 @@ using SGTD_WebApi.Models.Person;
 
 namespace SGTD_WebApi.Services.Implementation;
 
+/// <summary>
+/// Servicio para gestionar personas del sistema.
+/// Proporciona funcionalidades para crear, actualizar, consultar y eliminar personas,
+/// con validación de duplicados por nombre, teléfono y número de documento.
+/// </summary>
 public class PersonService : IPersonService
 {
     private readonly DatabaseContext _context;
 
+    /// <summary>
+    /// Inicializa una nueva instancia del servicio de personas.
+    /// </summary>
+    /// <param name="context">Contexto de base de datos para acceder a las entidades.</param>
     public PersonService(DatabaseContext context)
     {
         _context = context;
     }
 
+    /// <summary>
+    /// Crea una nueva persona de forma asíncrona.
+    /// </summary>
+    /// <param name="requestParams">Parámetros que contienen la información de la persona a crear.</param>
+    /// <returns>Una tarea que representa la operación asíncrona.</returns>
+    /// <exception cref="ValidationException">Se lanza cuando ya existe una persona con el mismo nombre, teléfono o DNI.</exception>
     public async Task CreateAsync(PersonRequestParams requestParams)
     {
         var personExists = await _context.People
@@ -42,6 +57,14 @@ public class PersonService : IPersonService
         await _context.SaveChangesAsync();
     }
 
+    /// <summary>
+    /// Actualiza una persona existente de forma asíncrona.
+    /// </summary>
+    /// <param name="requestParams">Parámetros que contienen la información actualizada de la persona.</param>
+    /// <returns>Una tarea que representa la operación asíncrona.</returns>
+    /// <exception cref="ArgumentException">Se lanza cuando el ID de la persona es requerido para la actualización.</exception>
+    /// <exception cref="KeyNotFoundException">Se lanza cuando la persona no se encuentra.</exception>
+    /// <exception cref="ValidationException">Se lanza cuando ya existe otra persona con el mismo nombre, teléfono o DNI.</exception>
     public async Task UpdateAsync(PersonRequestParams requestParams)
     {
         if (requestParams.Id == 0)
@@ -74,6 +97,10 @@ public class PersonService : IPersonService
         await _context.SaveChangesAsync();
     }
 
+    /// <summary>
+    /// Obtiene todas las personas de forma asíncrona.
+    /// </summary>
+    /// <returns>Una lista de objetos DTO que representan todas las personas.</returns>
     public async Task<List<PersonDto>> GetAllAsync()
     {
         return await _context.People
@@ -90,6 +117,12 @@ public class PersonService : IPersonService
             .ToListAsync();
     }
 
+    /// <summary>
+    /// Obtiene una persona específica por su identificador de forma asíncrona.
+    /// </summary>
+    /// <param name="id">El identificador único de la persona.</param>
+    /// <returns>Un objeto DTO que representa la persona.</returns>
+    /// <exception cref="KeyNotFoundException">Se lanza cuando la persona no se encuentra.</exception>
     public async Task<PersonDto> GetByIdAsync(int id)
     {
         var person = await _context.People.FirstOrDefaultAsync(p => p.Id == id);
@@ -108,6 +141,12 @@ public class PersonService : IPersonService
         };
     }
 
+    /// <summary>
+    /// Elimina una persona por su identificador de forma asíncrona.
+    /// </summary>
+    /// <param name="id">El identificador único de la persona a eliminar.</param>
+    /// <returns>Una tarea que representa la operación asíncrona.</returns>
+    /// <exception cref="KeyNotFoundException">Se lanza cuando la persona no se encuentra.</exception>
     public async Task DeleteByIdAsync(int id)
     {
         var person = await _context.People.FirstOrDefaultAsync(p => p.Id == id);

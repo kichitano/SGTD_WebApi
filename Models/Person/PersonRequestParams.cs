@@ -1,5 +1,8 @@
 ﻿namespace SGTD_WebApi.Models.Person;
 
+/// <summary>
+/// Parámetros de solicitud para operaciones de personas.
+/// </summary>
 public class PersonRequestParams
 {
     public int Id { get; set; }

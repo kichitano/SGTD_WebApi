@@ -2,6 +2,9 @@
 
 namespace SGTD_WebApi.Models.User;
 
+/// <summary>
+/// Parámetros de solicitud para operaciones de usuarios.
+/// </summary>
 public class UserRequestParams
 {
     public Guid? UserGuid { get; set; }

@@ -5,15 +5,30 @@ using SGTD_WebApi.Models.DocumentaryProcedure;
 
 namespace SGTD_WebApi.Services.Implementation;
 
+/// <summary>
+/// Servicio para gestionar procedimientos documentarios.
+/// Proporciona funcionalidades para crear, actualizar, consultar y eliminar procedimientos documentarios,
+/// incluyendo la gestión de pasos y documentos asociados a cada procedimiento.
+/// </summary>
 public class DocumentaryProcedureService : IDocumentaryProcedureService
 {
     private readonly DatabaseContext _context;
 
+    /// <summary>
+    /// Inicializa una nueva instancia del servicio de procedimientos documentarios.
+    /// </summary>
+    /// <param name="context">Contexto de base de datos para acceder a las entidades.</param>
     public DocumentaryProcedureService(DatabaseContext context)
     {
         _context = context;
     }
 
+    /// <summary>
+    /// Crea un nuevo procedimiento documentario de forma asíncrona.
+    /// </summary>
+    /// <param name="requestParams">Parámetros que contienen la información del procedimiento a crear.</param>
+    /// <returns>Una tarea que representa la operación asíncrona.</returns>
+    /// <exception cref="InvalidOperationException">Se lanza cuando ya existe un trámite documentario con el mismo nombre.</exception>
     public async Task CreateAsync(DocumentaryProcedureRequestParams requestParams)
     {
         if (await IsProcedureNameUniqueAsync(requestParams.Name))
@@ -37,6 +52,10 @@ public class DocumentaryProcedureService : IDocumentaryProcedureService
         }
     }
 
+    /// <summary>
+    /// Obtiene todos los procedimientos documentarios activos de forma asíncrona.
+    /// </summary>
+    /// <returns>Una lista de objetos DTO que representan todos los procedimientos documentarios activos.</returns>
     public async Task<List<DocumentaryProcedureDto>> GetAllAsync()
     {
         var procedures = await _context.DocumentaryProcedures
@@ -68,6 +87,12 @@ public class DocumentaryProcedureService : IDocumentaryProcedureService
         return result;
     }
 
+    /// <summary>
+    /// Obtiene un procedimiento documentario específico por su identificador de forma asíncrona.
+    /// </summary>
+    /// <param name="id">El identificador único del procedimiento documentario.</param>
+    /// <returns>Un objeto DTO que representa el procedimiento documentario.</returns>
+    /// <exception cref="InvalidOperationException">Se lanza cuando el procedimiento documentario no se encuentra.</exception>
     public async Task<DocumentaryProcedureDto> GetByIdAsync(int id)
     {
         var procedure = await _context.DocumentaryProcedures
@@ -95,6 +120,13 @@ public class DocumentaryProcedureService : IDocumentaryProcedureService
         return procedureDto;
     }
 
+    /// <summary>
+    /// Actualiza un procedimiento documentario existente de forma asíncrona.
+    /// </summary>
+    /// <param name="requestParams">Parámetros que contienen la información actualizada del procedimiento.</param>
+    /// <returns>Una tarea que representa la operación asíncrona.</returns>
+    /// <exception cref="ArgumentException">Se lanza cuando el ID es requerido para la operación de actualización.</exception>
+    /// <exception cref="InvalidOperationException">Se lanza cuando el procedimiento no se encuentra o ya existe otro con el mismo nombre.</exception>
     public async Task UpdateAsync(DocumentaryProcedureRequestParams requestParams)
     {
         if (!requestParams.Id.HasValue)
@@ -127,6 +159,12 @@ public class DocumentaryProcedureService : IDocumentaryProcedureService
         await _context.SaveChangesAsync();
     }
 
+    /// <summary>
+    /// Elimina lógicamente un procedimiento documentario por su identificador de forma asíncrona.
+    /// </summary>
+    /// <param name="id">El identificador único del procedimiento documentario a eliminar.</param>
+    /// <returns>Una tarea que representa la operación asíncrona.</returns>
+    /// <exception cref="InvalidOperationException">Se lanza cuando el procedimiento documentario no se encuentra.</exception>
     public async Task DeleteAsync(int id)
     {
         var procedure = await _context.DocumentaryProcedures
@@ -146,6 +184,12 @@ public class DocumentaryProcedureService : IDocumentaryProcedureService
         await _context.SaveChangesAsync();
     }
 
+    /// <summary>
+    /// Verifica si el nombre de un procedimiento documentario es único de forma asíncrona.
+    /// </summary>
+    /// <param name="name">El nombre del procedimiento a verificar.</param>
+    /// <param name="excludeId">ID del procedimiento a excluir de la verificación (opcional).</param>
+    /// <returns>True si el nombre es único, false en caso contrario.</returns>
     private async Task<bool> IsProcedureNameUniqueAsync(string name, int? excludeId = null)
     {
         var trimmedName = name?.Trim() ?? string.Empty;
@@ -158,6 +202,12 @@ public class DocumentaryProcedureService : IDocumentaryProcedureService
         return !await query.AnyAsync();
     }
 
+    /// <summary>
+    /// Crea los pasos de un procedimiento documentario de forma asíncrona.
+    /// </summary>
+    /// <param name="procedureId">El identificador del procedimiento documentario.</param>
+    /// <param name="steps">Lista de parámetros de pasos a crear.</param>
+    /// <returns>Una tarea que representa la operación asíncrona.</returns>
     private async Task CreateStepsAsync(int procedureId, List<DocumentaryProcedureStepRequestParams> steps)
     {
         if (steps == null || !steps.Any()) return;
@@ -179,6 +229,12 @@ public class DocumentaryProcedureService : IDocumentaryProcedureService
         }
     }
 
+    /// <summary>
+    /// Crea los documentos asociados a un paso de procedimiento de forma asíncrona.
+    /// </summary>
+    /// <param name="stepId">El identificador del paso del procedimiento.</param>
+    /// <param name="documents">Lista de parámetros de documentos a crear.</param>
+    /// <returns>Una tarea que representa la operación asíncrona.</returns>
     private async Task CreateStepDocumentsAsync(int stepId, List<DocumentaryProcedureStepDocumentRequestParams> documents)
     {
         if (documents == null || !documents.Any()) return;
@@ -198,6 +254,11 @@ public class DocumentaryProcedureService : IDocumentaryProcedureService
         await _context.SaveChangesAsync();
     }
 
+    /// <summary>
+    /// Elimina físicamente los pasos existentes de un procedimiento de forma asíncrona.
+    /// </summary>
+    /// <param name="procedureId">El identificador del procedimiento documentario.</param>
+    /// <returns>Una tarea que representa la operación asíncrona.</returns>
     private async Task DeleteExistingStepsAsync(int procedureId)
     {
         var existingSteps = await _context.DocumentaryProcedureSteps
@@ -216,6 +277,11 @@ public class DocumentaryProcedureService : IDocumentaryProcedureService
         _context.DocumentaryProcedureSteps.RemoveRange(existingSteps);
     }
 
+    /// <summary>
+    /// Elimina lógicamente los pasos existentes de un procedimiento de forma asíncrona.
+    /// </summary>
+    /// <param name="procedureId">El identificador del procedimiento documentario.</param>
+    /// <returns>Una tarea que representa la operación asíncrona.</returns>
     private async Task DeleteExistingStepsLogicallyAsync(int procedureId)
     {
         var existingSteps = await _context.DocumentaryProcedureSteps
@@ -241,6 +307,11 @@ public class DocumentaryProcedureService : IDocumentaryProcedureService
         }
     }
 
+    /// <summary>
+    /// Obtiene los pasos de un procedimiento documentario por su identificador de forma asíncrona.
+    /// </summary>
+    /// <param name="procedureId">El identificador del procedimiento documentario.</param>
+    /// <returns>Una lista de objetos DTO que representan los pasos del procedimiento.</returns>
     private async Task<List<DocumentaryProcedureStepDto>> GetStepsByProcedureIdAsync(int procedureId)
     {
         var steps = await _context.DocumentaryProcedureSteps
@@ -274,6 +345,11 @@ public class DocumentaryProcedureService : IDocumentaryProcedureService
         return stepDtos;
     }
 
+    /// <summary>
+    /// Obtiene los documentos asociados a un paso de procedimiento por su identificador de forma asíncrona.
+    /// </summary>
+    /// <param name="stepId">El identificador del paso del procedimiento.</param>
+    /// <returns>Una lista de objetos DTO que representan los documentos del paso.</returns>
     private async Task<List<DocumentaryProcedureStepDocumentDto>> GetDocumentsByStepIdAsync(int stepId)
     {
         var documents = await _context.DocumentaryProcedureStepDocuments

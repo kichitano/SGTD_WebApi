@@ -8,11 +8,20 @@ using SGTD_WebApi.Models.Authenticator;
 
 namespace SGTD_WebApi.Services.Implementation;
 
+/// <summary>
+/// Servicio para gestionar la autenticación de dos factores (2FA).
+/// Proporciona funcionalidades para generar claves secretas, tokens de activación, códigos QR y verificación OTP.
+/// </summary>
 public class AuthenticatorService : IAuthenticatorService
 {
     private readonly DatabaseContext _context;
     private readonly AuthenticatorHelper _authenticatorHelper;
 
+    /// <summary>
+    /// Inicializa una nueva instancia del servicio de autenticación de dos factores.
+    /// </summary>
+    /// <param name="context">Contexto de base de datos para acceder a las entidades.</param>
+    /// <param name="configuration">Configuración de la aplicación para el helper de autenticación.</param>
     public AuthenticatorService(
         DatabaseContext context, 
         IConfiguration configuration)
@@ -21,6 +30,11 @@ public class AuthenticatorService : IAuthenticatorService
         _authenticatorHelper = new AuthenticatorHelper(configuration);
     }
 
+    /// <summary>
+    /// Genera un token de activación para autenticador de forma asíncrona.
+    /// </summary>
+    /// <param name="userGuid">El identificador único del usuario.</param>
+    /// <returns>El token de activación generado o cadena vacía si el usuario no existe.</returns>
     public async Task<string> GenerateAuthenticatorKeyAsync(Guid userGuid)
     {
         var user = await _context.Users
@@ -49,6 +63,12 @@ public class AuthenticatorService : IAuthenticatorService
         return authenticatorToken;
     }
 
+    /// <summary>
+    /// Activa un token de autenticador y genera un código QR para configuración de forma asíncrona.
+    /// </summary>
+    /// <param name="authenticatorToken">El token de activación del autenticador.</param>
+    /// <returns>Un objeto DTO que contiene el nombre completo del usuario y la imagen QR en base64.</returns>
+    /// <exception cref="InvalidOperationException">Se lanza cuando el token, usuario o clave secreta son inválidos.</exception>
     public async Task<AuthenticatorQRDto> ActivateAuthenticatorToken(string authenticatorToken)
     {
         var userGuid = await _context.Authenticators
@@ -95,6 +115,12 @@ public class AuthenticatorService : IAuthenticatorService
         };
     }
 
+    /// <summary>
+    /// Verifica un código OTP del autenticador de forma asíncrona.
+    /// </summary>
+    /// <param name="requestParams">Parámetros que contienen el email del usuario y el código OTP.</param>
+    /// <returns>True si el código OTP es válido, false en caso contrario.</returns>
+    /// <exception cref="InvalidOperationException">Se lanza cuando el usuario o la clave secreta son inválidos.</exception>
     public async Task<bool> VerifyAuthenticatorOtpAsync(AuthenticatorOtpRequestParams requestParams)
     {
         var userGuid= await _context.Users
@@ -128,6 +154,11 @@ public class AuthenticatorService : IAuthenticatorService
         return isValid;
     }
 
+    /// <summary>
+    /// Genera una imagen QR en formato base64 a partir de una URI.
+    /// </summary>
+    /// <param name="qrCodeUri">La URI para generar el código QR.</param>
+    /// <returns>La imagen QR codificada en base64.</returns>
     private string GenerateBase64Qr(string qrCodeUri)
     {
         using var qrGenerator = new QRCodeGenerator();
@@ -137,12 +168,23 @@ public class AuthenticatorService : IAuthenticatorService
         return Convert.ToBase64String(qrCodeBytes);
     }
 
+    /// <summary>
+    /// Genera una clave secreta aleatoria para autenticación de dos factores.
+    /// </summary>
+    /// <returns>La clave secreta codificada en Base32.</returns>
     public string GenerateSecretKey()
     {
         var key = KeyGeneration.GenerateRandomKey(20);
         return Base32Encoding.ToString(key);
     }
 
+    /// <summary>
+    /// Genera una URI para código QR de autenticación TOTP.
+    /// </summary>
+    /// <param name="email">El email del usuario.</param>
+    /// <param name="secretKey">La clave secreta para autenticación.</param>
+    /// <param name="appName">El nombre de la aplicación.</param>
+    /// <returns>La URI formateada para generar el código QR.</returns>
     public string GenerateQrCodeUri(string email, string secretKey, string appName)
     {
         return $"otpauth://totp/{appName}:{email}?secret={secretKey}&issuer={appName}&digits=6";

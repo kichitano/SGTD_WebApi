@@ -6,11 +6,21 @@ using SGTD_WebApi.Models.PositionDependency;
 
 namespace SGTD_WebApi.Services.Implementation;
 
+/// <summary>
+/// Servicio para gestionar cargos o posiciones organizacionales.
+/// Proporciona funcionalidades completas para crear, actualizar, consultar y eliminar posiciones,
+/// incluyendo la gestión de jerarquías, dependencias y validaciones de integridad organizacional.
+/// </summary>
 public class PositionService : IPositionService
 {
     private readonly DatabaseContext _context;
     private readonly IPositionDependencyService _positionDependencyService;
 
+    /// <summary>
+    /// Inicializa una nueva instancia del servicio de posiciones.
+    /// </summary>
+    /// <param name="context">Contexto de base de datos para acceder a las entidades.</param>
+    /// <param name="positionDependencyService">Servicio para gestionar dependencias entre posiciones.</param>
     public PositionService(
         DatabaseContext context,
         IPositionDependencyService positionDependencyService)
@@ -19,6 +29,12 @@ public class PositionService : IPositionService
         _positionDependencyService = positionDependencyService;
     }
 
+    /// <summary>
+    /// Crea una nueva posición de forma asíncrona.
+    /// </summary>
+    /// <param name="requestParams">Parámetros que contienen la información de la posición a crear.</param>
+    /// <returns>Una tarea que representa la operación asíncrona.</returns>
+    /// <exception cref="InvalidOperationException">Se lanza cuando el nombre de la posición ya existe o hay conflictos de jerarquía.</exception>
     public async Task CreateAsync(PositionRequestParams requestParams)
     {
         if (await IsPositionNameUniqueAsync(requestParams.Name))
@@ -52,6 +68,14 @@ public class PositionService : IPositionService
         }
     }
 
+    /// <summary>
+    /// Actualiza una posición existente de forma asíncrona.
+    /// </summary>
+    /// <param name="requestParams">Parámetros que contienen la información actualizada de la posición.</param>
+    /// <returns>Una tarea que representa la operación asíncrona.</returns>
+    /// <exception cref="ArgumentNullException">Se lanza cuando el ID de la posición es nulo.</exception>
+    /// <exception cref="KeyNotFoundException">Se lanza cuando la posición no se encuentra.</exception>
+    /// <exception cref="InvalidOperationException">Se lanza cuando el nombre ya existe o hay conflictos de jerarquía.</exception>
     public async Task UpdateAsync(PositionRequestParams requestParams)
     {
         if (requestParams.Id == null)
@@ -107,6 +131,10 @@ public class PositionService : IPositionService
         }
     }
 
+    /// <summary>
+    /// Obtiene todas las posiciones de forma asíncrona.
+    /// </summary>
+    /// <returns>Una lista de objetos DTO que representan todas las posiciones.</returns>
     public async Task<List<PositionDto>> GetAllAsync()
     {
         var positions = await _context.Positions
@@ -131,6 +159,12 @@ public class PositionService : IPositionService
         return positions;
     }
 
+    /// <summary>
+    /// Obtiene una posición específica por su identificador de forma asíncrona.
+    /// </summary>
+    /// <param name="id">El identificador único de la posición.</param>
+    /// <returns>Un objeto DTO que representa la posición.</returns>
+    /// <exception cref="KeyNotFoundException">Se lanza cuando la posición no se encuentra.</exception>
     public async Task<PositionDto> GetByIdAsync(int id)
     {
         var position = await _context.Positions
@@ -158,6 +192,14 @@ public class PositionService : IPositionService
         return position;
     }
 
+    /// <summary>
+    /// Elimina una posición por su identificador de forma asíncrona.
+    /// Verifica que la posición no tenga usuarios ni pasos de procedimientos activos asociados.
+    /// </summary>
+    /// <param name="id">El identificador único de la posición a eliminar.</param>
+    /// <returns>Una tarea que representa la operación asíncrona.</returns>
+    /// <exception cref="KeyNotFoundException">Se lanza cuando la posición no se encuentra.</exception>
+    /// <exception cref="InvalidOperationException">Se lanza cuando la posición tiene usuarios o pasos de procedimientos activos.</exception>
     public async Task DeleteByIdAsync(int id)
     {
         var position = await _context.Positions.FirstOrDefaultAsync(p => p.Id == id);
@@ -194,6 +236,12 @@ public class PositionService : IPositionService
         await _context.SaveChangesAsync();
     }
 
+    /// <summary>
+    /// Crea una nueva posición y retorna su identificador de forma asíncrona.
+    /// </summary>
+    /// <param name="requestParams">Parámetros que contienen la información de la posición a crear.</param>
+    /// <returns>El identificador de la posición creada.</returns>
+    /// <exception cref="InvalidOperationException">Se lanza cuando el nombre de la posición ya existe.</exception>
     public async Task<int> CreateReturnIdAsync(PositionRequestParams requestParams)
     {
         if (await IsPositionNameUniqueAsync(requestParams.Name))
@@ -224,6 +272,11 @@ public class PositionService : IPositionService
         throw new InvalidOperationException("Position name already exists.");
     }
 
+    /// <summary>
+    /// Obtiene todas las posiciones de un área específica de forma asíncrona.
+    /// </summary>
+    /// <param name="areaId">El identificador del área.</param>
+    /// <returns>Una lista de objetos DTO que representan las posiciones del área.</returns>
     public async Task<List<PositionDto>> GetAllByAreaIdAsync(int areaId)
     {
         var positions = await _context.Positions
@@ -244,6 +297,12 @@ public class PositionService : IPositionService
         return positions;
     }
 
+    /// <summary>
+    /// Obtiene las posiciones disponibles para ser jefes directos en un área de forma asíncrona.
+    /// </summary>
+    /// <param name="currentAreaId">El identificador del área actual.</param>
+    /// <param name="excludePositionId">ID de la posición a excluir de los resultados (opcional).</param>
+    /// <returns>Una lista de objetos DTO que representan las posiciones disponibles como jefes directos.</returns>
     public async Task<List<PositionDto>> GetAvailableDirectManagersAsync(int currentAreaId, int? excludePositionId = null)
     {
         var sameAreaPositions = await _context.Positions

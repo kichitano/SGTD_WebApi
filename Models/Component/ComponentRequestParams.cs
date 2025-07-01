@@ -2,6 +2,9 @@
 
 namespace SGTD_WebApi.Models.Component;
 
+/// <summary>
+/// Parámetros de solicitud para operaciones con componentes del sistema
+/// </summary>
 public class ComponentRequestParams
 {
     public int? Id { get; set; }

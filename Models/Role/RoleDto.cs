@@ -1,5 +1,8 @@
 ﻿namespace SGTD_WebApi.Models.Role;
 
+/// <summary>
+/// DTO que representa un rol del sistema.
+/// </summary>
 public class RoleDto
 {
     public int Id { get; set; }
