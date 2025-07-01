@@ -6,11 +6,9 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 namespace SGTD_WebApi.Migrations
 {
-    /// <inheritdoc />
     public partial class AddUserFileSharing : Migration
     {
-        /// <inheritdoc />
-        protected override void Up(MigrationBuilder migrationBuilder)
+            protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
                 name: "UserFileShares",
@@ -61,8 +59,7 @@ namespace SGTD_WebApi.Migrations
                 column: "UserFileId");
         }
 
-        /// <inheritdoc />
-        protected override void Down(MigrationBuilder migrationBuilder)
+            protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
                 name: "UserFileShares");

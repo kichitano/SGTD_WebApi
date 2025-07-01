@@ -51,7 +51,6 @@ public class PersonService : IPersonService
         if (person == null)
             throw new KeyNotFoundException("Person not found.");
 
-        // Verificar si ya existe otra persona con los mismos datos (excluyendo la actual)
         var duplicateExists = await _context.People
             .Where(q => q.Id != requestParams.Id && 
                        (q.Phone.Equals(requestParams.Phone) || 

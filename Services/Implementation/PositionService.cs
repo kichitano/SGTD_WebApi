@@ -23,7 +23,6 @@ public class PositionService : IPositionService
     {
         if (await IsPositionNameUniqueAsync(requestParams.Name))
         {
-            // Validar la lógica de jefatura directa
             await ValidateDirectManagerLogicAsync(requestParams.AreaId, requestParams.DirectManagerPositionId);
 
             var position = new Position
@@ -64,7 +63,6 @@ public class PositionService : IPositionService
 
         if (await IsPositionNameUniqueAsync(requestParams.Name, requestParams.Id))
         {
-            // Validar la lógica de jefatura directa (excluyendo la posición actual)
             await ValidateDirectManagerLogicAsync(requestParams.AreaId, requestParams.DirectManagerPositionId, requestParams.Id);
 
             position.Name = requestParams.Name;
@@ -166,26 +164,22 @@ public class PositionService : IPositionService
         if (position == null)
             throw new KeyNotFoundException("Position not found.");
 
-        // Check if position is referenced by any active users
         var hasActiveUsers = await _context.Users.AnyAsync(u => u.PositionId == id && !u.IsDeleted);
         if (hasActiveUsers)
         {
             throw new InvalidOperationException("Cannot delete position because it is assigned to one or more active users. Please reassign users to different positions first.");
         }
 
-        // Check if position is referenced by any active documentary procedure steps
         var hasActiveProcedureSteps = await _context.DocumentaryProcedureSteps.AnyAsync(dps => dps.PositionId == id && !dps.IsDeleted);
         if (hasActiveProcedureSteps)
         {
             throw new InvalidOperationException("Cannot delete position because it is referenced by one or more active documentary procedure steps. Please update or remove these procedure steps first.");
         }
 
-        // Realizar eliminación lógica en lugar de física
         position.IsDeleted = true;
         position.DeletedAt = DateTime.UtcNow;
         position.UpdatedAt = DateTime.UtcNow;
 
-        // También realizar eliminación lógica de dependencias donde esta posición es padre o hijo
         var dependencies = await _context.PositionsDependency
             .Where(pd => (pd.ParentPositionId == id || pd.ChildPositionId == id) && !pd.IsDeleted)
             .ToListAsync();
@@ -252,7 +246,6 @@ public class PositionService : IPositionService
 
     public async Task<List<PositionDto>> GetAvailableDirectManagersAsync(int currentAreaId, int? excludePositionId = null)
     {
-        // Solo obtener posiciones de la misma área (excluyendo la posición actual si se especifica)
         var sameAreaPositions = await _context.Positions
             .Include(p => p.Area)
             .Where(p => p.AreaId == currentAreaId && (!excludePositionId.HasValue || p.Id != excludePositionId.Value) && !p.IsDeleted)
@@ -317,7 +310,6 @@ public class PositionService : IPositionService
 
     private async Task ValidateDirectManagerLogicAsync(int areaId, int? directManagerPositionId, int? excludePositionId = null)
     {
-        // Si no se especifica jefe directo, verificar que no exista ya una máxima autoridad para esta área
         if (!directManagerPositionId.HasValue)
         {
             var query = _context.Positions
@@ -335,7 +327,6 @@ public class PositionService : IPositionService
         }
         else
         {
-            // Si se especifica jefe directo, verificar que pertenezca a la misma área o a otra área válida
             var directManager = await _context.Positions
                 .FirstOrDefaultAsync(p => p.Id == directManagerPositionId.Value && !p.IsDeleted);
 
@@ -344,7 +335,6 @@ public class PositionService : IPositionService
                 throw new InvalidOperationException("El jefe directo especificado no existe.");
             }
 
-            // Verificar que no se cree una referencia circular
             if (excludePositionId.HasValue && await WouldCreateCircularReferenceAsync(excludePositionId.Value, directManagerPositionId.Value))
             {
                 throw new InvalidOperationException("La asignación de jefe directo crearía una referencia circular en la jerarquía.");
@@ -354,7 +344,6 @@ public class PositionService : IPositionService
 
     private async Task<bool> WouldCreateCircularReferenceAsync(int positionId, int proposedManagerId)
     {
-        // Verificar si el proposed manager tiene como jefe (directo o indirecto) a la posición actual
         var currentManagerId = (int?)proposedManagerId;
         var visitedIds = new HashSet<int> { positionId };
 

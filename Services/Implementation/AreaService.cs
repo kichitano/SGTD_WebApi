@@ -161,7 +161,6 @@ public class AreaService : IAreaService
         if (area == null)
             throw new KeyNotFoundException("Area not found.");
 
-        // Verificar si el área tiene dependencias activas (áreas hijas)
         var hasActiveChildAreas = await _context.AreaDependencies
             .AnyAsync(ad => ad.ParentAreaId == id && !ad.IsDeleted);
         
@@ -170,7 +169,6 @@ public class AreaService : IAreaService
             throw new InvalidOperationException("No se puede eliminar el área porque tiene áreas dependientes activas.");
         }
 
-        // Verificar si el área está siendo usada por posiciones activas
         var hasActivePositions = await _context.Positions
             .AnyAsync(p => p.AreaId == id && !p.IsDeleted);
             
@@ -179,12 +177,10 @@ public class AreaService : IAreaService
             throw new InvalidOperationException("No se puede eliminar el área porque tiene posiciones asociadas activas.");
         }
 
-        // Realizar eliminación lógica en lugar de física
         area.IsDeleted = true;
         area.DeletedAt = DateTime.UtcNow;
         area.UpdatedAt = DateTime.UtcNow;
 
-        // También realizar eliminación lógica de dependencias del área donde es padre o hijo
         var dependencies = await _context.AreaDependencies
             .Where(ad => (ad.ParentAreaId == id || ad.ChildAreaId == id) && !ad.IsDeleted)
             .ToListAsync();

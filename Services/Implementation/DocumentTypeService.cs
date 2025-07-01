@@ -15,7 +15,6 @@ public class DocumentTypeService : IDocumentTypeService
 
     public async Task CreateAsync(DocumentTypeRequestParams requestParams)
     {
-        // Verificar si ya existe un tipo de documento con el mismo nombre
         var trimmedName = requestParams.Name?.Trim() ?? string.Empty;
         var existingDocumentType = await _context.DocumentTypes
             .AnyAsync(dt => dt.Name.Trim().ToLower() == trimmedName.ToLower());
@@ -42,7 +41,6 @@ public class DocumentTypeService : IDocumentTypeService
         if (documentType == null)
             throw new KeyNotFoundException("DocumentType not found.");
 
-        // Verificar si ya existe otro tipo de documento con el mismo nombre (excluyendo el actual)
         var trimmedName = requestParams.Name?.Trim() ?? string.Empty;
         var existingDocumentType = await _context.DocumentTypes
             .AnyAsync(dt => dt.Id != requestParams.Id && dt.Name.Trim().ToLower() == trimmedName.ToLower());
@@ -89,14 +87,12 @@ public class DocumentTypeService : IDocumentTypeService
         if (documentType == null)
             throw new KeyNotFoundException("DocumentType not found.");
 
-        // Verificar si el tipo de documento está siendo usado por pasos de procedimientos documentarios activos
         var hasActiveProcedureSteps = await _context.DocumentaryProcedureStepDocuments.AnyAsync(dpsd => dpsd.DocumentTypeId == id && !dpsd.IsDeleted);
         if (hasActiveProcedureSteps)
         {
             throw new InvalidOperationException("No se puede eliminar el tipo de documento porque está siendo usado por procedimientos documentarios activos.");
         }
 
-        // Realizar eliminación lógica en lugar de física
         documentType.IsDeleted = true;
         documentType.DeletedAt = DateTime.UtcNow;
         documentType.UpdatedAt = DateTime.UtcNow;

@@ -15,7 +15,6 @@ public class ComponentService : IComponentService
 
     public async Task CreateAsync(ComponentRequestParams requestParams)
     {
-        // Verificar si ya existe un componente con el mismo nombre
         var trimmedName = requestParams.Name?.Trim() ?? string.Empty;
         var existingComponent = await _context.Components
             .AnyAsync(c => c.Name.Trim().ToLower() == trimmedName.ToLower());
@@ -41,7 +40,6 @@ public class ComponentService : IComponentService
         if (component == null)
             throw new KeyNotFoundException("Component not found.");
 
-        // Verificar si ya existe otro componente con el mismo nombre (excluyendo el actual)
         var trimmedName = requestParams.Name?.Trim() ?? string.Empty;
         var existingComponent = await _context.Components
             .AnyAsync(c => c.Id != requestParams.Id && c.Name.Trim().ToLower() == trimmedName.ToLower());
@@ -85,11 +83,9 @@ public class ComponentService : IComponentService
         if (component == null)
             throw new KeyNotFoundException("Component not found.");
 
-        // Verificar si el componente tiene permisos de roles asociados activos
         var hasActiveRolePermissions = await _context.RoleComponentPermissions.AnyAsync(rcp => rcp.ComponentId == id && !rcp.IsDeleted);
         if (hasActiveRolePermissions)
         {
-            // Realizar eliminación lógica de permisos relacionados
             var permissions = await _context.RoleComponentPermissions.Where(rcp => rcp.ComponentId == id && !rcp.IsDeleted).ToListAsync();
             foreach (var permission in permissions)
             {
@@ -99,7 +95,6 @@ public class ComponentService : IComponentService
             }
         }
 
-        // Realizar eliminación lógica en lugar de física
         component.IsDeleted = true;
         component.DeletedAt = DateTime.UtcNow;
         component.UpdatedAt = DateTime.UtcNow;

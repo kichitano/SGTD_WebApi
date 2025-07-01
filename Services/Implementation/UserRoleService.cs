@@ -83,7 +83,6 @@ public class UserRoleService : IUserRoleService
         if (!userRoles.Any())
             return; // No hay roles que eliminar, no es un error
 
-        // Eliminación lógica de todos los roles del usuario
         foreach (var userRole in userRoles)
         {
             userRole.IsDeleted = true;

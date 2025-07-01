@@ -4,13 +4,11 @@ namespace SGTD_WebApi.Services;
 
 public interface IDocumentaryProcessService
 {
-    // Standard CRUD methods following Area/Position pattern
     Task CreateAsync(DocumentaryProcessRequestParams requestParams, int userId);
     Task UpdateAsync(DocumentaryProcessRequestParams requestParams, int userId);
     Task<List<DocumentaryProcessInstanceDto>> GetAllAsync(int userId);
     Task DeleteByIdAsync(int id, int userId);
 
-    // Domain-specific methods
     Task<List<DocumentaryProcessInstanceDto>> GetMyProcessesAsync(int userId);
     Task<List<DocumentaryProcessInstanceDto>> GetPendingProcessesForUserAsync(int userId);
     Task<List<DocumentaryProcessInstanceDto>> GetAvailableProcessesForUserAreaAsync(int userId);

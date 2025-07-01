@@ -19,7 +19,6 @@ public class UserService : IUserService
 
     public async Task CreateAsync(UserRequestParams requestParams)
     {
-        // Verificar si ya existe un usuario con el mismo email
         var existingUserByEmail = await _context.Users
             .AnyAsync(u => u.Email.ToLower() == requestParams.Email.ToLower());
             
@@ -28,7 +27,6 @@ public class UserService : IUserService
             throw new InvalidOperationException("Ya existe un usuario con ese email.");
         }
 
-        // Verificar si ya existe un usuario con la misma persona
         var existingUserByPerson = await _context.Users
             .AnyAsync(u => u.PersonId == requestParams.PersonId);
             
@@ -62,7 +60,6 @@ public class UserService : IUserService
         if (user == null)
             throw new KeyNotFoundException("Usuario no encontrado.");
 
-        // Verificar si ya existe otro usuario con el mismo email (excluyendo el actual)
         var existingUserByEmail = await _context.Users
             .AnyAsync(u => u.UserGuid != requestParams.UserGuid && u.Email.ToLower() == requestParams.Email.ToLower());
             
@@ -71,7 +68,6 @@ public class UserService : IUserService
             throw new InvalidOperationException("Ya existe otro usuario con ese email.");
         }
 
-        // Verificar si ya existe otro usuario con la misma persona (excluyendo el actual)
         var existingUserByPerson = await _context.Users
             .AnyAsync(u => u.UserGuid != requestParams.UserGuid && u.PersonId == requestParams.PersonId);
             
@@ -149,12 +145,10 @@ public class UserService : IUserService
         if (user == null)
             throw new KeyNotFoundException("Usuario no encontrado.");
 
-        // Realizar eliminación lógica en lugar de física
         user.IsDeleted = true;
         user.DeletedAt = DateTime.UtcNow;
         user.UpdatedAt = DateTime.UtcNow;
 
-        // También realizar eliminación lógica de tokens relacionados
         var tokens = await _context.UserTokens.Where(t => t.UserGuid == user.UserGuid).ToListAsync();
         foreach (var token in tokens)
         {
@@ -163,7 +157,6 @@ public class UserService : IUserService
             token.UpdatedAt = DateTime.UtcNow;
         }
 
-        // También realizar eliminación lógica de roles relacionados
         var roles = await _context.UserRoles.Where(ur => ur.UserId == user.Id).ToListAsync();
         foreach (var role in roles)
         {
@@ -186,8 +179,7 @@ public class UserService : IUserService
     {
         if (!string.IsNullOrWhiteSpace(requestParams.Email))
         {
-            // Verificar si ya existe un usuario con el mismo email
-            var existingUserByEmail = await _context.Users
+                var existingUserByEmail = await _context.Users
                 .AnyAsync(u => u.Email.ToLower() == requestParams.Email.ToLower());
                 
             if (existingUserByEmail)
@@ -195,8 +187,7 @@ public class UserService : IUserService
                 throw new InvalidOperationException("Ya existe un usuario con ese email.");
             }
 
-            // Verificar si ya existe un usuario con la misma persona
-            var existingUserByPerson = await _context.Users
+                var existingUserByPerson = await _context.Users
                 .AnyAsync(u => u.PersonId == requestParams.PersonId);
                 
             if (existingUserByPerson)

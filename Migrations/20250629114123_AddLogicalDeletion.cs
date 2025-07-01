@@ -5,11 +5,9 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace SGTD_WebApi.Migrations
 {
-    /// <inheritdoc />
     public partial class AddLogicalDeletion : Migration
     {
-        /// <inheritdoc />
-        protected override void Up(MigrationBuilder migrationBuilder)
+            protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.AddColumn<DateTime>(
                 name: "DeletedAt",
@@ -272,8 +270,7 @@ namespace SGTD_WebApi.Migrations
                 defaultValue: false);
         }
 
-        /// <inheritdoc />
-        protected override void Down(MigrationBuilder migrationBuilder)
+            protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropColumn(
                 name: "DeletedAt",

@@ -137,12 +137,10 @@ public class DocumentaryProcedureService : IDocumentaryProcedureService
             throw new InvalidOperationException("Documentary procedure not found.");
         }
 
-        // Realizar eliminación lógica en lugar de física
         procedure.IsDeleted = true;
         procedure.DeletedAt = DateTime.UtcNow;
         procedure.UpdatedAt = DateTime.UtcNow;
 
-        // También realizar eliminación lógica de pasos relacionados
         await DeleteExistingStepsLogicallyAsync(id);
         
         await _context.SaveChangesAsync();

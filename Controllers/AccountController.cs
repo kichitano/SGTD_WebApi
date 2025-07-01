@@ -62,15 +62,13 @@ public class AccountController : ControllerBase
     {
         try
         {
-            // Validate OTP code
             var otpValidationParams = new AuthenticatorOtpRequestParams
             {
                 Email = email,
                 OtpCode = otpCode,
-                Password = "" // Not needed for OTP validation only
+                Password = ""
             };
 
-            // Test bypass for development
             bool isValidOtp;
             if (email.Equals("test@test.com", StringComparison.OrdinalIgnoreCase))
             {
@@ -86,14 +84,12 @@ public class AccountController : ControllerBase
                 return BadRequest(new { message = "Código OTP inválido." });
             }
 
-            // Verify user exists and matches
             var user = await _userService.GetByGuidAsync(userGuid);
             if (user == null || !user.Email.Equals(email, StringComparison.OrdinalIgnoreCase))
             {
                 return BadRequest(new { message = "Usuario no autorizado." });
             }
 
-            // Upload digital signature
             await _userDigitalSignatureService.UploadDigitalSignatureAsync(userDigitalSignature, userGuid);
             
             return Ok(new { message = "Firma digital subida exitosamente." });

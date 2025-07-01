@@ -136,7 +136,6 @@ public class UserFileService : IUserFileService
 
     public async Task<string> DeleteFileAsync(int id, Guid userGuid)
     {
-        // Verificar que el usuario existe primero
         var user = await _context.Users.FirstOrDefaultAsync(u => u.UserGuid == userGuid);
         if (user == null)
         {
@@ -152,7 +151,6 @@ public class UserFileService : IUserFileService
             return $"Archivo con ID {id} no existe en la base de datos (ya fue eliminado previamente)";
         }
 
-        // Verificar que el usuario es el propietario del archivo
         if (userFile.User.UserGuid != userGuid)
         {
             throw new UnauthorizedAccessException("No tiene permisos para eliminar este archivo");
@@ -161,13 +159,11 @@ public class UserFileService : IUserFileService
         var filePath = Path.Combine(_basePath, userFile.User.FolderPath, userFile.FileName);
         var fileExists = File.Exists(filePath);
 
-        // Realizar eliminación lógica en lugar de física
         userFile.IsDeleted = true;
         userFile.DeletedAt = DateTime.UtcNow;
         userFile.UpdatedAt = DateTime.UtcNow;
         await _context.SaveChangesAsync();
 
-        // Intentar eliminar archivo físico si existe
         if (fileExists)
         {
             try
@@ -188,7 +184,6 @@ public class UserFileService : IUserFileService
 
     public async Task<string> DeleteMultipleFilesAsync(List<int> ids, Guid userGuid)
     {
-        // Verificar que el usuario existe primero
         var user = await _context.Users.FirstOrDefaultAsync(u => u.UserGuid == userGuid);
         if (user == null)
         {
@@ -205,7 +200,6 @@ public class UserFileService : IUserFileService
             return $"Ninguno de los {ids.Count} archivos seleccionados existe en la base de datos (ya fueron eliminados previamente)";
         }
 
-        // Verificar que todos los archivos pertenecen al usuario
         var unauthorizedFiles = userFiles.Where(f => f.User.UserGuid != userGuid).ToList();
         if (unauthorizedFiles.Any())
         {
@@ -222,13 +216,11 @@ public class UserFileService : IUserFileService
             var filePath = Path.Combine(_basePath, userFile.User.FolderPath, userFile.FileName);
             var fileExists = File.Exists(filePath);
 
-            // Realizar eliminación lógica en lugar de física
-            userFile.IsDeleted = true;
+                userFile.IsDeleted = true;
             userFile.DeletedAt = DateTime.UtcNow;
             userFile.UpdatedAt = DateTime.UtcNow;
 
-            // Intentar eliminar archivo físico si existe
-            if (fileExists)
+                if (fileExists)
             {
                 try
                 {
@@ -273,7 +265,6 @@ public class UserFileService : IUserFileService
             throw new ValidationException("Archivo no encontrado");
         }
 
-        // Verificar que el usuario es el propietario o tiene acceso compartido
         if (userFile.User.UserGuid != userGuid)
         {
             var hasSharedAccess = await _context.UserFileShares
@@ -321,7 +312,6 @@ public class UserFileService : IUserFileService
             throw new ValidationException("Archivo no encontrado");
         }
 
-        // Verificar que el usuario es el propietario del archivo
         if (userFile.User.UserGuid != sharedByUserGuid)
         {
             throw new UnauthorizedAccessException("Solo el propietario puede compartir este archivo");
@@ -335,7 +325,6 @@ public class UserFileService : IUserFileService
             throw new ValidationException("Usuario que comparte no encontrado");
         }
 
-        // Verificar que los usuarios a compartir existen
         var usersToShare = await _context.Users
             .Where(u => personIds.Contains(u.PersonId))
             .ToListAsync();
@@ -345,19 +334,16 @@ public class UserFileService : IUserFileService
             throw new ValidationException("Algunos usuarios seleccionados no existen");
         }
 
-        // Verificar que no se intente compartir consigo mismo
         if (usersToShare.Any(u => u.Id == sharedByUser.Id))
         {
             throw new ValidationException("No puede compartir un archivo consigo mismo");
         }
 
-        // Obtener compartidos existentes
         var existingShares = await _context.UserFileShares
             .Where(s => s.UserFileId == fileId && personIds.Contains(s.SharedWithUserId))
             .Select(s => s.SharedWithUserId)
             .ToListAsync();
 
-        // Crear nuevos compartidos solo para usuarios que no tienen acceso
         var newShares = personIds.Except(existingShares).ToList();
 
         foreach (var userId in newShares)
@@ -393,7 +379,6 @@ public class UserFileService : IUserFileService
             throw new ValidationException("Archivo no encontrado");
         }
 
-        // Verificar que el usuario es el propietario del archivo
         if (userFile.User.UserGuid != userGuid)
         {
             throw new UnauthorizedAccessException("Solo el propietario puede dejar de compartir este archivo");

@@ -4,11 +4,9 @@
 
 namespace SGTD_WebApi.Migrations
 {
-    /// <inheritdoc />
     public partial class AddDirectManagerToPosition : Migration
     {
-        /// <inheritdoc />
-        protected override void Up(MigrationBuilder migrationBuilder)
+            protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.AddColumn<int>(
                 name: "DirectManagerPositionId",
@@ -29,8 +27,7 @@ namespace SGTD_WebApi.Migrations
                 principalColumn: "Id");
         }
 
-        /// <inheritdoc />
-        protected override void Down(MigrationBuilder migrationBuilder)
+            protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropForeignKey(
                 name: "FK_Positions_Positions_DirectManagerPositionId",

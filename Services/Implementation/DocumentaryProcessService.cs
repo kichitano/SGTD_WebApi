@@ -16,7 +16,6 @@ public class DocumentaryProcessService : IDocumentaryProcessService
         _configuration = configuration;
     }
 
-    // Standard CRUD methods following Area/Position pattern
     public async Task CreateAsync(DocumentaryProcessRequestParams requestParams, int userId)
     {
         var existingProcess = await _context.DocumentaryProcessInstances
@@ -81,7 +80,6 @@ public class DocumentaryProcessService : IDocumentaryProcessService
             .OrderByDescending(p => p.RequestedAt)
             .ToListAsync();
 
-        // Filter based on user permissions
         var user = await _context.Users.Include(u => u.Position).FirstOrDefaultAsync(u => u.Id == userId);
         var filteredProcesses = processes.Where(p => 
             p.RequestedByUserId == userId || 
@@ -194,7 +192,6 @@ public class DocumentaryProcessService : IDocumentaryProcessService
         if (user?.Position?.AreaId == null)
             return new List<DocumentaryProcessInstanceDto>();
 
-        // Get processes that have unassigned steps in the user's area
         var availableSteps = await _context.DocumentaryProcessStepInstances
             .Include(si => si.DocumentaryProcessInstance)
                 .ThenInclude(pi => pi.DocumentaryProcedure)
@@ -255,7 +252,6 @@ public class DocumentaryProcessService : IDocumentaryProcessService
 
         if (process == null) return null;
 
-        // Verificar que el usuario tenga acceso al proceso
         var user = await _context.Users.Include(u => u.Position).FirstOrDefaultAsync(u => u.Id == userId);
         var hasAccess = process.RequestedByUserId == userId || 
                        process.StepInstances.Any(si => si.DocumentaryProcedureStep.PositionId == user?.PositionId);
@@ -282,7 +278,6 @@ public class DocumentaryProcessService : IDocumentaryProcessService
         if (!steps.Any())
             throw new ArgumentException("El procedimiento no tiene pasos configurados");
 
-        // Generar número de proceso único
         var processNumber = await GenerateProcessNumberAsync();
 
         var processInstance = new DocumentaryProcessInstance
@@ -299,7 +294,6 @@ public class DocumentaryProcessService : IDocumentaryProcessService
         _context.DocumentaryProcessInstances.Add(processInstance);
         await _context.SaveChangesAsync();
 
-        // Crear instancias de pasos
         foreach (var step in steps)
         {
             var stepInstance = new DocumentaryProcessStepInstance
@@ -312,12 +306,10 @@ public class DocumentaryProcessService : IDocumentaryProcessService
             _context.DocumentaryProcessStepInstances.Add(stepInstance);
         }
 
-        // Guardar documentos upload iniciales
         await SaveUploadDocumentsAsync(processInstance.Id, null, createDto.UploadDocuments, userId);
 
         await _context.SaveChangesAsync();
 
-        // Enviar notificaciones para el primer paso
         await NotifyStepAssignmentAsync(processInstance.Id, 1);
 
         return await GetProcessByIdAsync(processInstance.Id, userId);
@@ -370,15 +362,12 @@ public class DocumentaryProcessService : IDocumentaryProcessService
         {
             stepInstance.CompletedAt = DateTime.UtcNow;
 
-            // Guardar documentos del paso
-            await SaveUploadDocumentsAsync(stepInstance.DocumentaryProcessInstanceId, stepInstance.Id, updateDto.Documents, userId);
+                await SaveUploadDocumentsAsync(stepInstance.DocumentaryProcessInstanceId, stepInstance.Id, updateDto.Documents, userId);
 
-            // Avanzar al siguiente paso o completar proceso
             await AdvanceProcessAsync(stepInstance.DocumentaryProcessInstanceId);
         }
         else if (updateDto.Status == DocumentaryStepStatus.Rejected)
         {
-            // Rechazar todo el proceso
             stepInstance.DocumentaryProcessInstance.Status = DocumentaryProcessStatus.Rejected;
             stepInstance.DocumentaryProcessInstance.CompletedAt = DateTime.UtcNow;
         }
@@ -401,14 +390,12 @@ public class DocumentaryProcessService : IDocumentaryProcessService
 
         var user = await _context.Users.Include(u => u.Position).FirstOrDefaultAsync(u => u.Id == userId);
         
-        // Verificar permisos de descarga
         var canDownload = document.DocumentaryProcessInstance.RequestedByUserId == userId ||
                          document.DocumentaryProcessStepInstance?.DocumentaryProcedureStep.PositionId == user?.PositionId;
 
         if (!canDownload)
             throw new UnauthorizedAccessException("No tiene permisos para descargar este documento");
 
-        // Verificar si es documento del último paso para usuario solicitante
         if (document.DocumentaryProcessInstance.RequestedByUserId == userId && document.DocumentType.IsUploadable)
         {
             var maxStepOrder = await _context.DocumentaryProcessStepInstances
@@ -525,7 +512,6 @@ public class DocumentaryProcessService : IDocumentaryProcessService
         
         if (process.CurrentStepOrder >= maxOrder)
         {
-            // Proceso completado
             process.Status = DocumentaryProcessStatus.Completed;
             process.CompletedAt = DateTime.UtcNow;
             
@@ -533,7 +519,6 @@ public class DocumentaryProcessService : IDocumentaryProcessService
         }
         else
         {
-            // Avanzar al siguiente paso
             process.CurrentStepOrder++;
             await NotifyStepAssignmentAsync(processInstanceId, process.CurrentStepOrder);
         }
@@ -614,7 +599,6 @@ public class DocumentaryProcessService : IDocumentaryProcessService
             Documents = process.Documents.Select(MapDocumentToDto).ToList()
         };
 
-        // Separar documentos por tipo
         dto.RequiredUploadDocuments = dto.Documents.Where(d => d.DocumentTypeIsUploadable && d.StepOrder == null).ToList();
         dto.AvailableDownloadDocuments = dto.Documents.Where(d => !d.DocumentTypeIsUploadable && CanUserDownloadDocument(d, currentUserId, process)).ToList();
 
@@ -673,7 +657,6 @@ public class DocumentaryProcessService : IDocumentaryProcessService
     {
         if (!userId.HasValue) return false;
 
-        // El solicitante solo puede descargar documentos del último paso
         if (process.RequestedByUserId == userId.Value)
         {
             var maxCompletedStep = process.StepInstances
@@ -683,7 +666,6 @@ public class DocumentaryProcessService : IDocumentaryProcessService
             return document.StepOrder == maxCompletedStep;
         }
 
-        // Los usuarios del paso pueden descargar documentos de su paso
         return true;
     }
 

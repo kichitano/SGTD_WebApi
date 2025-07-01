@@ -38,7 +38,6 @@ public class DocumentaryProcessController : Controller
         return GetCurrentUserId();
     }
 
-    // Standard CRUD Methods following Area/Position pattern
     [Route("")]
     [HttpPost]
     public async Task<ActionResult> CreateAsync(DocumentaryProcessRequestParams requestParams)
@@ -109,7 +108,7 @@ public class DocumentaryProcessController : Controller
     {
         try
         {
-            var userId = GetCurrentUserId(); // Delete usa el usuario actual del token
+            var userId = GetCurrentUserId();
             await _documentaryProcessService.DeleteByIdAsync(requestParams.Id, userId);
             return Ok();
         }
@@ -119,7 +118,6 @@ public class DocumentaryProcessController : Controller
         }
     }
 
-    // Domain-specific methods
 
     [HttpGet("my-processes")]
     public async Task<ActionResult<List<DocumentaryProcessInstanceDto>>> GetMyProcesses([FromQuery] Guid? userGuid = null)
@@ -247,8 +245,6 @@ public class DocumentaryProcessController : Controller
             var userId = GetCurrentUserId();
             var fileData = await _documentaryProcessService.DownloadDocumentAsync(documentId, userId);
             
-            // Obtener información del documento para el nombre del archivo
-            // Esto requeriría un método adicional en el servicio, por simplicidad usamos un nombre genérico
             return File(fileData, "application/octet-stream", $"document_{documentId}");
         }
         catch (UnauthorizedAccessException ex)

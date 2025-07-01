@@ -162,7 +162,6 @@ public class DatabaseContext : DbContext
     {
         base.OnModelCreating(modelBuilder);
 
-        // Configure global query filters for logical deletion
         foreach (var entityType in modelBuilder.Model.GetEntityTypes())
         {
             if (typeof(Base).IsAssignableFrom(entityType.ClrType))
@@ -200,7 +199,6 @@ public class DatabaseContext : DbContext
         ConfigureOneToManyRelationship<DocumentaryProcedureStepDocument, DocumentaryProcedureStep>(modelBuilder, dpsd => dpsd.DocumentaryProcedureStep, dpsd => dpsd.DocumentaryProcedureStepId);
         ConfigureOneToManyRelationship<DocumentaryProcedureStepDocument, DocumentType>(modelBuilder, dpsd => dpsd.DocumentType, dpsd => dpsd.DocumentTypeId);
 
-        // Configuraciones específicas para entidades de procesos documentarios
         modelBuilder.Entity<DocumentaryProcessInstance>()
             .HasOne(dpi => dpi.DocumentaryProcedure)
             .WithMany()

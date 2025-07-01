@@ -109,7 +109,6 @@ public class AuthenticatorService : IAuthenticatorService
             .Where(q =>
                 q.UserGuid == userGuid
                 && q.IsActive)
-                //&& q.ExpiresAt > DateTime.UtcNow)
             .OrderByDescending(q => q.Id)
             .Select(q => q.SecretKey)
             .FirstOrDefaultAsync();

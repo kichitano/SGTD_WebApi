@@ -7,10 +7,6 @@ namespace SGTD_WebApi.Configurations;
 
 public static class ServiceConfiguration
 {
-    /// <summary>
-    /// Recibe una colleccion de servicios para inicializar correctamente la inyeccion de dependencias
-    /// </summary>
-    /// <param name="services"></param>
     public static void Configure(IServiceCollection services)
     {
         services.AddHttpContextAccessor();
