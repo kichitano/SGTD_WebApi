@@ -16,6 +16,99 @@ public class DocumentaryProcessService : IDocumentaryProcessService
         _configuration = configuration;
     }
 
+    // Standard CRUD methods following Area/Position pattern
+    public async Task CreateAsync(DocumentaryProcessRequestParams requestParams, int userId)
+    {
+        var existingProcess = await _context.DocumentaryProcessInstances
+            .FirstOrDefaultAsync(p => p.ProcessNumber == requestParams.Name);
+
+        if (existingProcess != null)
+            throw new ArgumentException("Ya existe un proceso con este nombre");
+
+        var entity = new DocumentaryProcessInstance
+        {
+            ProcessNumber = requestParams.Name,
+            DocumentaryProcedureId = requestParams.DocumentaryProcessId,
+            RequestedByUserId = userId,
+            CurrentStepOrder = 1,
+            Status = requestParams.Status ? DocumentaryProcessStatus.InProgress : DocumentaryProcessStatus.Cancelled,
+            Notes = requestParams.Description,
+            RequestedAt = DateTime.UtcNow
+        };
+
+        _context.DocumentaryProcessInstances.Add(entity);
+        await _context.SaveChangesAsync();
+    }
+
+    public async Task UpdateAsync(DocumentaryProcessRequestParams requestParams, int userId)
+    {
+        if (!requestParams.Id.HasValue)
+            throw new ArgumentNullException(nameof(requestParams.Id));
+
+        var entity = await _context.DocumentaryProcessInstances
+            .FirstOrDefaultAsync(p => p.Id == requestParams.Id.Value);
+
+        if (entity == null)
+            throw new ArgumentException("Proceso no encontrado");
+
+        if (entity.RequestedByUserId != userId)
+            throw new UnauthorizedAccessException("No tiene permisos para editar este proceso");
+
+        entity.ProcessNumber = requestParams.Name;
+        entity.Notes = requestParams.Description;
+        entity.Status = requestParams.Status ? DocumentaryProcessStatus.InProgress : DocumentaryProcessStatus.Cancelled;
+
+        await _context.SaveChangesAsync();
+    }
+
+    public async Task<List<DocumentaryProcessInstanceDto>> GetAllAsync(int userId)
+    {
+        var processes = await _context.DocumentaryProcessInstances
+            .Include(p => p.DocumentaryProcedure)
+            .Include(p => p.RequestedByUser)
+                .ThenInclude(u => u.Person)
+            .Include(p => p.StepInstances)
+                .ThenInclude(si => si.DocumentaryProcedureStep)
+                    .ThenInclude(ps => ps.Area)
+            .Include(p => p.StepInstances)
+                .ThenInclude(si => si.DocumentaryProcedureStep)
+                    .ThenInclude(ps => ps.Position)
+            .Include(p => p.StepInstances)
+                .ThenInclude(si => si.AssignedToUser)
+                    .ThenInclude(u => u.Person)
+            .Include(p => p.Documents)
+                .ThenInclude(d => d.DocumentType)
+            .OrderByDescending(p => p.RequestedAt)
+            .ToListAsync();
+
+        // Filter based on user permissions
+        var user = await _context.Users.Include(u => u.Position).FirstOrDefaultAsync(u => u.Id == userId);
+        var filteredProcesses = processes.Where(p => 
+            p.RequestedByUserId == userId || 
+            p.StepInstances.Any(si => si.DocumentaryProcedureStep.PositionId == user?.PositionId)
+        ).ToList();
+
+        return filteredProcesses.Select(p => MapToDto(p, userId)).ToList();
+    }
+
+    public async Task DeleteByIdAsync(int id, int userId)
+    {
+        var entity = await _context.DocumentaryProcessInstances
+            .FirstOrDefaultAsync(p => p.Id == id);
+
+        if (entity == null)
+            throw new ArgumentException("Proceso no encontrado");
+
+        if (entity.RequestedByUserId != userId)
+            throw new UnauthorizedAccessException("No tiene permisos para eliminar este proceso");
+
+        if (entity.Status == DocumentaryProcessStatus.InProgress)
+            throw new InvalidOperationException("No se puede eliminar un proceso en progreso");
+
+        _context.DocumentaryProcessInstances.Remove(entity);
+        await _context.SaveChangesAsync();
+    }
+
     public async Task<List<DocumentaryProcessInstanceDto>> GetMyProcessesAsync(int userId)
     {
         var processes = await _context.DocumentaryProcessInstances

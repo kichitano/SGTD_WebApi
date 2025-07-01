@@ -1,15 +1,17 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SGTD_WebApi.Models.DocumentaryProcess;
+using SGTD_WebApi.Models;
 using SGTD_WebApi.Services;
 using System.Security.Claims;
+using System.ComponentModel.DataAnnotations;
 
 namespace SGTD_WebApi.Controllers;
 
-[ApiController]
 [Route("[controller]")]
+[ApiController]
 [Authorize]
-public class DocumentaryProcessController : ControllerBase
+public class DocumentaryProcessController : Controller
 {
     private readonly IDocumentaryProcessService _documentaryProcessService;
 
@@ -23,6 +25,89 @@ public class DocumentaryProcessController : ControllerBase
         var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         return int.TryParse(userIdClaim, out int userId) ? userId : 0;
     }
+
+    // Standard CRUD Methods following Area/Position pattern
+    [Route("")]
+    [HttpPost]
+    public async Task<ActionResult> CreateAsync(DocumentaryProcessRequestParams requestParams)
+    {
+        try
+        {
+            var userId = GetCurrentUserId();
+            await _documentaryProcessService.CreateAsync(requestParams, userId);
+            return Ok();
+        }
+        catch (ValidationException ex)
+        {
+            return BadRequest(ex.Message);
+        }
+        catch (ArgumentNullException ex)
+        {
+            return BadRequest(ex.Message);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, ex.Message);
+        }
+    }
+
+    [Route("")]
+    [HttpPut]
+    public async Task<ActionResult> UpdateAsync(DocumentaryProcessRequestParams requestParams)
+    {
+        try
+        {
+            var userId = GetCurrentUserId();
+            await _documentaryProcessService.UpdateAsync(requestParams, userId);
+            return Ok();
+        }
+        catch (ValidationException ex)
+        {
+            return BadRequest(ex.Message);
+        }
+        catch (ArgumentNullException ex)
+        {
+            return BadRequest(ex.Message);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, ex.Message);
+        }
+    }
+
+    [Route("")]
+    [HttpGet]
+    public async Task<ActionResult> GetAllAsync()
+    {
+        try
+        {
+            var userId = GetCurrentUserId();
+            var response = await _documentaryProcessService.GetAllAsync(userId);
+            return Ok(response);
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(ex.Message);
+        }
+    }
+
+    [Route("delete")]
+    [HttpPost]
+    public async Task<ActionResult> DeleteByIdAsync([FromBody] DeleteRequestParams requestParams)
+    {
+        try
+        {
+            var userId = GetCurrentUserId();
+            await _documentaryProcessService.DeleteByIdAsync(requestParams.Id, userId);
+            return Ok();
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(ex.Message);
+        }
+    }
+
+    // Domain-specific methods
 
     [HttpGet("my-processes")]
     public async Task<ActionResult<List<DocumentaryProcessInstanceDto>>> GetMyProcesses()
@@ -69,13 +154,14 @@ public class DocumentaryProcessController : ControllerBase
         }
     }
 
-    [HttpGet("{processId}")]
-    public async Task<ActionResult<DocumentaryProcessInstanceDto>> GetProcessById(int processId)
+    [Route("{id}")]
+    [HttpGet]
+    public async Task<ActionResult<DocumentaryProcessInstanceDto>> GetByIdAsync(int id)
     {
         try
         {
             var userId = GetCurrentUserId();
-            var process = await _documentaryProcessService.GetProcessByIdAsync(processId, userId);
+            var process = await _documentaryProcessService.GetProcessByIdAsync(id, userId);
             
             if (process == null)
                 return NotFound("Proceso no encontrado o sin permisos de acceso");
@@ -88,7 +174,7 @@ public class DocumentaryProcessController : ControllerBase
         }
     }
 
-    [HttpPost]
+    [HttpPost("instance")]
     public async Task<ActionResult<DocumentaryProcessInstanceDto>> CreateProcess([FromBody] CreateDocumentaryProcessInstanceDto createDto)
     {
         try
